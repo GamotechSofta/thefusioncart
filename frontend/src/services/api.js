@@ -40,50 +40,27 @@ const getCategoryEndpoint = (category) => {
   return null;
 };
 
-export const fetchSarees = async (category, subcategory = null, mainCategory = null) => {
+export const fetchSarees = async (category, subcategory = null, mainCategory = null, limit = null, random = false) => {
   try {
     // Determine which endpoint to use based on category
     const categoryEndpoint = getCategoryEndpoint(category);
     
     let url;
+    const params = new URLSearchParams();
+    if (mainCategory) params.append('mainCategory', mainCategory);
+    if (category) params.append('category', category);
+    if (subcategory) params.append('subcategory', subcategory);
+    if (limit) params.append('limit', String(limit));
+    if (random) params.append('random', 'true');
+
     if (categoryEndpoint) {
-      // Use category-specific endpoint for faster loading
       url = `${API_URL}${categoryEndpoint}`;
-      const params = new URLSearchParams();
-      
-      // Only pass subcategory parameter, not category
-      // Category is already identified by the endpoint path
-      if (mainCategory) {
-        params.append('mainCategory', mainCategory);
-      }
-      if (category) {
-        params.append('category', category);
-      }
-      if (subcategory) {
-        params.append('subcategory', subcategory);
-      }
-      
-      if (params.toString()) {
-        url += `?${params.toString()}`;
-      }
     } else {
-      // Fallback to legacy endpoint if category not recognized
       url = `${API_URL}/products`;
-      const params = new URLSearchParams();
-      
-      if (mainCategory) {
-        params.append('mainCategory', mainCategory);
-      }
-      if (subcategory) {
-        params.append('subcategory', subcategory);
-      }
-      if (category) {
-        params.append('category', category);
-      }
-      
-      if (params.toString()) {
-        url += `?${params.toString()}`;
-      }
+    }
+
+    if (params.toString()) {
+      url += `?${params.toString()}`;
     }
     
     const response = await fetch(url, {

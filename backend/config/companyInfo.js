@@ -1,11 +1,12 @@
 /** Company details for invoice emails */
 export const COMPANY_INFO = {
-  legalName: 'BUYNEST VENTURES PRIVATE LIMITED',
-  brandName: 'BuyNest',
+  legalName: 'SHOPZEN VENTURES PRIVATE LIMITED',
+  brandName: 'Shopzen',
   website: 'https://buynestventures.shop',
-  email: 'buynestventures5@gmail.com',
-  phone: '8512898728',
+  email: 'shopzen68@gmail.com',
+  phone: '+918745015901',
   registeredAddress:
-    'Space No-B-4, Basement Floor, Plot No.-12, Suneja Tower-II, Dist Center, Janak Puri, New Delhi, Delhi, 110058, India',
-  gstin: '07AAOCB9505E1ZL',
+    'Fourth Floor, Unit No OF-437, Tower A2, Spaze I Tech Park, Sohna Road, Sector 49, Gurugram, Haryana 122018',
+  gstin: '06ABUCSO304BIZP',
+  cin: 'U47912HR2026PTC146574',
 };

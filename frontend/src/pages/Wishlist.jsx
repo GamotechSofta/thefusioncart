@@ -37,18 +37,18 @@ const Wishlist = () => {
 
   if (!wishlistItems.length) {
     return (
-      <div className="min-h-[60vh] bg-white px-4 flex items-center justify-center">
+      <div className="min-h-[60vh] bg-canvas px-4 flex items-center justify-center">
         <div className="max-w-md mx-auto py-12 text-center">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-pink-50 flex items-center justify-center text-pink-500 shadow-sm border border-pink-100">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-white flex items-center justify-center text-accent border border-line">
             <FaHeart className="w-9 h-9" />
           </div>
-          <h2 className="text-2xl font-bold text-black mb-2">Your wishlist is empty</h2>
+          <h2 className="section-title text-2xl text-ink mb-2">Your wishlist is empty</h2>
           <p className="text-gray-600 mb-6 text-sm sm:text-base">
             Explore our cosmetics and beauty collection and tap the heart icon on any product to save it here.
           </p>
           <Link
             to="/"
-            className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 shadow-md hover:shadow-lg transition-all transform hover:scale-105 active:scale-95"
+            className="btn-primary"
           >
             Browse products
           </Link>
@@ -58,11 +58,11 @@ const Wishlist = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-8">
-        <div className="flex items-center justify-between gap-3 mb-6">
+    <div className="min-h-screen bg-canvas">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex items-center justify-between gap-3 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-black">Wishlist</h1>
+            <h1 className="section-title text-3xl sm:text-4xl text-ink">Wishlist</h1>
             <p className="text-black/70 text-sm mt-1">{wishlistItems.length} saved item(s)</p>
           </div>
         </div>
@@ -71,7 +71,7 @@ const Wishlist = () => {
           {wishlistItems.map((item) => {
             const removing = isTogglingWishlist(item.id);
             return (
-              <div key={item.id} className="group bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div key={item.id} className="group product-card bg-white">
                 <div className="relative aspect-[3/4] bg-gray-50 flex items-center justify-center">
                   <img
                     src={item.image}

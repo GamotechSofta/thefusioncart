@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { FaRupeeSign, FaFilter, FaTimes, FaChevronDown, FaChevronUp, FaStar, FaRegStar } from 'react-icons/fa';
 import { searchProducts } from '../services/api';
-import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 import ScrollToTop from '../components/ScrollToTop';
+import ProductCard from '../components/ProductCard';
 
 // Add CSS to hide scrollbar
 const styles = `
@@ -34,7 +34,7 @@ const getProductBrand = (p) =>
   p?.product_info?.manufacturer ||
   p?.manufacturer ||
   p?.product_info?.brandName ||
-  'BuyNest';
+  'Shopzen';
 
 const getProductShortDescription = (p) =>
   String(
@@ -311,7 +311,7 @@ const Search = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-canvas py-8 px-4">
       <style>{styles}</style>
       <div className="max-w-[1600px] mx-auto">
         {q && (
@@ -405,69 +405,10 @@ const Search = () => {
               </div>
 
               {/* Product Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-                {filteredResults.map((p) => {
-                  const price = getProductPrice(p);
-                  const brand = getProductBrand(p);
-                  const shortDescription = getProductShortDescription(p);
-
-                  return (
-              <div
-                key={p._id || p.title}
-                className="group bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 hover:border-pink-100"
-              >
-                <Link to={`/product/${p._id || p.id || ''}`} className="block">
-                  <div className="relative w-full aspect-[3/4] bg-gray-50">
-                    <img
-                      src={getProductImage(p, 'image1') || p.image || placeholders.productList}
-                      alt={p.title || p.name || 'Product'}
-                      className="w-full h-full object-cover transition-transform duration-500"
-                      onError={(e) => { 
-                        e.target.onerror = null;
-                        e.target.src = placeholders.productList; 
-                      }}
-                    />
-                  </div>
-
-                  <div className="relative p-4">
-                    <p className="text-sm font-bold text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem]">
-                      {p.title || p.name || 'Untitled Product'}
-                    </p>
-
-                    <p className="text-xs sm:text-sm text-gray-700/80 line-clamp-2 mb-2 min-h-[1.5rem] transition-colors">
-                      {shortDescription || ' '}
-                    </p>
-
-                    <h3 className="text-xs font-semibold text-[#5c9404] uppercase tracking-wide line-clamp-1 mb-2">
-                      {brand}
-                    </h3>
-
-                    {/* Rating */}
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="flex items-center">
-                        {Array.from({ length: 5 }).map((_, idx) => {
-                          const ratingRounded = Math.round(getProductRatingValue(p));
-                          const isFilled = idx < ratingRounded;
-                          return isFilled ? (
-                            <FaStar key={idx} className="w-3 h-3 text-amber-500" />
-                          ) : (
-                            <FaRegStar key={idx} className="w-3 h-3 text-amber-500" />
-                          );
-                        })}
-                      </div>
-                      <span className="text-xs font-medium text-gray-700">{getProductRatingValue(p).toFixed(1)}</span>
-                    </div>
-                
-                    <div className="mt-3">
-                      <span className="text-lg sm:text-xl font-bold text-green-600">
-                        ₹{Math.round(price).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            );
-                })}
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                {filteredResults.map((p) => (
+                  <ProductCard key={p._id || p.title} product={p} />
+                ))}
               </div>
             </div>
           </div>
@@ -494,7 +435,7 @@ const Search = () => {
             <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
               <button
                 onClick={() => setShowMobileFilters(false)}
-                className="w-full bg-pink-600 text-white py-2 px-4 rounded-md hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+                className="w-full btn-primary"
               >
                 Apply Filters
               </button>

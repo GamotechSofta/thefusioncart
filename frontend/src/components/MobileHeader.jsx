@@ -59,18 +59,17 @@ const MobileHeader = () => {
 
   return (
     <>
-      <div ref={headerRef} className="lg:hidden w-full border-t border-gray-200 border-b border-gray-200 shadow-sm relative bg-white" style={{ overflow: 'visible' }}>
-        {/* Horizontal Scrollable Categories */}
-        <div className="relative px-2 sm:px-3 py-1.5" ref={categoryRef} style={{ overflow: 'visible' }}>
-          <div className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto hide-scrollbar" style={{ overflowY: 'visible', scrollBehavior: 'smooth' }}>
+      <div ref={headerRef} className="lg:hidden w-full border-b border-line relative bg-white" style={{ overflow: 'visible' }}>
+        <div className="relative px-3 py-2" ref={categoryRef} style={{ overflow: 'visible' }}>
+          <div className="flex items-center space-x-2 overflow-x-auto hide-scrollbar" style={{ overflowY: 'visible', scrollBehavior: 'smooth' }}>
             {categories.map((category) => {
               const isActive = location.pathname === category.path;
               return (
                 <div key={category.name} className="relative group shrink-0">
                   <button
                     type="button"
-                    className={`flex items-center font-medium text-[11px] sm:text-xs transition-all duration-200 cursor-pointer whitespace-nowrap px-2.5 py-1 rounded-full touch-manipulation ${
-                      isActive ? 'bg-gray-900 text-white font-semibold shadow-sm' : 'text-gray-800 bg-gray-100 active:bg-gray-200'
+                    className={`flex items-center text-[11px] tracking-[0.06em] uppercase transition-colors duration-200 cursor-pointer whitespace-nowrap px-3 py-1.5 rounded-full touch-manipulation ${
+                      isActive ? 'bg-ink text-white font-medium' : 'text-muted bg-canvas hover:text-ink'
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();

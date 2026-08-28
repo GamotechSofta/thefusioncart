@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProductImage } from '../utils/imagePlaceholder';
 import { COMPANY_INFO } from '../config/companyInfo';
-import brandLogo from '../assets/buynest.logo.jpeg';
+import brandLogo from '../assets/logo.jpeg';
 import { api } from '../utils/api';
 
 const Invoice = ({ order, user, onPrint }) => {
@@ -10,7 +10,8 @@ const Invoice = ({ order, user, onPrint }) => {
   useEffect(() => {
     api.getLogo('footer')
       .then((logo) => {
-        if (logo?.url) setLogoUrl(logo.url);
+        const isLegacy = /buynest|untitled_1500_x_500|shopzen-logo/i.test(`${logo?.url || ''} ${logo?.alt || ''}`);
+        if (logo?.url && !isLegacy) setLogoUrl(brandLogo);
       })
       .catch(() => {});
   }, []);
@@ -56,7 +57,7 @@ const Invoice = ({ order, user, onPrint }) => {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{COMPANY_INFO.brandName}</h1>
               <p className="text-gray-600 font-medium text-sm sm:text-base">{COMPANY_INFO.legalName}</p>
               <p className="text-sm text-gray-500 mt-1 max-w-sm">{COMPANY_INFO.registeredAddress}</p>
-              <p className="text-sm text-gray-500 mt-1">GSTIN: {COMPANY_INFO.gstin}</p>
+              <p className="text-sm text-gray-500 mt-1">GSTIN: {COMPANY_INFO.gstin} | CIN: {COMPANY_INFO.cin}</p>
             </div>
           </div>
           <div className="text-right">

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FaRupeeSign, FaSpinner, FaFilter, FaTimes, FaChevronDown, FaChevronUp, FaStar, FaRegStar } from 'react-icons/fa';
+import { useParams, Link } from 'react-router-dom';
+import { FaRupeeSign, FaFilter, FaTimes, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { fetchSarees } from '../services/api';
-import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 import ScrollToTop from './ScrollToTop';
-import { useHeaderColor } from '../utils/useHeaderColor';
+import ProductCard from './ProductCard';
+import CategoryRail from './CategoryRail';
+import { getCategoryDisplayName } from '../data/categoryTree';
 
 // Add CSS to hide scrollbar and loading animation
 const styles = `
@@ -60,40 +61,12 @@ const styles = `
   }
 `;
 
-const getProductMrp = (p) => Number(p?.originalPrice ?? p?.mrp ?? 0) || 0;
 const getProductPrice = (p) =>
   Number(p?.price ?? p?.mrp ?? p?.originalPrice ?? p?.finalPrice ?? 0) || 0;
 const hasDisplayablePrice = (p) => getProductPrice(p) > 0;
 
-const getProductRatingValue = (p) => {
-  const r = p?.rating ?? p?.averageRating ?? p?.ratingAvg ?? p?.ratingsAvg ?? p?.product_info?.rating;
-  const n = Number(r);
-  // Fallback matches ProductDetail which currently shows a static rating.
-  if (Number.isFinite(n) && n > 0) return n;
-  return 4.2;
-};
-
-const getProductBrand = (p) =>
-  p?.product_info?.brand ||
-  p?.brand ||
-  p?.product_info?.manufacturer ||
-  p?.manufacturer ||
-  p?.product_info?.brandName ||
-  'BuyNest';
-
-const getProductShortDescription = (p) =>
-  String(
-    p?.shortDescription ||
-      p?.description ||
-      p?.product_info?.shortDescription ||
-      p?.product_info?.description ||
-      ''
-  ).trim();
-
 const ProductList = ({ defaultCategory } = {}) => {
   const { categoryName, subCategoryName } = useParams();
-  const navigate = useNavigate();
-  const headerColor = useHeaderColor();
   const navbarRef = useRef(null);
   const filterSidebarRef = useRef(null);
   const filterContainerRef = useRef(null);
@@ -423,8 +396,13 @@ const ProductList = ({ defaultCategory } = {}) => {
         const data = await fetchSarees(requestCategory, requestSubCategory, requestMainCategory);
         console.log('ProductList - Received products:', data?.length || 0);
         const pricedProducts = (Array.isArray(data) ? data : []).filter(hasDisplayablePrice);
-        setProducts(pricedProducts);
-        setFilteredProducts(pricedProducts);
+        const shuffled = [...pricedProducts];
+        for (let i = shuffled.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        setProducts(shuffled);
+        setFilteredProducts(shuffled);
       } catch (err) {
         console.error('Failed to load products:', err);
         setError('Failed to load products. Please try again later.');
@@ -652,10 +630,6 @@ const ProductList = ({ defaultCategory } = {}) => {
     };
   }, [loading, filteredProducts.length, displayCount, loadingMore]);
 
-  const handleCardClick = (product) => {
-    navigate(`/product/${product._id}`);
-  };
-
   const activeFilterCount = [
     selectedFabrics.length,
     selectedBrands.length,
@@ -739,8 +713,7 @@ const ProductList = ({ defaultCategory } = {}) => {
         {activeFilterCount > 0 && (
           <button 
             onClick={resetFilters}
-            className="text-sm text-black px-4 py-1.5 rounded-lg border-2 border-black font-medium transition-all shadow-sm"
-            style={{ backgroundColor: headerColor }}
+            className="text-sm text-ink px-4 py-1.5 rounded-md border border-ink font-medium hover:bg-ink hover:text-white transition-colors"
           >
             Clear all
           </button>
@@ -1235,7 +1208,7 @@ const ProductList = ({ defaultCategory } = {}) => {
   }
 
   return (
-    <div className="min-h-screen bg-white" style={{ position: 'relative', overflowX: 'hidden' }}>
+    <div className="relative min-h-screen bg-canvas">
       <style>{styles}</style>
       {loading && (
         <div className="fixed left-0 right-0 top-0 z-50">
@@ -1245,76 +1218,66 @@ const ProductList = ({ defaultCategory } = {}) => {
         </div>
       )}
 
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
-        {/* Modern Header */}
-        <div className="mb-1 sm:mb-2">
-          <div className="flex flex-col items-center text-center mb-1 sm:mb-2">
-            <h1 
-              className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-1 uppercase text-black"
-              style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                letterSpacing: '1.2px',
-              }}
-            >
-              {effectiveSubCategory
-                ? effectiveSubCategory
-                : (effectiveCategory
-                    ? effectiveCategory
-                    : 'All Products')}
-            </h1>
-            
-            
-          </div>
-        </div>
+      <div>
+        <CategoryRail />
 
-        <div
-          ref={filterContainerRef}
-          className="flex gap-6 lg:gap-8 relative filter-sticky-container lg:h-[calc(100vh-var(--app-header-height,80px)-2rem)]"
-          style={{ position: 'relative', overflow: 'visible' }}
-        >
-          {priceExtent.max > 0 && (
-            <aside
-              className="hidden lg:block lg:w-1/5 lg:max-w-[20%] flex-shrink-0"
-              style={{ alignSelf: 'flex-start', position: 'relative' }}
-            >
-              <div
-                ref={filterSidebarRef}
-                className="filter-sticky-sidebar"
-                style={{
-                  position: 'sticky',
-                  top: `${navbarHeight}px`,
-                  zIndex: 40,
-                  marginTop: 0,
-                  overflow: 'visible',
-                }}
-              >
-                <div className="bg-white rounded-xl border border-gray-300 p-3">
-                  <PriceFilterSection idSuffix="-desk" />
-                </div>
-              </div>
-            </aside>
-          )}
-
-          {/* Main Content */}
-          <div
-            className={`flex-1 min-w-0 lg:h-full lg:overflow-y-auto custom-scrollbar lg:pr-1 ${
-              priceExtent.max > 0 ? 'lg:w-4/5 lg:max-w-[80%]' : 'w-full'
-            }`}
-          >
-            {/* Mobile Filter Button & Active Filters */}
-            <div className="lg:hidden mb-3 space-y-2">
-              <button 
+        <div className="pl-[4.75rem] sm:pl-[5.5rem]">
+          <div className="flex items-center justify-between gap-2 border-b border-line bg-canvas px-2.5 py-2.5 sm:px-4">
+            <div className="min-w-0">
+              <h1 className="truncate text-[15px] font-semibold text-ink sm:text-lg">
+                {effectiveSubCategory
+                  ? getCategoryDisplayName(effectiveSubCategory)
+                  : (effectiveCategory || 'All Products')}
+              </h1>
+              <p className="text-[11px] text-muted">
+                {loading ? 'Loading…' : `${filteredProducts.length} products`}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
                 onClick={() => setShowMobileFilters(true)}
-                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-black hover:border-black hover:bg-gray-100 shadow-sm hover:shadow-md transition-all text-sm"
+                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-medium text-ink"
               >
-                <FaFilter className="text-black text-sm" />
-                <span className="font-medium">Filters</span>
+                <FaFilter className="h-3 w-3" />
+                Filters
                 {activeFilterCount > 0 && (
-                  <span className="ml-1 px-2 py-0.5 bg-black text-white text-xs font-bold rounded-full shadow-sm">
+                  <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[9px] text-white">
                     {activeFilterCount}
                   </span>
                 )}
               </button>
+              <select
+                className="hidden rounded-full border border-line bg-white px-3 py-1.5 text-[11px] text-ink sm:block"
+                defaultValue="featured"
+                onChange={(e) => {
+                  const sorted = [...filteredProducts];
+                  switch (e.target.value) {
+                    case 'price-low-high':
+                      sorted.sort((a, b) => getProductPrice(a) - getProductPrice(b));
+                      break;
+                    case 'price-high-low':
+                      sorted.sort((a, b) => getProductPrice(b) - getProductPrice(a));
+                      break;
+                    case 'newest':
+                      sorted.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                      break;
+                    default:
+                      break;
+                  }
+                  setFilteredProducts(sorted);
+                }}
+              >
+                <option value="featured">Featured</option>
+                <option value="price-low-high">Price: Low to High</option>
+                <option value="price-high-low">Price: High to Low</option>
+                <option value="newest">Newest</option>
+              </select>
+            </div>
+          </div>
+
+          <div ref={filterContainerRef} className="px-2 pt-3 pb-2 sm:px-3 sm:pt-4">
+            <div className="mb-2 space-y-2">
 
               {/* Active Filters Pills */}
               {activeFilterCount > 0 && (
@@ -1437,42 +1400,6 @@ const ProductList = ({ defaultCategory } = {}) => {
               )}
             </div>
 
-            {/* Compact Results Bar */}
-            <div className="flex items-center justify-between gap-3 mb-3 sm:mb-5 bg-white px-3 sm:px-4 py-2 rounded-lg border border-gray-100 shadow-sm">
-              <p className="text-xs sm:text-sm text-gray-700 whitespace-nowrap">
-                Showing <span className="font-semibold text-gray-900">{filteredProducts.length}</span> {filteredProducts.length === 1 ? 'product' : 'products'}
-              </p>
-              <div className="flex items-center gap-2">
-                <label htmlFor="sort" className="text-xs font-medium text-gray-600 whitespace-nowrap">Sort</label>
-                <select 
-                  id="sort" 
-                  className="text-xs sm:text-sm border border-gray-200 rounded-md px-2.5 sm:px-3 py-1.5 focus:ring-1 focus:ring-gray-400 focus:border-gray-400 bg-white font-medium text-gray-900 cursor-pointer transition-colors hover:border-gray-300"
-                  onChange={(e) => {
-                    const sorted = [...filteredProducts];
-                    switch(e.target.value) {
-                      case 'price-low-high':
-                        sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
-                        break;
-                      case 'price-high-low':
-                        sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
-                        break;
-                      case 'newest':
-                        sorted.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-                        break;
-                      default:
-                        break;
-                    }
-                    setFilteredProducts(sorted);
-                  }}
-                >
-                  <option value="featured">Featured</option>
-                  <option value="price-low-high">Price: Low to High</option>
-                  <option value="price-high-low">Price: High to Low</option>
-                  <option value="newest">Newest Arrivals</option>
-                </select>
-              </div>
-            </div>
-            
             {/* Product Grid */}
             {loading ? (
               <div className="relative min-h-[500px] flex items-center justify-center">
@@ -1499,8 +1426,7 @@ const ProductList = ({ defaultCategory } = {}) => {
                     </div>
                     <button
                       onClick={resetFilters}
-                      className="px-8 py-3 text-black rounded-xl border-2 border-black font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-                      style={{ backgroundColor: headerColor }}
+                      className="btn-primary"
                     >
                       Clear all filters
                     </button>
@@ -1516,8 +1442,7 @@ const ProductList = ({ defaultCategory } = {}) => {
                     </div>
                     <Link
                       to="/"
-                      className="inline-block px-8 py-3 text-black rounded-xl border-2 border-black font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-                      style={{ backgroundColor: headerColor }}
+                      className="inline-block btn-primary"
                     >
                       Continue Shopping
                     </Link>
@@ -1526,73 +1451,10 @@ const ProductList = ({ defaultCategory } = {}) => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4 gap-2 sm:gap-4 md:gap-5 lg:gap-6">
-                  {filteredProducts.slice(0, displayCount).map((p) => {
-                    const price = getProductPrice(p);
-                    const brand = getProductBrand(p);
-                    const shortDescription = getProductShortDescription(p);
-
-                    return (
-                      <div
-                        key={p._id || p.title}
-                        className="group bg-white overflow-hidden shadow-sm transition-all duration-500 cursor-pointer border border-gray-100 transform "
-                        onClick={() => handleCardClick(p)}
-                      >
-                    <div className="relative w-full aspect-[3/4] bg-gray-100 overflow-hidden flex items-center justify-center">
-                      <img
-                        src={getProductImage(p, 'image1')}
-                        alt={p.title}
-                        className="w-full h-full object-contain transition-transform duration-300"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = placeholders.productList;
-                        }}
-                        loading="lazy"
-                      />
-                      {/* Gradient overlay on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    </div>
-
-                    <div className="relative p-3 sm:p-4 md:p-5 bg-white">
-                      {/* No underline accent on hover */}
-                      <p className="text-sm sm:text-base font-bold text-black line-clamp-2 mb-2 sm:mb-3 min-h-[2.5rem] sm:min-h-[3rem] transition-colors">
-                        {p.title || 'Untitled Product'}
-                      </p>
-
-                      <p className="text-xs sm:text-sm text-gray-700/80 line-clamp-2 mb-2 min-h-[1.5rem] transition-colors">
-                        {shortDescription || ' '}
-                      </p>
-
-                      <h3 className="text-xs font-semibold text-[#5c9404] uppercase tracking-wide line-clamp-1 mb-2">
-                        {brand}
-                      </h3>
-
-                      {/* Rating */}
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center">
-                          {Array.from({ length: 5 }).map((_, idx) => {
-                            const ratingRounded = Math.round(getProductRatingValue(p));
-                            const isFilled = idx < ratingRounded;
-                            return isFilled ? (
-                              <FaStar key={idx} className="w-3 h-3 text-amber-500" />
-                            ) : (
-                              <FaRegStar key={idx} className="w-3 h-3 text-amber-500" />
-                            );
-                          })}
-                        </div>
-                        <span className="text-xs font-medium text-gray-700">{getProductRatingValue(p).toFixed(1)}</span>
-                      </div>
-
-                      {/* Price */}
-                      <div className="mt-3">
-                        <span className="text-lg sm:text-xl font-bold text-green-600">
-                          ₹{Math.round(price).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                      </div>
-                    );
-                  })}
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                  {filteredProducts.slice(0, displayCount).map((p) => (
+                    <ProductCard key={p._id || p.title} product={p} />
+                  ))}
                 </div>
                 
                 {/* Infinite Scroll Sentinel & Loading Indicator */}
@@ -1629,7 +1491,7 @@ const ProductList = ({ defaultCategory } = {}) => {
 
       {/* Modern Mobile Filter Modal */}
       {showMobileFilters && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-50">
           <div 
             className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
             onClick={() => setShowMobileFilters(false)}
@@ -1663,8 +1525,7 @@ const ProductList = ({ defaultCategory } = {}) => {
               </div>
               <button
                 onClick={() => setShowMobileFilters(false)}
-                className="w-full px-6 py-4 text-black font-bold rounded-xl border-2 border-black transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                style={{ backgroundColor: headerColor }}
+                className="w-full btn-primary"
               >
                 Apply Filters
               </button>

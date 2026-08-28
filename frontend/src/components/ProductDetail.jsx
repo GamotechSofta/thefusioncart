@@ -51,10 +51,7 @@ const LoginModal = ({ isOpen, onClose, backgroundLocation }) => {
           <Link
             to="/signin"
             state={backgroundLocation ? { backgroundLocation } : undefined}
-            className="flex-1 text-black font-semibold px-6 py-3 rounded-lg text-center border-2 border-black transition-all"
-            style={{ backgroundColor: '#E7EFD9' }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#DEE9CD'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#E7EFD9'}
+            className="flex-1 btn-primary"
           >
             Login
           </Link>
@@ -95,7 +92,7 @@ const ProductCard = ({ product }) => {
     product?.product_info?.manufacturer ||
     product?.manufacturer ||
     product?.product_info?.brandName ||
-    'BuyNest';
+    'Shopzen';
 
   const shortDescription = String(
     product?.shortDescription ||
@@ -108,13 +105,13 @@ const ProductCard = ({ product }) => {
   return (
     <div
       onClick={() => navigate(`/product/${product._id || product.id}`)}
-      className="group bg-white overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 transform"
+      className="group product-card cursor-pointer bg-white"
     >
-      <div className="relative w-full aspect-[3/4] bg-gray-100 overflow-hidden flex items-center justify-center">
+      <div className="relative w-full aspect-[3/4] bg-canvas overflow-hidden flex items-center justify-center">
         <img
           src={imageUrl}
           alt={product.name || product.title || 'Product'}
-          className="w-full h-full object-contain transition-transform duration-300"
+          className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = placeholders.productList;
@@ -123,37 +120,30 @@ const ProductCard = ({ product }) => {
         />
       </div>
       <div className="relative p-4 bg-white">
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8B2BE2] via-[#5c9404] to-[#8B2BE2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
-        <p className="text-sm font-bold text-black line-clamp-2 mb-2 min-h-[2.5rem] group-hover:text-[#5c9404] transition-colors">
+        <p className="text-[11px] font-medium text-muted uppercase tracking-[0.14em] line-clamp-1 mb-1.5">
+          {brand}
+        </p>
+        <p className="text-sm font-medium text-ink line-clamp-2 mb-2 min-h-[2.5rem]">
           {product.name || product.title || 'Untitled Product'}
         </p>
-
-        <p className="text-xs sm:text-sm text-gray-700/80 line-clamp-2 mb-2 min-h-[1.5rem] transition-colors">
+        <p className="text-xs text-muted line-clamp-2 mb-3 min-h-[1.5rem]">
           {shortDescription || ' '}
         </p>
-
-        <h3 className="text-xs font-semibold text-[#5c9404] uppercase tracking-wide line-clamp-1 mb-2">
-          {brand}
-        </h3>
-
-        {/* Rating */}
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-1.5 mb-3">
           <div className="flex items-center">
             {Array.from({ length: 5 }).map((_, idx) => {
               const ratingRounded = Math.round(ratingValue);
               return idx < ratingRounded ? (
-                <FaStar key={idx} className="w-3 h-3 text-amber-500" />
+                <FaStar key={idx} className="w-3 h-3 text-ink/80" />
               ) : (
-                <FaRegStar key={idx} className="w-3 h-3 text-amber-500" />
+                <FaRegStar key={idx} className="w-3 h-3 text-line" />
               );
             })}
           </div>
-          <span className="text-xs font-medium text-gray-700">{ratingValue.toFixed(1)}</span>
+          <span className="text-xs text-muted">{ratingValue.toFixed(1)}</span>
         </div>
-
-        {/* Price (only) */}
-        <div className="mt-3">
-          <span className="text-lg font-bold text-green-600">
+        <div>
+          <span className="text-lg font-semibold text-ink">
             ₹{Math.round(finalPrice).toLocaleString()}
           </span>
         </div>
@@ -552,21 +542,20 @@ const ProductDetail = () => {
     <>
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} backgroundLocation={location} />
       
-      <div className="min-h-screen bg-[#f1f3f6]">
-        <div className="max-w-[1320px] mx-auto px-2 sm:px-4 lg:px-6 py-3 sm:py-6 pb-20 sm:pb-6">
-          {/* Back Button */}
+      <div className="min-h-screen bg-canvas">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-24 sm:pb-10">
           <button 
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 text-sm text-gray-700 hover:text-black mb-4 transition-colors"
+            className="inline-flex items-center gap-2 text-xs tracking-[0.14em] uppercase text-muted hover:text-ink mb-6 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            back
+            Back
           </button>
 
-          <div className="bg-white border border-gray-200 rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.06)] p-3 sm:p-4 lg:p-5">
-            <div className="grid lg:grid-cols-[44%_56%] gap-3 sm:gap-4 lg:gap-6">
+          <div className="bg-white border border-line rounded-lg p-4 sm:p-6 lg:p-8">
+            <div className="grid lg:grid-cols-[48%_52%] gap-8 lg:gap-12">
             
             {/* LEFT COLUMN: Flipkart-like gallery */}
             <div className="p-1 sm:p-2 h-fit">
@@ -581,7 +570,7 @@ const ProductDetail = () => {
                         type="button"
                         onClick={() => setSelectedImageIndex(idx)}
                         className={`w-12 h-12 border rounded-sm overflow-hidden bg-white ${
-                          isActive ? 'border-blue-500' : 'border-gray-200 hover:border-gray-400'
+                          isActive ? 'border-ink' : 'border-line hover:border-ink/50'
                         }`}
                       >
                         <img
@@ -599,7 +588,7 @@ const ProductDetail = () => {
                 </div>
 
                 <div className="relative">
-                  <div className="aspect-square max-h-[360px] sm:max-h-[400px] lg:max-h-[420px] xl:max-h-[460px] w-full bg-white flex items-center justify-center border border-gray-100 rounded-sm overflow-hidden mx-auto">
+                  <div className="aspect-square max-h-[420px] sm:max-h-[480px] w-full bg-canvas flex items-center justify-center border border-line rounded-lg overflow-hidden mx-auto">
                     <img
                       src={imageUrl}
                       alt={productTitle}
@@ -636,18 +625,18 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              <div className="mt-4 hidden sm:flex gap-2">
+              <div className="mt-5 hidden sm:flex gap-3">
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 h-12 bg-[#ff9f00] text-white font-semibold rounded-sm hover:opacity-95"
+                  className="flex-1 btn-secondary h-12"
                 >
-                  ADD TO CART
+                  Add to cart
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  className="flex-1 h-12 bg-[#fb641b] text-white font-semibold rounded-sm hover:opacity-95"
+                  className="flex-1 btn-primary h-12"
                 >
-                  BUY NOW
+                  Buy now
                 </button>
               </div>
 
@@ -663,8 +652,8 @@ const ProductDetail = () => {
                           onClick={() => setSelectedSize(size)}
                           className={`px-3 py-1.5 rounded-sm border transition-all text-sm ${
                             isSelected
-                              ? 'border-blue-600 text-blue-700 bg-blue-50'
-                              : 'border-gray-300 hover:border-gray-400'
+                              ? 'border-ink text-white bg-ink'
+                              : 'border-line hover:border-ink text-ink'
                           }`}
                         >
                           {size}
@@ -683,29 +672,29 @@ const ProductDetail = () => {
             </div>
 
             {/* RIGHT COLUMN: Flipkart-like info */}
-            <div className="p-2 sm:p-3 space-y-5">
+            <div className="p-1 sm:p-2 space-y-6">
               <div>
-                <h1 className="text-xl sm:text-2xl font-medium text-[#212121] leading-snug">{displayTitle}</h1>
+                <h1 className="section-title text-2xl sm:text-3xl lg:text-4xl text-ink leading-snug">{displayTitle}</h1>
                 {productBrand && (
-                  <p className="text-sm text-[#878787] mt-1">by <span className="text-[#2874f0] font-medium">{productBrand}</span></p>
+                  <p className="text-sm text-muted mt-2 tracking-wide uppercase">{productBrand}</p>
                 )}
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 bg-[#388e3c] text-white text-xs px-2 py-0.5 rounded">
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 bg-accent text-white text-xs px-2 py-0.5 rounded">
                     4.2 <FaStar className="w-3 h-3" />
                   </span>
-                  <span className="text-xs text-[#878787]">2,184 ratings & 146 reviews</span>
+                  <span className="text-xs text-muted">2,184 ratings</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-3xl font-semibold text-green-600">
+                <span className="text-3xl font-semibold text-ink">
                   ₹{Math.round(finalPrice).toLocaleString()}
                 </span>
               </div>
 
               <div className="grid sm:grid-cols-[120px_1fr] gap-2 items-center">
-                <span className="text-sm text-[#878787]">Quantity</span>
-                <div className="inline-flex items-center border border-gray-300 rounded-sm w-fit">
+                <span className="text-sm text-muted">Quantity</span>
+                <div className="inline-flex items-center border border-line rounded-md w-fit">
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -724,25 +713,25 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-[120px_1fr] gap-2 items-center border-b border-[#f0f0f0] pb-4">
-                <span className="text-sm text-[#878787]">Delivery</span>
+              <div className="grid sm:grid-cols-[120px_1fr] gap-2 items-center border-b border-line pb-4">
+                <span className="text-sm text-muted">Delivery</span>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     placeholder="Enter pincode"
-                    className="h-9 px-3 border border-[#dfe1e5] rounded-sm text-sm outline-none focus:border-[#2874f0] w-full sm:w-48"
+                    className="h-9 px-3 border border-line rounded-md text-sm outline-none focus:border-ink w-full sm:w-48 bg-canvas/50"
                   />
-                  <button className="text-sm font-semibold text-[#2874f0]">Check</button>
+                  <button className="text-sm font-medium text-ink underline underline-offset-4">Check</button>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-medium text-[#212121] mb-3">Product details</h3>
+                <h3 className="text-lg font-medium text-ink mb-3">Product details</h3>
                 <div className="grid sm:grid-cols-[170px_1fr] gap-y-2 text-sm">
                   {specRows.map(([label, value]) => (
                     <Fragment key={label}>
-                      <div className="text-[#878787]">{label}</div>
-                      <div className="text-[#212121]">{value}</div>
+                      <div className="text-muted">{label}</div>
+                      <div className="text-ink">{value}</div>
                     </Fragment>
                   ))}
                 </div>
@@ -750,14 +739,14 @@ const ProductDetail = () => {
 
               {productDescription && (
                 <div>
-                  <h3 className="text-lg font-medium text-[#212121] mb-2">Description</h3>
-                  <p className="text-sm text-[#212121] leading-6 whitespace-pre-line">{productDescription}</p>
+                  <h3 className="text-lg font-medium text-ink mb-2">Description</h3>
+                  <p className="text-sm text-muted leading-7 whitespace-pre-line">{productDescription}</p>
                 </div>
               )}
 
-              <div className="bg-[#f5faff] border border-[#d6e8ff] rounded-sm p-3 text-sm">
-                <div className="font-medium text-[#212121]">Safe and secure payments. Easy returns.</div>
-                <div className="text-[#555] mt-1">Free shipping on eligible orders.</div>
+              <div className="bg-canvas border border-line rounded-md p-4 text-sm">
+                <div className="font-medium text-ink">Secure payments. Easy returns.</div>
+                <div className="text-muted mt-1">Free shipping on eligible orders.</div>
               </div>
             </div>
           </div>
@@ -768,20 +757,20 @@ const ProductDetail = () => {
       </div>
 
       {/* Mobile sticky purchase bar */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-[0_-2px_8px_rgba(0,0,0,0.08)]">
-        <div className="p-2">
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-line">
+        <div className="p-3">
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={handleAddToCart}
-              className="h-11 bg-[#ff9f00] text-white text-sm font-semibold rounded-sm"
+              className="h-11 btn-secondary"
             >
-              ADD TO CART
+              Add to cart
             </button>
             <button
               onClick={handleBuyNow}
-              className="h-11 bg-[#fb641b] text-white text-sm font-semibold rounded-sm"
+              className="h-11 btn-primary"
             >
-              BUY NOW
+              Buy now
             </button>
           </div>
         </div>
@@ -816,10 +805,7 @@ const NotFoundState = () => (
     <p className="text-black mb-6">The product you are looking for doesn't exist or has been removed.</p>
     <Link 
       to="/" 
-      className="text-black px-8 py-3 rounded-lg font-medium border-2 border-black transition-all"
-      style={{ backgroundColor: '#E7EFD9' }}
-      onMouseEnter={(e) => e.target.style.backgroundColor = '#DEE9CD'}
-      onMouseLeave={(e) => e.target.style.backgroundColor = '#E7EFD9'}
+      className="text-ink px-8 py-3 btn-primary"
     >
       Back to Home
     </Link>

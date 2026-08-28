@@ -186,7 +186,7 @@ export default function AddressForm() {
           key,
           amount: order.amount,
           currency: order.currency,
-          name: 'BuyNest',
+          name: 'Shopzen',
           description: 'Order Payment',
           order_id: order.id,
           prefill: { name: formData.name || '', contact: formData.mobile || '' },

@@ -82,7 +82,7 @@ function buildInvoiceHtml({ order, items, customerName }) {
         <h1 style="margin:0 0 4px;font-size:24px;">${COMPANY_INFO.brandName}</h1>
         <p style="margin:0 0 8px;color:#4b5563;font-size:14px;">${COMPANY_INFO.legalName}</p>
         <p style="margin:0;color:#6b7280;font-size:12px;">${COMPANY_INFO.registeredAddress}</p>
-        <p style="margin:8px 0 0;color:#6b7280;font-size:12px;">GSTIN: ${COMPANY_INFO.gstin}</p>
+        <p style="margin:8px 0 0;color:#6b7280;font-size:12px;">GSTIN: ${COMPANY_INFO.gstin} | CIN: ${COMPANY_INFO.cin}</p>
       </div>
 
       <p style="margin:0 0 16px;font-size:15px;">Hi ${customerName || 'Customer'},</p>

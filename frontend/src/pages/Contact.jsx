@@ -1,21 +1,16 @@
 import React from 'react';
 import ScrollToTop from '../components/ScrollToTop';
-import { Mail, Phone, MapPin, Clock, MessageSquare, Building2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Building2 } from 'lucide-react';
 import { COMPANY_INFO } from '../config/companyInfo';
 
 const Contact = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 text-gray-800">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-16 sm:py-20 px-4 sm:px-6 lg:px-8 text-center">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+    <div className="min-h-screen bg-canvas text-ink">
+      <div className="relative overflow-hidden bg-ink text-white py-16 sm:py-20 px-4 sm:px-6 lg:px-8 text-center">
         <div className="relative max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-white/90 text-xs font-semibold uppercase tracking-wider mb-4 border border-white/20">
-            <MessageSquare className="w-3.5 h-3.5 text-rose-400" />
-            Get In Touch
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-            Contact Us
+          <p className="section-kicker text-white/60 mb-4">Get in touch</p>
+          <h1 className="section-title text-4xl sm:text-5xl md:text-6xl tracking-tight mb-5 text-white">
+            Contact us
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
             We'd love to hear from you! Get in touch with us through any of the following channels:
@@ -33,7 +28,7 @@ const Contact = () => {
             {COMPANY_INFO.legalName}
           </h2>
           <p className="text-sm sm:text-base text-gray-500 max-w-xl mx-auto">
-            E-commerce retailer of premium apparel and fashion products.
+            E-commerce retailer of beauty, wellness, and everyday essentials.
           </p>
           <p className="text-xs text-gray-400 mt-2">
             GSTIN: {COMPANY_INFO.gstin} &nbsp;|&nbsp; CIN: {COMPANY_INFO.cin}
@@ -76,7 +71,7 @@ const Contact = () => {
                 {COMPANY_INFO.phone}
               </a>
               <a
-                href={`https://wa.me/91${COMPANY_INFO.phone}`}
+                href={`https://wa.me/${COMPANY_INFO.phone.replace(/\D/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-full transition-colors inline-flex items-center gap-1 shadow-sm"

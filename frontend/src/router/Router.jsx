@@ -111,9 +111,7 @@ const Router = () => {
     : null;
   const backgroundLocation = backgroundLocationFromState || fallbackBackgroundLocation;
   const routesLocation = backgroundLocation || location;
-  const hideBottomNav = location.pathname.includes('/product/') || 
-                       location.pathname === '/products' || 
-                       location.pathname.startsWith('/category/');
+  const hideBottomNav = location.pathname.includes('/product/');
 
   return (
     <CartProvider>

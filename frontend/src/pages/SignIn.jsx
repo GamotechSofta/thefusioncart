@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
-import brandLogo from '../assets/buynest.logo.jpeg';
+import brandLogo from '../assets/logo.jpeg';
 
 const SignIn = () => {
   const [loginMode, setLoginMode] = useState('email'); // 'email' or 'mobile'
@@ -333,7 +333,7 @@ const SignIn = () => {
 
   return (
     <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden relative transition-all duration-300">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-[0_24px_60px_rgba(23,23,23,0.18)] border border-line overflow-hidden relative">
         
         {/* Close Button */}
         <button
@@ -351,11 +351,11 @@ const SignIn = () => {
           
           {/* Header & Logo */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center p-2 rounded-2xl bg-pink-50/80 mb-3 border border-pink-100 shadow-sm">
-              <img src={brandLogo} alt="BuyNest" className="h-8 sm:h-9 w-auto object-contain" />
+            <div className="inline-flex items-center justify-center p-2 rounded-xl bg-canvas mb-3 border border-line">
+              <img src={brandLogo} alt="Shopzen" className="h-10 sm:h-12 w-auto object-contain" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-              {step === 3 ? 'Welcome to BuyNest!' : 'Welcome Back'}
+            <h2 className="section-title text-3xl text-ink tracking-tight">
+              {step === 3 ? 'Welcome to Shopzen!' : 'Welcome Back'}
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">
               {step === 3
@@ -488,7 +488,7 @@ const SignIn = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-pink-500/25 flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full btn-primary disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {loading ? (
                     <>
@@ -530,7 +530,7 @@ const SignIn = () => {
                 <button
                   type="submit"
                   disabled={loading || mobile.length !== 10 || !/^[6-9]\d{9}$/.test(mobile)}
-                  className="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-pink-500/25 flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {loading ? (
                     <>
@@ -596,7 +596,7 @@ const SignIn = () => {
                 <button
                   type="submit"
                   disabled={loading || getOtpValue().length !== 6}
-                  className="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-pink-500/25 flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {loading ? (
                     <>
@@ -664,7 +664,7 @@ const SignIn = () => {
                 <button
                   type="submit"
                   disabled={loading || !newName.trim()}
-                  className="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-pink-500/25 flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {loading ? (
                     <>

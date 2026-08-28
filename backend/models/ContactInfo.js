@@ -1,5 +1,13 @@
 import mongoose from 'mongoose';
 
+const CURRENT_CONTACT = {
+  email: 'shopzen68@gmail.com',
+  phone: '+918745015901',
+  address:
+    'Fourth Floor, Unit No OF-437, Tower A2, Spaze I Tech Park, Sohna Road, Sector 49, Gurugram, Haryana 122018',
+  companyName: 'SHOPZEN VENTURES PRIVATE LIMITED',
+};
+
 const contactInfoSchema = new mongoose.Schema(
   {
     email: {
@@ -20,7 +28,7 @@ const contactInfoSchema = new mongoose.Schema(
     },
     companyName: {
       type: String,
-      default: 'BuyNest',
+      default: 'SHOPZEN VENTURES PRIVATE LIMITED',
       trim: true,
     },
   },
@@ -31,23 +39,24 @@ const contactInfoSchema = new mongoose.Schema(
 contactInfoSchema.statics.getContactInfo = async function () {
   let contactInfo = await this.findOne();
   if (!contactInfo) {
-    contactInfo = await this.create({
-      email: 'buynestventures5@gmail.com',
-      phone: '8512898728',
-      address: 'Space No-B-4, Basement Floor, Plot No.-12, Suneja Tower-II, Dist Center, Janak Puri, New Delhi, Delhi, 110058, India',
-      companyName: 'BUYNEST VENTURES PRIVATE LIMITED',
-    });
+    contactInfo = await this.create(CURRENT_CONTACT);
+    return contactInfo;
   }
+
+  const isStale = /buynest|janak puri|suneja/i.test(
+    `${contactInfo.email} ${contactInfo.companyName} ${contactInfo.address || ''}`
+  );
+  if (isStale) {
+    contactInfo.email = CURRENT_CONTACT.email;
+    contactInfo.phone = CURRENT_CONTACT.phone;
+    contactInfo.address = CURRENT_CONTACT.address;
+    contactInfo.companyName = CURRENT_CONTACT.companyName;
+    await contactInfo.save();
+  }
+
   return contactInfo;
 };
 
 const ContactInfo = mongoose.models.ContactInfo || mongoose.model('ContactInfo', contactInfoSchema);
 
 export default ContactInfo;
-
-
-
-
-
-
-

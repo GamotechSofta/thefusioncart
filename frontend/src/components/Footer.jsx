@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Facebook, Instagram, Truck, Shield, RotateCcw, HeadphonesIcon, MessageCircle, Clock, ChevronRight } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Instagram, MessageCircle, Clock } from 'lucide-react';
 import { api } from '../utils/api';
-import brandLogo from '../assets/buynest.logo.jpeg';
+import brandLogo from '../assets/logo.jpeg';
 import { COMPANY_INFO } from '../config/companyInfo';
 
 const CONTACT_INFO = {
@@ -18,7 +18,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   const [footerLogo, setFooterLogo] = useState({
     url: brandLogo,
-    alt: 'BuyNest',
+    alt: 'Shopzen',
     width: 'auto',
     height: 'auto',
   });
@@ -30,10 +30,11 @@ const Footer = () => {
   const loadLogo = async () => {
     try {
       const logo = await api.getLogo('footer').catch(() => null);
-      if (logo && logo.url) {
-        setFooterLogo({ 
-          url: logo.url, 
-          alt: logo.alt || 'BuyNest',
+      const isLegacy = /buynest|untitled_1500_x_500|shopzen-logo/i.test(`${logo?.url || ''} ${logo?.alt || ''}`);
+      if (logo && logo.url && !isLegacy) {
+        setFooterLogo({
+          url: brandLogo,
+          alt: logo.alt || 'Shopzen',
           width: logo.width || 'auto',
           height: logo.height || 'auto',
         });
@@ -55,32 +56,23 @@ const Footer = () => {
 
   const quickLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Shop All Products', path: '/products' },
-    { name: 'New Arrivals', path: '/new-arrivals' },
-    { name: 'Special Offers', path: '/offers' },
     { name: 'About Us', path: '/about' },
     { name: 'Contact Us', path: '/contact' },
+    { name: 'Wishlist', path: '/wishlist' },
+    { name: 'My Account', path: '/profile' },
   ];
 
   const categories = [
-    { name: 'Bath & Hand Wash', path: '/category/beauty-and-hygiene/bath-and-hand-wash' },
-    { name: 'Feminine Hygiene', path: '/category/beauty-and-hygiene/feminine-hygiene' },
-    { name: 'Fragrances & Deos', path: '/category/beauty-and-hygiene/fragrances-and-deos' },
-    { name: 'Hair Care', path: '/category/beauty-and-hygiene/hair-care' },
-    { name: 'Health & Medicine', path: '/category/beauty-and-hygiene/health-and-medicine' },
-    { name: 'Makeup', path: '/category/beauty-and-hygiene/makeup' },
-    { name: 'Oral Care', path: '/category/beauty-and-hygiene/oral-care' },
-    { name: 'Skin Care', path: '/category/beauty-and-hygiene/skin-care' },
+    { name: 'Skin Essentials', path: '/category/beauty-and-hygiene/skin-care' },
+    { name: 'Hair Essentials', path: '/category/beauty-and-hygiene/hair-care' },
+    { name: 'Colour & Makeup', path: '/category/beauty-and-hygiene/makeup' },
+    { name: 'Bath & Hands', path: '/category/beauty-and-hygiene/bath-and-hand-wash' },
+    { name: 'Scents & Deos', path: '/category/beauty-and-hygiene/fragrances-and-deos' },
+    { name: 'Dental Care', path: '/category/beauty-and-hygiene/oral-care' },
+    { name: 'Feminine Care', path: '/category/beauty-and-hygiene/feminine-hygiene' },
+    { name: 'Health & Wellness', path: '/category/beauty-and-hygiene/health-and-medicine' },
   ];
 
-  const trustFeatures = [
-    { icon: Truck, title: 'Free Shipping', description: 'On all orders above ₹500' },
-    { icon: Shield, title: '100% Authentic', description: 'Genuine sourced products' },
-    { icon: RotateCcw, title: 'Easy Returns', description: '7-day hassle-free return' },
-    { icon: HeadphonesIcon, title: 'Dedicated Support', description: 'Mon - Sat: 9 AM - 6 PM' },
-  ];
-
-  // Extract phone number without +91 for WhatsApp link
   const whatsappNumber = CONTACT_INFO.phone.replace(/[\s+\-]/g, '').replace(/^91/, '');
 
   const socialLinks = [
@@ -88,69 +80,39 @@ const Footer = () => {
       name: 'WhatsApp',
       icon: <MessageCircle className="w-4 h-4" />,
       url: `https://wa.me/91${whatsappNumber}`,
-      bgColor: 'hover:bg-emerald-500 hover:text-white',
     },
     {
       name: 'Instagram',
       icon: <Instagram className="w-4 h-4" />,
       url: 'https://instagram.com',
-      bgColor: 'hover:bg-pink-600 hover:text-white',
     },
     {
       name: 'Facebook',
       icon: <Facebook className="w-4 h-4" />,
       url: 'https://facebook.com',
-      bgColor: 'hover:bg-blue-600 hover:text-white',
     },
   ];
 
   return (
-    <footer className="w-full bg-white text-gray-800 border-t border-gray-200 mt-12">
-      {/* Trust Features Strip */}
-      <div className="w-full border-b border-gray-100 bg-gray-50/70">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
-            {trustFeatures.map((feature, index) => {
-              const IconComponent = feature.icon;
-              return (
-                <div key={index} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-200/80 shadow-xs">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-900 text-white flex items-center justify-center shrink-0">
-                    <IconComponent className="w-4 h-4 sm:w-5 sm:h-5 text-rose-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="font-bold text-xs sm:text-sm text-gray-900 leading-tight">{feature.title}</h4>
-                    <p className="text-[11px] sm:text-xs text-gray-500 leading-tight mt-0.5 truncate">{feature.description}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Footer Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
-          
-          {/* Brand & About (Col span 4) */}
-          <div className="lg:col-span-4 space-y-4">
+    <footer className="w-full bg-white text-ink border-t border-line mt-16">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12">
+          <div className="lg:col-span-4 space-y-5">
             <Link to="/" className="inline-block">
               <img 
                 src={footerLogo.url || brandLogo}
                 alt={footerLogo.alt || CONTACT_INFO.companyName}
-                className="h-11 sm:h-12 w-auto max-w-[200px] object-contain"
+                className="h-12 sm:h-14 w-auto max-w-[240px] object-contain object-left"
                 onError={(e) => {
                   e.target.src = brandLogo;
                 }}
               />
             </Link>
-            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-sm">
-              <strong className="font-semibold text-gray-900">{COMPANY_INFO.legalName}</strong> — your trusted online destination for premium apparel and fashion. We deliver excellence in product availability, affordability, and service across India.
+            <p className="text-sm text-muted leading-relaxed max-w-sm">
+              <strong className="font-medium text-ink">{COMPANY_INFO.legalName}</strong> — a considered destination for everyday essentials, beauty, and wellness. Quality products, fair prices, and reliable service across India.
             </p>
-            
-            {/* Social Links */}
-            <div className="pt-2">
-              <p className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-2.5">Connect With Us</p>
+            <div className="pt-1">
+              <p className="section-kicker mb-3">Connect</p>
               <div className="flex items-center gap-2">
                 {socialLinks.map((social, index) => (
                   <a
@@ -158,7 +120,7 @@ const Footer = () => {
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`w-9 h-9 rounded-lg bg-gray-100 text-gray-700 flex items-center justify-center transition-all duration-200 ${social.bgColor}`}
+                    className="w-9 h-9 rounded-full border border-line text-ink flex items-center justify-center hover:bg-ink hover:text-white hover:border-ink transition-colors duration-200"
                     aria-label={social.name}
                   >
                     {social.icon}
@@ -168,119 +130,83 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links (Col span 2) */}
-          <div className="lg:col-span-2 space-y-3">
-            <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-100">
-              Quick Links
-            </h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
+          <div className="lg:col-span-2 space-y-4">
+            <h4 className="section-kicker pb-2">Quick links</h4>
+            <ul className="space-y-2.5 text-sm">
               {quickLinks.map((link, index) => (
                 <li key={index}>
-                  <Link 
-                    to={link.path}
-                    className="text-gray-600 hover:text-gray-900 flex items-center gap-1.5 transition-colors group"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-900 transition-transform group-hover:translate-x-0.5" />
-                    <span>{link.name}</span>
+                  <Link to={link.path} className="text-muted hover:text-ink transition-colors">
+                    {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Categories (Col span 3) */}
-          <div className="lg:col-span-3 space-y-3">
-            <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-100">
-              Categories
-            </h4>
-            <ul className="grid grid-cols-1 gap-2 text-xs sm:text-sm">
+          <div className="lg:col-span-3 space-y-4">
+            <h4 className="section-kicker pb-2">Categories</h4>
+            <ul className="grid grid-cols-1 gap-2.5 text-sm">
               {categories.map((category, index) => (
                 <li key={index}>
-                  <Link 
-                    to={category.path}
-                    className="text-gray-600 hover:text-gray-900 flex items-center gap-1.5 transition-colors group"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-900 transition-transform group-hover:translate-x-0.5" />
-                    <span>{category.name}</span>
+                  <Link to={category.path} className="text-muted hover:text-ink transition-colors">
+                    {category.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact Details (Col span 3) */}
-          <div className="lg:col-span-3 space-y-3">
-            <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-100">
-              Contact &amp; Support
-            </h4>
-            <div className="space-y-3 text-xs sm:text-sm text-gray-600">
-              <div className="flex items-start gap-2.5">
-                <Phone className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+          <div className="lg:col-span-3 space-y-4">
+            <h4 className="section-kicker pb-2">Contact</h4>
+            <div className="space-y-4 text-sm text-muted">
+              <div className="flex items-start gap-3">
+                <Phone className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                 <div>
-                  <a href={`tel:${CONTACT_INFO.phone}`} className="text-gray-900 font-semibold hover:text-rose-600 transition-colors">
+                  <a href={`tel:${CONTACT_INFO.phone}`} className="text-ink hover:text-accent transition-colors">
                     {CONTACT_INFO.phone}
                   </a>
-                  <p className="text-[11px] text-gray-500">Call / WhatsApp Support</p>
+                  <p className="text-xs text-muted mt-0.5">Call / WhatsApp</p>
                 </div>
               </div>
-
-              <div className="flex items-start gap-2.5">
-                <Mail className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3">
+                <Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                 <div>
-                  <a href={`mailto:${CONTACT_INFO.email}`} className="text-gray-900 font-semibold hover:text-rose-600 break-all transition-colors">
+                  <a href={`mailto:${CONTACT_INFO.email}`} className="text-ink hover:text-accent break-all transition-colors">
                     {CONTACT_INFO.email}
                   </a>
-                  <p className="text-[11px] text-gray-500">24/7 Email Support</p>
+                  <p className="text-xs text-muted mt-0.5">Email support</p>
                 </div>
               </div>
-
-              <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-gray-600 leading-relaxed">
-                  {CONTACT_INFO.address}
-                </p>
+              <div className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <p className="text-xs leading-relaxed">{CONTACT_INFO.address}</p>
               </div>
-
-              <div className="flex items-start gap-2.5 pt-1 border-t border-gray-100">
-                <Clock className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-gray-600">
-                  <strong className="text-gray-900 font-medium">Mon - Sat:</strong> 9:00 AM – 6:00 PM IST
+              <div className="flex items-start gap-3 pt-2 border-t border-line">
+                <Clock className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <p className="text-xs">
+                  <strong className="text-ink font-medium">Mon – Sat:</strong> 9:00 AM – 6:00 PM IST
                 </p>
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
-      {/* Policies Bar */}
-      <div className="w-full bg-gray-50 border-t border-gray-200 py-3.5 px-4">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm font-medium text-gray-600">
-          <Link to="/privacy" className="hover:text-gray-900 transition-colors">
-            Privacy Policy
-          </Link>
-          <span className="text-gray-300">•</span>
-          <Link to="/terms" className="hover:text-gray-900 transition-colors">
-            Terms &amp; Conditions
-          </Link>
-          <span className="text-gray-300">•</span>
-          <Link to="/shipping" className="hover:text-gray-900 transition-colors">
-            Shipping Policy
-          </Link>
-          <span className="text-gray-300">•</span>
-          <Link to="/refund-cancellation" className="hover:text-gray-900 transition-colors">
-            Refund &amp; Cancellation Policy
-          </Link>
+      <div className="w-full bg-canvas border-t border-line py-4 px-4">
+        <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs tracking-wide text-muted">
+          <Link to="/privacy" className="hover:text-ink transition-colors">Privacy Policy</Link>
+          <Link to="/terms" className="hover:text-ink transition-colors">Terms &amp; Conditions</Link>
+          <Link to="/shipping" className="hover:text-ink transition-colors">Shipping Policy</Link>
+          <Link to="/refund-cancellation" className="hover:text-ink transition-colors">Refund &amp; Cancellation</Link>
         </div>
       </div>
 
-      {/* Bottom Copyright Bar */}
-      <div className="w-full bg-gray-900 text-gray-400 py-4 px-4 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-center sm:text-left">
+      <div className="w-full bg-ink text-white/70 py-4 px-4">
+        <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-center sm:text-left">
           <p>
-            © {currentYear} <strong className="text-white font-semibold">{CONTACT_INFO.companyName}</strong>. All Rights Reserved.
+            © {currentYear} <strong className="text-white font-medium">{CONTACT_INFO.companyName}</strong>. All rights reserved.
           </p>
-          <p className="text-gray-500 text-center sm:text-right">
+          <p className="text-white/50 text-center sm:text-right">
             GSTIN: {CONTACT_INFO.gstin} &nbsp;|&nbsp; CIN: {CONTACT_INFO.cin}
           </p>
         </div>

@@ -1,57 +1,189 @@
 @import "tailwindcss";
 
-/* Prevent horizontal scrolling */
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --color-canvas: #ffffff;
+  --color-ink: #102030;
+  --color-muted: #5d6a75;
+  --color-line: #e2e6ea;
+  --color-accent: #102030;
+  --color-accent-dark: #0a1520;
+  --color-gold: #c39662;
+}
+
 html, body {
   max-width: 100%;
   overflow-x: hidden;
 }
 
-/* Ensure all elements respect their container's width */
 * {
   box-sizing: border-box;
 }
 
-/* Ensure sticky positioning works correctly */
 #root {
   position: relative;
   overflow-x: hidden;
+  min-height: 100%;
 }
 
-/* Prevent parent containers from breaking sticky positioning */
 main {
   overflow-x: hidden;
   overflow-y: visible;
   position: relative;
 }
 
-/* Ensure sticky elements work in flex containers */
 .flex {
   min-height: 0;
 }
 
-/* Theme override: replace Tailwind pink/rose palette with screenshot accent.
-   This keeps existing classNames working without editing every component. */
 :root {
-  --theme-accent-green: #5c9404;
-  --theme-accent-green-dark: #4f7c03;
-  --theme-accent-green-darker: #3a5d00;
-  --theme-accent-green-50: #e7efd9;
-  --theme-accent-green-100: #dee9cd;
-  --theme-accent-green-200: #c9eaa0;
-  --theme-accent-green-300: #b1dc7b;
-  --theme-accent-green-400: #93c853;
+  --theme-accent-green: #102030;
+  --theme-accent-green-dark: #0a1520;
+  --theme-accent-green-darker: #071018;
+  --theme-accent-green-50: #f3f5f7;
+  --theme-accent-green-100: #e8ecf0;
+  --theme-accent-green-200: #c8d0d8;
+  --theme-accent-green-300: #8b97a3;
+  --theme-accent-green-400: #c39662;
 
-  --theme-accent-green-rgb: 92 148 4;
-  --theme-accent-green-dark-rgb: 79 124 3;
-  --theme-accent-green-darker-rgb: 58 93 0;
-  --theme-accent-green-50-rgb: 231 239 217;
-  --theme-accent-green-100-rgb: 222 233 205;
-  --theme-accent-green-200-rgb: 201 234 160;
-  --theme-accent-green-300-rgb: 177 220 123;
-  --theme-accent-green-400-rgb: 147 200 83;
+  --theme-accent-green-rgb: 16 32 48;
+  --theme-accent-green-dark-rgb: 10 21 32;
+  --theme-accent-green-darker-rgb: 7 16 24;
+  --theme-accent-green-50-rgb: 243 245 247;
+  --theme-accent-green-100-rgb: 232 236 240;
+  --theme-accent-green-200-rgb: 200 208 216;
+  --theme-accent-green-300-rgb: 139 151 163;
+  --theme-accent-green-400-rgb: 195 150 98;
+
+  --canvas: #ffffff;
+  --ink: #102030;
+  --muted: #5d6a75;
+  --line: #e2e6ea;
+  --gold: #c39662;
 }
 
-/* Pink -> Green */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.011em;
+}
+
+h1, h2, h3, .font-display {
+  font-family: "Fraunces", Georgia, serif;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+::selection {
+  background: #c39662;
+  color: #102030;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #102030;
+  color: #fff;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  padding: 0.85rem 1.4rem;
+  border-radius: 0.25rem;
+  border: 1px solid #102030;
+  transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #0a1520;
+  border-color: #0a1520;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #102030;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  padding: 0.85rem 1.4rem;
+  border-radius: 0.25rem;
+  border: 1px solid #102030;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: #102030;
+  color: #fff;
+}
+
+.product-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 1.05rem;
+  overflow: hidden;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes offers-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.offers-marquee {
+  display: flex;
+  width: max-content;
+  animation: offers-marquee 32s linear infinite;
+}
+
+.section-kicker {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.section-title {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  line-height: 1.15;
+}
+
+/* Pink/rose classNames remap to navy + sparse gold */
 .text-pink-50 { color: var(--theme-accent-green-50) !important; }
 .text-pink-100 { color: var(--theme-accent-green-100) !important; }
 .text-pink-200 { color: var(--theme-accent-green-200) !important; }
@@ -79,7 +211,6 @@ main {
 .border-pink-600 { border-color: var(--theme-accent-green-dark) !important; }
 .border-pink-700 { border-color: var(--theme-accent-green-darker) !important; }
 
-/* Focus rings/borders that use pink in components */
 .focus\:ring-pink-300:focus { --tw-ring-color: var(--theme-accent-green-300) !important; }
 .focus\:ring-pink-400:focus { --tw-ring-color: var(--theme-accent-green-400) !important; }
 .focus\:ring-pink-500:focus { --tw-ring-color: var(--theme-accent-green) !important; }
@@ -87,7 +218,6 @@ main {
 .focus\:border-pink-400:focus { border-color: var(--theme-accent-green-400) !important; }
 .focus\:border-pink-500:focus { border-color: var(--theme-accent-green) !important; }
 
-/* Rose -> Green (commonly used in gradients) */
 .text-rose-50 { color: var(--theme-accent-green-50) !important; }
 .text-rose-100 { color: var(--theme-accent-green-100) !important; }
 .text-rose-200 { color: var(--theme-accent-green-200) !important; }
@@ -115,80 +245,73 @@ main {
 .border-rose-600 { border-color: var(--theme-accent-green-dark) !important; }
 .border-rose-700 { border-color: var(--theme-accent-green-darker) !important; }
 
-/* Gradient stops: keep bg-gradient-to-* from/via/to colors in sync */
-/* Pink */
 .from-pink-50 { --tw-gradient-from: rgb(var(--theme-accent-green-50-rgb) / 1) !important; }
 .via-pink-50 { --tw-gradient-via: rgb(var(--theme-accent-green-50-rgb) / 1) !important; }
 .to-pink-50 { --tw-gradient-to: rgb(var(--theme-accent-green-50-rgb) / 1) !important; }
-
 .from-pink-100 { --tw-gradient-from: rgb(var(--theme-accent-green-100-rgb) / 1) !important; }
 .via-pink-100 { --tw-gradient-via: rgb(var(--theme-accent-green-100-rgb) / 1) !important; }
 .to-pink-100 { --tw-gradient-to: rgb(var(--theme-accent-green-100-rgb) / 1) !important; }
-
 .from-pink-200 { --tw-gradient-from: rgb(var(--theme-accent-green-200-rgb) / 1) !important; }
 .via-pink-200 { --tw-gradient-via: rgb(var(--theme-accent-green-200-rgb) / 1) !important; }
 .to-pink-200 { --tw-gradient-to: rgb(var(--theme-accent-green-200-rgb) / 1) !important; }
-
 .from-pink-300 { --tw-gradient-from: rgb(var(--theme-accent-green-300-rgb) / 1) !important; }
 .via-pink-300 { --tw-gradient-via: rgb(var(--theme-accent-green-300-rgb) / 1) !important; }
 .to-pink-300 { --tw-gradient-to: rgb(var(--theme-accent-green-300-rgb) / 1) !important; }
-
 .from-pink-400 { --tw-gradient-from: rgb(var(--theme-accent-green-400-rgb) / 1) !important; }
 .via-pink-400 { --tw-gradient-via: rgb(var(--theme-accent-green-400-rgb) / 1) !important; }
 .to-pink-400 { --tw-gradient-to: rgb(var(--theme-accent-green-400-rgb) / 1) !important; }
-
 .from-pink-500 { --tw-gradient-from: rgb(var(--theme-accent-green-rgb) / 1) !important; }
 .via-pink-500 { --tw-gradient-via: rgb(var(--theme-accent-green-rgb) / 1) !important; }
 .to-pink-500 { --tw-gradient-to: rgb(var(--theme-accent-green-rgb) / 1) !important; }
-
 .from-pink-600 { --tw-gradient-from: rgb(var(--theme-accent-green-dark-rgb) / 1) !important; }
 .via-pink-600 { --tw-gradient-via: rgb(var(--theme-accent-green-dark-rgb) / 1) !important; }
 .to-pink-600 { --tw-gradient-to: rgb(var(--theme-accent-green-dark-rgb) / 1) !important; }
-
 .from-pink-700 { --tw-gradient-from: rgb(var(--theme-accent-green-darker-rgb) / 1) !important; }
 .via-pink-700 { --tw-gradient-via: rgb(var(--theme-accent-green-darker-rgb) / 1) !important; }
 .to-pink-700 { --tw-gradient-to: rgb(var(--theme-accent-green-darker-rgb) / 1) !important; }
 
-/* Rose */
 .from-rose-50 { --tw-gradient-from: rgb(var(--theme-accent-green-50-rgb) / 1) !important; }
 .via-rose-50 { --tw-gradient-via: rgb(var(--theme-accent-green-50-rgb) / 1) !important; }
 .to-rose-50 { --tw-gradient-to: rgb(var(--theme-accent-green-50-rgb) / 1) !important; }
-
 .from-rose-100 { --tw-gradient-from: rgb(var(--theme-accent-green-100-rgb) / 1) !important; }
 .via-rose-100 { --tw-gradient-via: rgb(var(--theme-accent-green-100-rgb) / 1) !important; }
 .to-rose-100 { --tw-gradient-to: rgb(var(--theme-accent-green-100-rgb) / 1) !important; }
-
 .from-rose-200 { --tw-gradient-from: rgb(var(--theme-accent-green-200-rgb) / 1) !important; }
 .via-rose-200 { --tw-gradient-via: rgb(var(--theme-accent-green-200-rgb) / 1) !important; }
 .to-rose-200 { --tw-gradient-to: rgb(var(--theme-accent-green-200-rgb) / 1) !important; }
-
 .from-rose-300 { --tw-gradient-from: rgb(var(--theme-accent-green-300-rgb) / 1) !important; }
 .via-rose-300 { --tw-gradient-via: rgb(var(--theme-accent-green-300-rgb) / 1) !important; }
 .to-rose-300 { --tw-gradient-to: rgb(var(--theme-accent-green-300-rgb) / 1) !important; }
-
 .from-rose-400 { --tw-gradient-from: rgb(var(--theme-accent-green-400-rgb) / 1) !important; }
 .via-rose-400 { --tw-gradient-via: rgb(var(--theme-accent-green-400-rgb) / 1) !important; }
 .to-rose-400 { --tw-gradient-to: rgb(var(--theme-accent-green-400-rgb) / 1) !important; }
-
 .from-rose-500 { --tw-gradient-from: rgb(var(--theme-accent-green-rgb) / 1) !important; }
 .via-rose-500 { --tw-gradient-via: rgb(var(--theme-accent-green-rgb) / 1) !important; }
 .to-rose-500 { --tw-gradient-to: rgb(var(--theme-accent-green-rgb) / 1) !important; }
-
 .from-rose-600 { --tw-gradient-from: rgb(var(--theme-accent-green-dark-rgb) / 1) !important; }
 .via-rose-600 { --tw-gradient-via: rgb(var(--theme-accent-green-dark-rgb) / 1) !important; }
 .to-rose-600 { --tw-gradient-to: rgb(var(--theme-accent-green-dark-rgb) / 1) !important; }
-
 .from-rose-700 { --tw-gradient-from: rgb(var(--theme-accent-green-darker-rgb) / 1) !important; }
 .via-rose-700 { --tw-gradient-via: rgb(var(--theme-accent-green-darker-rgb) / 1) !important; }
 .to-rose-700 { --tw-gradient-to: rgb(var(--theme-accent-green-darker-rgb) / 1) !important; }
 
-/* Utility: hide scrollbars (keep scrolling enabled) */
 .hide-scrollbar {
-  -ms-overflow-style: none; /* IE/Edge legacy */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 .hide-scrollbar::-webkit-scrollbar {
   width: 0;
   height: 0;
-  display: none; /* Chrome/Safari */
+  display: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #c8d0d8;
+  border-radius: 999px;
 }

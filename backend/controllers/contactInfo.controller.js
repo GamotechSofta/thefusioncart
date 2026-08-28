@@ -45,7 +45,7 @@ export async function adminUpdateContactInfo(req, res) {
         email,
         phone,
         address,
-        companyName: companyName || 'BuyNest',
+        companyName: companyName || 'SHOPZEN VENTURES PRIVATE LIMITED',
       });
     }
 

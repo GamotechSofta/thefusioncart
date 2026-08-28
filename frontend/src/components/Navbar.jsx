@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Search, Heart, ShoppingBag, User, Menu, X, ChevronRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { searchProducts } from '../services/api';
 import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 import { navbarCategories } from '../data/categoryTree';
 import { api } from '../utils/api';
-import brandLogo from '../assets/buynest.logo.jpeg';
+import brandLogo from '../assets/logo.jpeg';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -14,10 +16,13 @@ const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
   const searchWrapRefDesktop = useRef(null);
+  const searchWrapRefMobile = useRef(null);
+  const mobileSearchInputRef = useRef(null);
   const categoryRef = useRef(null);
   const hoverCloseTimeoutRef = useRef(null);
   const navigate = useNavigate();
@@ -29,7 +34,7 @@ const Navbar = () => {
   const [avatarError, setAvatarError] = useState(false);
   const [headerLogo, setHeaderLogo] = useState({
     url: brandLogo,
-    alt: 'BuyNest',
+    alt: 'Shopzen',
     width: 'auto',
     height: 'auto',
   });
@@ -39,10 +44,11 @@ const Navbar = () => {
       try {
         const { api } = await import('../utils/api');
         const logo = await api.getLogo('header').catch(() => null);
-        if (logo && logo.url) {
-          setHeaderLogo({ 
-            url: logo.url, 
-            alt: logo.alt || 'BuyNest',
+        const isLegacy = /buynest|untitled_1500_x_500|shopzen-logo/i.test(`${logo?.url || ''} ${logo?.alt || ''}`);
+        if (logo && logo.url && !isLegacy) {
+          setHeaderLogo({
+            url: brandLogo,
+            alt: logo.alt || 'Shopzen',
             width: logo.width || 'auto',
             height: logo.height || 'auto',
           });
@@ -238,7 +244,13 @@ const Navbar = () => {
     const q = searchQuery.trim();
     if (!q) return;
     setSearchOpen(false);
+    setMobileSearchExpanded(false);
     navigate(`/search?q=${encodeURIComponent(q)}`);
+  };
+
+  const closeMobileSearch = () => {
+    setSearchOpen(false);
+    setMobileSearchExpanded(false);
   };
 
   const handleSearchKeyPress = (e) => {
@@ -247,7 +259,7 @@ const Navbar = () => {
       handleSearch();
     }
     if (e.key === 'Escape') {
-      setSearchOpen(false);
+      closeMobileSearch();
     }
   };
 
@@ -280,10 +292,14 @@ const Navbar = () => {
   useEffect(() => {
     const onClick = (e) => {
       const inDesktop = searchWrapRefDesktop.current && searchWrapRefDesktop.current.contains(e.target);
-      if (!inDesktop) setSearchOpen(false);
+      const inMobile = searchWrapRefMobile.current && searchWrapRefMobile.current.contains(e.target);
+      if (!inDesktop && !inMobile) {
+        setSearchOpen(false);
+        setMobileSearchExpanded(false);
+      }
     };
     const onEscape = (e) => {
-      if (e.key === 'Escape') setSearchOpen(false);
+      if (e.key === 'Escape') closeMobileSearch();
     };
     document.addEventListener('mousedown', onClick);
     document.addEventListener('touchstart', onClick);
@@ -296,20 +312,9 @@ const Navbar = () => {
   }, []);
 
   const categories = navbarCategories;
-  const hideCategoryChevron = new Set([
-    'Beauty & Hygiene',
-    'Beverages',
-    'Cleaning & Household',
-    'Snacks & Branded Foods',
-  ]);
-  const hoverOpensDropdown = new Set([
-    'Beauty & Hygiene',
-    'Beverages',
-    'Cleaning & Household',
-    'Snacks & Branded Foods',
-  ]);
+  const isCategoryRoute = location.pathname.startsWith('/category/');
 
-  const CATEGORY_MENU_CLOSE_MS = 320;
+  const CATEGORY_MENU_CLOSE_MS = 160;
 
   const cancelCategoryMenuClose = () => {
     if (hoverCloseTimeoutRef.current) {
@@ -341,18 +346,49 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setMobileSearchExpanded(false);
+    setSearchOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setIsMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    if (!mobileSearchExpanded) return;
+    const t = setTimeout(() => mobileSearchInputRef.current?.focus(), 220);
+    return () => clearTimeout(t);
+  }, [mobileSearchExpanded]);
+
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
   return (
-    <nav className={`sticky top-0 z-[70] w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 transition-shadow duration-200 ${isScrolled ? 'shadow-md' : 'shadow-sm'}`}>
-      {/* Bottom Bar - Clean white background with Logo, Navigation, and Icons */}
+    <nav className={`sticky top-0 z-[70] w-full bg-white/95 backdrop-blur-md border-b transition-all duration-200 ${isScrolled ? 'border-line shadow-[0_8px_24px_rgba(23,23,23,0.04)]' : 'border-line/70 shadow-none'}`}>
       <div className="w-full">
-        <div className="w-full max-w-[1750px] mx-auto px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-3 lg:gap-4 xl:gap-6 min-w-0">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-[72px] lg:h-14 gap-3 lg:gap-4 min-w-0">
             {/* Logo/Brand - Left */}
             <Link to="/" className="flex-shrink-0 flex items-center py-1">
               <img 
                 src={headerLogo.url || brandLogo}
-                alt={headerLogo.alt || 'BuyNest'}
-                className="h-7 sm:h-8 md:h-8.5 lg:h-9 xl:h-10 w-auto max-w-[100px] sm:max-w-[120px] md:max-w-[130px] lg:max-w-[150px] xl:max-w-[175px] object-contain transition-all duration-200"
+                alt={headerLogo.alt || 'Shopzen'}
+                className="h-10 sm:h-11 md:h-12 lg:h-8 xl:h-9 w-auto max-w-[180px] sm:max-w-[220px] md:max-w-[260px] lg:max-w-[160px] xl:max-w-[180px] object-contain object-left"
                 onError={(e) => {
                   e.target.src = brandLogo;
                 }}
@@ -360,335 +396,486 @@ const Navbar = () => {
             </Link>
 
             {/* Navigation Menu - Center (Desktop & Laptop >= 1024px) */}
-            <div className="hidden lg:flex items-center justify-center flex-1 min-w-0 px-1" ref={categoryRef}>
-              <div className="flex items-center gap-1 xl:gap-1.5 2xl:gap-2 mx-auto">
-                {categories.map((category) => {
-                  const isActive = location.pathname === category.path;
-                  return (
-                    <button
-                      key={category.name}
-                      type="button"
-                      className={`flex items-center font-medium text-[11px] xl:text-[12.5px] 2xl:text-[13px] tracking-tight transition-all duration-200 cursor-pointer whitespace-nowrap px-2 xl:px-2.5 2xl:px-3 py-1 xl:py-1.5 rounded-full touch-manipulation shrink-0 ${
-                        isActive
-                          ? 'bg-gray-900 text-white shadow-sm font-semibold'
-                          : 'text-gray-700 hover:text-black hover:bg-gray-100 active:bg-gray-200'
-                      }`}
-                      onClick={() => {
-                        navigate(category.path);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
+            <div className="hidden lg:flex items-center justify-center shrink-0 px-1" ref={categoryRef}>
+              <div className="flex items-center gap-1 xl:gap-2">
+                <Link
+                  to="/"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className={`font-display text-[15px] xl:text-base font-medium tracking-[-0.02em] whitespace-nowrap px-2.5 py-1.5 border-b-2 transition-colors ${
+                    location.pathname === '/'
+                      ? 'border-ink text-ink'
+                      : 'border-transparent text-muted hover:text-ink'
+                  }`}
+                >
+                  Home
+                </Link>
+
+                <div
+                  className="relative"
+                  onMouseEnter={() => {
+                    cancelCategoryMenuClose();
+                    setActiveCategory('shop');
+                  }}
+                  onMouseLeave={() => scheduleCategoryMenuClose('shop')}
+                >
+                  <button
+                    type="button"
+                    className={`flex items-center gap-1 font-display text-[15px] xl:text-base font-medium tracking-[-0.02em] transition-colors duration-200 cursor-pointer whitespace-nowrap px-2.5 py-1.5 border-b-2 ${
+                      isCategoryRoute || activeCategory === 'shop'
+                        ? 'border-ink text-ink'
+                        : 'border-transparent text-muted hover:text-ink'
+                    }`}
+                    aria-expanded={activeCategory === 'shop'}
+                    aria-haspopup="true"
+                  >
+                    <span>Categories</span>
+                    <svg
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${activeCategory === 'shop' ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
                     >
-                      <span className="whitespace-nowrap">{category.name}</span>
-                    </button>
-                  );
-                })}
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {activeCategory === 'shop' && (
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-[80]">
+                      <div className="bg-white border border-line rounded-lg shadow-[0_16px_40px_rgba(23,23,23,0.1)] min-w-[420px] p-3">
+                        <p className="section-kicker px-3 pt-1 pb-2">Shop by category</p>
+                        <div className="grid grid-cols-2 gap-0.5">
+                          {categories.map((category) => {
+                            const isActive = location.pathname === category.path;
+                            return (
+                              <button
+                                key={category.name}
+                                type="button"
+                                className={`text-left px-3 py-2.5 rounded-md text-sm transition-colors ${
+                                  isActive
+                                    ? 'bg-canvas text-ink font-medium'
+                                    : 'text-ink/80 hover:bg-canvas hover:text-ink'
+                                }`}
+                                onClick={() => {
+                                  setActiveCategory(null);
+                                  navigate(category.path);
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                              >
+                                {category.name}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <Link
+                  to="/about"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className={`font-display text-[15px] xl:text-base font-medium tracking-[-0.02em] whitespace-nowrap px-2.5 py-1.5 border-b-2 transition-colors ${
+                    location.pathname === '/about'
+                      ? 'border-ink text-ink'
+                      : 'border-transparent text-muted hover:text-ink'
+                  }`}
+                >
+                  About Us
+                </Link>
+
+                <Link
+                  to="/contact"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className={`font-display text-[15px] xl:text-base font-medium tracking-[-0.02em] whitespace-nowrap px-2.5 py-1.5 border-b-2 transition-colors ${
+                    location.pathname === '/contact'
+                      ? 'border-ink text-ink'
+                      : 'border-transparent text-muted hover:text-ink'
+                  }`}
+                >
+                  Contact Us
+                </Link>
               </div>
             </div>
 
-            {/* Icons - Right (Search, Cart on Mobile; All icons on Desktop) */}
-            <div className="flex items-center space-x-1 sm:space-x-1.5 md:space-x-2 lg:space-x-2.5 flex-shrink-0 ml-auto md:ml-0">
-              {/* Search Icon - Always Visible */}
-              <div className="relative" ref={searchWrapRefDesktop}>
+            {/* Desktop search bar */}
+            <div className="hidden lg:block relative flex-1 max-w-[320px] xl:max-w-[380px] mx-3 xl:mx-4" ref={searchWrapRefDesktop}>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSearch();
+                }}
+                className="flex items-center h-8 xl:h-9 w-full rounded-full border border-line bg-canvas pl-3 pr-1 gap-2 focus-within:border-ink focus-within:bg-white transition-colors"
+              >
+                <Search className="w-4 h-4 text-muted shrink-0" strokeWidth={1.75} />
+                <input
+                  type="text"
+                  placeholder="Search products, brands..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => {
+                    if (searchQuery.trim().length >= 2) setSearchOpen(true);
+                  }}
+                  onKeyDown={handleSearchKeyPress}
+                  className="flex-1 min-w-0 bg-transparent text-sm text-ink placeholder-muted outline-none"
+                />
                 <button
-                  onClick={() => setSearchOpen(!searchOpen)}
-                  className="p-2 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-800 transition-colors duration-150 group touch-manipulation border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                  aria-label="Search"
+                  type="submit"
+                  className="shrink-0 h-6 xl:h-7 px-3 rounded-full bg-ink text-white text-[10px] tracking-[0.12em] uppercase font-medium hover:bg-accent transition-colors"
                 >
-                  <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                  </svg>
+                  Search
                 </button>
-                {/* Search Dropdown */}
-                {searchOpen && (
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[min(78vw,20rem)] sm:w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-[80]">
-                    <div className="p-2 sm:p-3">
-                      <input
-                        type="text"
-                        placeholder="Search for products..."
-                        value={searchQuery}
-                        onChange={(e) => { const v = e.target.value; setSearchQuery(v); }}
-                        onKeyPress={handleSearchKeyPress}
-                        className="w-full px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-black placeholder-gray-500"
-                        autoFocus
-                      />
-                    </div>
-                    {searchLoading && (
-                      <div className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-black">Searching…</div>
-                    )}
-                    {!searchLoading && searchQuery.trim() && searchResults.length === 0 && (
-                      <div className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-black">No products found</div>
-                    )}
-                    {!searchLoading && searchResults.length > 0 && (
-                      <ul className="max-h-[60vh] sm:max-h-80 overflow-auto divide-y divide-gray-100">
-                        {searchResults.slice(0, 8).map((p) => (
-                          <li key={p._id || p.id || p.slug}>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSearchOpen(false);
-                                navigate(`/product/${p._id || p.id || ''}`);
-                              }}
-                              className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 hover:bg-gray-50 active:bg-gray-100 text-left touch-manipulation"
-                            >
-                              <img
-                                src={getProductImage(p, 'image1') || p.image || placeholders.thumbnail}
-                                alt={p.title || p.name || 'Product'}
-                                className="w-10 h-12 sm:w-12 sm:h-16 object-cover rounded-md border border-gray-100 flex-shrink-0"
-                                onError={(e) => { e.target.onerror = null; e.target.src = placeholders.thumbnail; }}
-                              />
-                              <div className="min-w-0 flex-1">
-                                <p className="text-xs sm:text-sm font-medium text-black truncate">{p.title || p.name || 'Product'}</p>
-                                {p.price && (
-                                  <p className="text-[10px] sm:text-xs text-black">₹{Number(p.price).toLocaleString()}</p>
-                                )}
-                              </div>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
+              </form>
+              {searchOpen && searchQuery.trim().length >= 2 && (
+                <div className="absolute left-0 right-0 top-[calc(100%+8px)] bg-white border border-line rounded-lg shadow-[0_16px_40px_rgba(23,23,23,0.1)] z-[80] overflow-hidden">
+                  {searchLoading && (
+                    <div className="px-4 py-3 text-sm text-muted">Searching…</div>
+                  )}
+                  {!searchLoading && searchResults.length === 0 && (
+                    <div className="px-4 py-3 text-sm text-muted">No products found</div>
+                  )}
+                  {!searchLoading && searchResults.length > 0 && (
+                    <ul className="max-h-80 overflow-auto divide-y divide-line">
+                      {searchResults.slice(0, 8).map((p) => (
+                        <li key={p._id || p.id || p.slug}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSearchOpen(false);
+                              navigate(`/product/${p._id || p.id || ''}`);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-canvas text-left"
+                          >
+                            <img
+                              src={getProductImage(p, 'image1') || p.image || placeholders.thumbnail}
+                              alt={p.title || p.name || 'Product'}
+                              className="w-11 h-14 object-cover rounded-md border border-line flex-shrink-0 bg-canvas"
+                              onError={(e) => { e.target.onerror = null; e.target.src = placeholders.thumbnail; }}
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-ink truncate">{p.title || p.name || 'Product'}</p>
+                              {p.price && (
+                                <p className="text-xs text-muted mt-0.5">₹{Number(p.price).toLocaleString()}</p>
+                              )}
+                            </div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div
+              ref={searchWrapRefMobile}
+              className={`lg:hidden relative min-w-0 overflow-visible transition-[max-width,opacity,margin] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                mobileSearchExpanded
+                  ? 'flex-1 max-w-[100%] opacity-100 ml-2'
+                  : 'max-w-0 opacity-0 ml-0 pointer-events-none'
+              }`}
+            >
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSearch();
+                }}
+                className="flex items-center h-10 w-full rounded-full border border-line bg-canvas pl-3 pr-2 gap-2 overflow-hidden"
+              >
+                <Search className="w-4 h-4 text-muted shrink-0" strokeWidth={1.75} />
+                <input
+                  ref={mobileSearchInputRef}
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchKeyPress}
+                  tabIndex={mobileSearchExpanded ? 0 : -1}
+                  className="flex-1 min-w-0 bg-transparent text-sm text-ink placeholder-muted outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={closeMobileSearch}
+                  className="p-1 rounded-full text-muted hover:text-ink"
+                  aria-label="Close search"
+                  tabIndex={mobileSearchExpanded ? 0 : -1}
+                >
+                  <X className="w-4 h-4" strokeWidth={1.75} />
+                </button>
+              </form>
+              <div
+                className={`absolute left-0 right-0 top-[calc(100%+8px)] bg-white border border-line rounded-lg shadow-[0_16px_40px_rgba(23,23,23,0.1)] z-[80] overflow-hidden origin-top transition-all duration-300 ease-out ${
+                  mobileSearchExpanded && searchOpen && searchQuery.trim().length >= 2
+                    ? 'opacity-100 translate-y-0 visible'
+                    : 'opacity-0 -translate-y-1 invisible pointer-events-none'
+                }`}
+              >
+                {searchLoading && (
+                  <div className="px-4 py-3 text-sm text-muted">Searching…</div>
+                )}
+                {!searchLoading && searchResults.length === 0 && (
+                  <div className="px-4 py-3 text-sm text-muted">No products found</div>
+                )}
+                {!searchLoading && searchResults.length > 0 && (
+                  <ul className="max-h-80 overflow-auto divide-y divide-line">
+                    {searchResults.slice(0, 8).map((p) => (
+                      <li key={p._id || p.id || p.slug}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            closeMobileSearch();
+                            navigate(`/product/${p._id || p.id || ''}`);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-canvas text-left"
+                        >
+                          <img
+                            src={getProductImage(p, 'image1') || p.image || placeholders.thumbnail}
+                            alt={p.title || p.name || 'Product'}
+                            className="w-10 h-12 object-cover rounded-md border border-line flex-shrink-0"
+                            onError={(e) => { e.target.onerror = null; e.target.src = placeholders.thumbnail; }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-ink truncate">{p.title || p.name || 'Product'}</p>
+                            {p.price && (
+                              <p className="text-xs text-muted">₹{Number(p.price).toLocaleString()}</p>
+                            )}
+                          </div>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </div>
+            </div>
 
-              {/* Wishlist Icon - Hidden on Mobile, Visible on Desktop */}
-              <Link to="/wishlist" className="hidden md:flex p-2 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-800 relative transition-colors duration-150 group touch-manipulation border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.312-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                </svg>
+            <div
+              className={`flex items-center gap-0.5 sm:gap-1 flex-shrink-0 ml-auto lg:ml-0 overflow-hidden transition-[opacity,transform,max-width,margin] duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                mobileSearchExpanded
+                  ? 'max-lg:opacity-0 max-lg:translate-x-3 max-lg:max-w-0 max-lg:ml-0 max-lg:pointer-events-none'
+                  : 'opacity-100 translate-x-0'
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileSearchExpanded(true);
+                  setSearchOpen(true);
+                }}
+                className="lg:hidden p-2 rounded-full text-ink hover:bg-canvas transition-colors"
+                aria-label="Search"
+              >
+                <Search className="w-5 h-5" strokeWidth={1.6} />
+              </button>
+
+              <Link
+                to="/wishlist"
+                className="hidden md:flex p-1.5 lg:p-1.5 rounded-full text-ink hover:bg-canvas relative transition-colors"
+                aria-label="Wishlist"
+              >
+                <Heart className="w-5 h-5" strokeWidth={1.6} />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-black text-white text-[10px] sm:text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-bold shadow-lg border border-white">
+                  <span className="absolute top-0.5 right-0.5 bg-accent text-white text-[9px] rounded-full h-4 min-w-4 px-0.5 flex items-center justify-center font-medium">
                     {wishlistCount > 9 ? '9+' : wishlistCount}
                   </span>
                 )}
               </Link>
 
-              {/* Cart Icon - Always Visible */}
-              <Link to="/cart" className="p-2 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-800 relative transition-colors duration-150 group touch-manipulation border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.25 10.5a.75.75 0 01-.75.75H5.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zm6.75 0a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75z" />
-                </svg>
+              <Link
+                to="/cart"
+                className="p-1.5 lg:p-1.5 rounded-full text-ink hover:bg-canvas relative transition-colors"
+                aria-label="Cart"
+              >
+                <ShoppingBag className="w-5 h-5" strokeWidth={1.6} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-black text-white text-[10px] sm:text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-bold shadow-lg border border-white">
+                  <span className="absolute top-0.5 right-0.5 bg-accent text-white text-[9px] rounded-full h-4 min-w-4 px-0.5 flex items-center justify-center font-medium">
                     {cartCount > 9 ? '9+' : cartCount}
                   </span>
                 )}
               </Link>
 
-              {/* Wishlist Icon - Always Visible */}
-              <NavLink
-                to="/wishlist"
-                className="hidden"
-              >
-                <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-gradient-to-r from-[#5c9404] to-[#8B2BE2] text-white text-[10px] sm:text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-bold shadow-lg border border-white">
-                    {wishlistCount > 9 ? '9+' : wishlistCount}
-                  </span>
-                )}
-              </NavLink>
-
-              {/* My Account Icon / User Profile Picture - Hidden on Mobile, Visible on Desktop */}
               {isAuthenticated && userInitial ? (
-                <Link 
-                  to="/profile" 
-                  className="hidden md:flex w-9 h-9 md:w-10 md:h-10 rounded-full bg-gray-900 text-white font-bold text-sm md:text-base items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-150 group touch-manipulation ring-1 ring-gray-200 hover:ring-gray-300 overflow-hidden border border-gray-200"
+                <Link
+                  to="/profile"
+                  className="hidden md:flex w-8 h-8 rounded-full bg-canvas text-ink items-center justify-center hover:bg-line transition-colors overflow-hidden border border-line"
                   title="My Profile"
                 >
                   {userAvatar && !avatarError ? (
-                    <img 
-                      src={userAvatar} 
-                      alt="Profile" 
+                    <img
+                      src={userAvatar}
+                      alt="Profile"
                       className="w-full h-full object-cover"
                       onError={() => setAvatarError(true)}
                     />
                   ) : (
-                    <span>{userInitial}</span>
+                    <User className="w-5 h-5" strokeWidth={1.6} />
                   )}
                 </Link>
               ) : (
-                <button 
-                  onClick={handleLogin} 
-                  className="hidden md:flex p-2 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-800 transition-colors duration-150 group touch-manipulation items-center justify-center border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                <button
+                  onClick={handleLogin}
+                  className="hidden md:flex p-2 rounded-full text-ink hover:bg-canvas transition-colors items-center justify-center"
                   aria-label="Sign In"
                 >
-                  <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                  </svg>
+                  <User className="w-5 h-5" strokeWidth={1.6} />
                 </button>
               )}
-            </div>
 
-            {/* Mobile menu button */}
-            <div className="flex items-center md:hidden ml-1">
               <button
-                onClick={() => setIsMobileMenuOpen((open) => !open)}
-                className="inline-flex items-center justify-center p-2 rounded-full text-gray-800 hover:text-black bg-gray-50 hover:bg-gray-100 border border-gray-200 focus:outline-none touch-manipulation active:bg-gray-100"
-                aria-expanded="false"
-                aria-label="Toggle menu"
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="lg:hidden inline-flex items-center justify-center p-2 rounded-full text-ink hover:bg-canvas focus:outline-none touch-manipulation"
+                aria-expanded={isMobileMenuOpen}
+                aria-label="Open menu"
               >
-                <span className="sr-only">Open main menu</span>
-                {isMobileMenuOpen ? (
-                  <svg className="block h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                ) : (
-                  <svg className="block h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                )}
+                <Menu className="h-6 w-6" strokeWidth={1.75} />
               </button>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div id="mobile-menu" className="md:hidden py-4 sm:py-6 border-t border-gray-200 bg-white shadow-lg relative z-[70] max-h-[calc(100vh-3.5rem)] overflow-y-auto">
-            {/* Mobile Navigation Links - Grid */}
-            <nav className="px-3 sm:px-4">
-              <div className="grid grid-cols-3 gap-2">
-                <Link
-                  to="/"
-                  className="bg-white border border-gray-300 rounded-lg py-2.5 px-2 text-center font-bold text-xs uppercase text-black hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 touch-manipulation shadow-sm"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    window.scrollTo(0, 0);
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <div className="lg:hidden">
+            <div
+              className={`fixed inset-0 z-[90] bg-ink/40 backdrop-blur-[2px] transition-opacity duration-300 ${
+                isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+              }`}
+              onClick={closeMobileMenu}
+              aria-hidden="true"
+            />
+            <aside
+              className={`fixed top-0 right-0 z-[100] h-dvh w-[min(88vw,360px)] bg-white shadow-[-16px_0_40px_rgba(23,23,23,0.12)] flex flex-col transition-transform duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'
+              }`}
+              aria-hidden={!isMobileMenuOpen}
+            >
+              <div className="flex items-center justify-between px-5 h-16 border-b border-line shrink-0">
+                <img
+                  src={headerLogo.url || brandLogo}
+                  alt={headerLogo.alt || 'Shopzen'}
+                  className="h-10 w-auto max-w-[200px] object-contain object-left"
+                  onError={(e) => {
+                    e.target.src = brandLogo;
                   }}
+                />
+                <button
+                  type="button"
+                  onClick={closeMobileMenu}
+                  className="p-2 rounded-full text-ink hover:bg-canvas"
+                  aria-label="Close menu"
                 >
-                  HOME
-                </Link>
-                <Link
-                  to="/about"
-                  className="bg-white border border-gray-300 rounded-lg py-2.5 px-2 text-center font-bold text-xs uppercase text-black hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 touch-manipulation shadow-sm"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    window.scrollTo(0, 0);
-                  }}
-                >
-                  ABOUT
-                </Link>
-                <Link
-                  to="/contact"
-                  className="bg-white border border-gray-300 rounded-lg py-2.5 px-2 text-center font-bold text-xs uppercase text-black hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 touch-manipulation shadow-sm"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    window.scrollTo(0, 0);
-                  }}
-                >
-                  CONTACT
-                </Link>
+                  <X className="w-5 h-5" strokeWidth={1.75} />
+                </button>
               </div>
-            </nav>
 
-            {/* Mobile Categories Section */}
-            <div className="mt-4 pt-3 px-3 sm:px-4 border-t border-gray-200">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-2 px-1">Beauty & Hygiene Categories</p>
-              <div className="grid grid-cols-2 gap-2">
-                {categories.map((cat) => {
-                  const isActive = location.pathname === cat.path;
-                  return (
-                    <button
-                      key={cat.name}
-                      type="button"
-                      className={`text-left px-3 py-2.5 rounded-lg text-xs font-medium transition-colors duration-150 border touch-manipulation ${
-                        isActive
-                          ? 'bg-gray-900 text-white border-gray-900 font-semibold shadow-sm'
-                          : 'bg-gray-50 text-gray-800 border-gray-200 hover:bg-gray-100 active:bg-gray-200'
-                      }`}
-                      onClick={() => {
-                        setIsMobileMenuOpen(false);
-                        navigate(cat.path);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                    >
-                      {cat.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+              <div className="flex-1 overflow-y-auto px-5 py-5">
+                <nav className="space-y-1">
+                  {[
+                    { name: 'Home', path: '/' },
+                    { name: 'About Us', path: '/about' },
+                    { name: 'Contact Us', path: '/contact' },
+                  ].map((item) => {
+                    const isActive = location.pathname === item.path;
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => {
+                          closeMobileMenu();
+                          window.scrollTo(0, 0);
+                        }}
+                        className={`flex items-center justify-between py-3 text-sm tracking-[0.08em] uppercase border-b border-line ${
+                          isActive ? 'text-ink font-semibold' : 'text-muted'
+                        }`}
+                      >
+                        {item.name}
+                        <ChevronRight className="w-4 h-4" />
+                      </Link>
+                    );
+                  })}
+                </nav>
 
-            {/* Mobile Menu Icons Section */}
-            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 px-3 sm:px-4 border-t border-gray-200">
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                {/* Wishlist - Mobile Only */}
-                <Link
-                  to="/wishlist"
-                  className="bg-white border border-gray-300 rounded-lg py-3 sm:py-4 px-3 sm:px-4 flex items-center justify-center space-x-2 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 touch-manipulation shadow-sm"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.312-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                  </svg>
-                  <span className="font-bold text-xs sm:text-sm text-black">Wishlist</span>
-                  {wishlistCount > 0 && (
-                    <span className="bg-black text-white text-[10px] sm:text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center font-bold">
-                      {wishlistCount > 9 ? '9+' : wishlistCount}
-                    </span>
-                  )}
-                </Link>
+                <div className="mt-7">
+                  <p className="section-kicker mb-3">Categories</p>
+                  <div className="space-y-1">
+                    {categories.map((cat) => {
+                      const isActive = location.pathname === cat.path;
+                      return (
+                        <button
+                          key={cat.name}
+                          type="button"
+                          className={`w-full flex items-center justify-between py-3 text-left text-sm border-b border-line ${
+                            isActive ? 'text-ink font-medium' : 'text-ink/80'
+                          }`}
+                          onClick={() => {
+                            closeMobileMenu();
+                            navigate(cat.path);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                        >
+                          {cat.name}
+                          <ChevronRight className="w-4 h-4 text-muted" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
-                {/* Profile - Mobile Only */}
-                {isAuthenticated && userInitial ? (
+                <div className="mt-7 grid grid-cols-2 gap-2">
                   <Link
-                    to="/profile"
-                    className="bg-white border border-gray-300 rounded-lg py-3 sm:py-4 px-3 sm:px-4 flex items-center justify-center space-x-2 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 touch-manipulation shadow-sm"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    to="/wishlist"
+                    onClick={closeMobileMenu}
+                    className="flex items-center justify-center gap-2 py-3 rounded-md border border-line text-sm text-ink hover:bg-canvas"
                   >
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gray-900 text-white font-bold text-sm sm:text-base flex items-center justify-center overflow-hidden">
-                      {userAvatar && !avatarError ? (
-                        <img 
-                          src={userAvatar} 
-                          alt="Profile" 
-                          className="w-full h-full object-cover"
-                          onError={() => setAvatarError(true)}
-                        />
-                      ) : (
-                        <span>{userInitial}</span>
-                      )}
-                    </div>
-                    <span className="font-bold text-xs sm:text-sm text-black">Profile</span>
+                    <Heart className="w-4 h-4" strokeWidth={1.6} />
+                    Wishlist
+                    {wishlistCount > 0 && (
+                      <span className="bg-accent text-white text-[10px] rounded-full h-5 min-w-5 px-1 flex items-center justify-center">
+                        {wishlistCount > 9 ? '9+' : wishlistCount}
+                      </span>
+                    )}
                   </Link>
-                ) : (
+                  {isAuthenticated && userInitial ? (
+                    <Link
+                      to="/profile"
+                      onClick={closeMobileMenu}
+                      className="flex items-center justify-center gap-2 py-3 rounded-md border border-line text-sm text-ink hover:bg-canvas"
+                    >
+                      <User className="w-4 h-4" strokeWidth={1.6} />
+                      Profile
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        closeMobileMenu();
+                        handleLogin();
+                      }}
+                      className="flex items-center justify-center gap-2 py-3 rounded-md border border-line text-sm text-ink hover:bg-canvas"
+                    >
+                      <User className="w-4 h-4" strokeWidth={1.6} />
+                      Sign In
+                    </button>
+                  )}
+                </div>
+
+                {isAuthenticated && (
                   <button
+                    type="button"
                     onClick={() => {
-                      handleLogin();
-                      setIsMobileMenuOpen(false);
+                      closeMobileMenu();
+                      handleLogout();
                     }}
-                    className="bg-white border border-gray-300 rounded-lg py-3 sm:py-4 px-3 sm:px-4 flex items-center justify-center space-x-2 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 touch-manipulation shadow-sm"
+                    className="mt-4 w-full py-3 rounded-md bg-ink text-white text-sm tracking-[0.08em] uppercase"
                   >
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
-                    <span className="font-bold text-xs sm:text-sm text-black">Sign In</span>
+                    Logout
                   </button>
                 )}
               </div>
-            </div>
-
-            {/* Auth Section in Mobile Menu */}
-            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 px-3 sm:px-4 border-t border-gray-200">
-              {isAuthenticated ? (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-center space-x-2 py-2.5 sm:py-3 px-3 sm:px-4 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 active:bg-gray-900 transition-colors duration-200 touch-manipulation text-sm sm:text-base"
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  <span>Logout</span>
-                </button>
-              ) : null}
-            </div>
-          </div>
+            </aside>
+          </div>,
+          document.body
         )}
-      </div>
 
       {/* Custom Styles for Dropdown */}
       <style>{`

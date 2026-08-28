@@ -4,11 +4,9 @@ import { FaTrash, FaPlus, FaMinus, FaArrowLeft, FaShoppingCart } from 'react-ico
 import { useCart } from '../context/CartContext';
 import { getProductImage, placeholders } from '../utils/imagePlaceholder';
 import ScrollToTop from './ScrollToTop';
-import { useHeaderColor } from '../utils/useHeaderColor';
 
 function Cart() {
   const navigate = useNavigate();
-  const headerColor = useHeaderColor();
   const { 
     cart = [], 
     updateQuantity, 
@@ -47,32 +45,29 @@ function Cart() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 max-w-6xl">
+    <div className="min-h-screen bg-canvas">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 max-w-6xl">
         <button 
           onClick={() => navigate('/')}
-          className="flex items-center text-black mb-4 sm:mb-6 transition-all cursor-pointer border-2 border-black rounded-lg px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-semibold shadow-sm transform hover:scale-105 active:scale-95 w-full sm:w-auto"
-          style={{ backgroundColor: headerColor }}
+          className="inline-flex items-center text-ink mb-8 transition-colors cursor-pointer border border-line rounded-md px-4 py-2 text-sm font-medium hover:border-ink bg-white"
         >
-          <FaArrowLeft className="mr-2 w-4 h-4 sm:w-5 sm:h-5" /> Continue Shopping
+          <FaArrowLeft className="mr-2 w-3.5 h-3.5" /> Continue shopping
         </button>
 
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 md:mb-8 flex items-center gap-2 sm:gap-3">
-          <span className="w-0.5 sm:w-1 h-6 sm:h-8 md:h-10 bg-gradient-to-b from-[#5c9404] to-[#8B2BE2] rounded-full"></span>
-          <span className="break-words">Your Shopping Cart ({cartCount} {cartCount === 1 ? 'item' : 'items'})</span>
+        <h1 className="section-title text-3xl sm:text-4xl text-ink mb-8">
+          Shopping cart <span className="text-muted text-xl font-sans font-normal">({cartCount})</span>
         </h1>
       
       {cart.length === 0 ? (
-        <div className="text-center py-8 sm:py-12 md:py-16 bg-white rounded-xl sm:rounded-2xl shadow-lg border-2 border-pink-200 px-4 sm:px-6">
-          <FaShoppingCart className="mx-auto text-4xl sm:text-5xl md:text-6xl text-pink-300 mb-4 sm:mb-6" />
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">Your cart is empty</h2>
-          <p className="text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base md:text-lg px-2">Looks like you haven't added anything to your cart yet.</p>
+        <div className="text-center py-16 bg-white rounded-lg border border-line px-6">
+          <FaShoppingCart className="mx-auto text-4xl text-muted mb-5" />
+          <h2 className="section-title text-2xl text-ink mb-2">Your cart is empty</h2>
+          <p className="text-muted mb-8">Looks like you haven't added anything yet.</p>
           <button 
             onClick={() => navigate('/')}
-            className="text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl border-2 border-black transition-all font-semibold shadow-lg transform hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base w-full sm:w-auto"
-            style={{ backgroundColor: headerColor }}
+            className="btn-primary"
           >
-            Continue Shopping
+            Continue shopping
           </button>
         </div>
       ) : (
@@ -89,8 +84,8 @@ function Cart() {
                const itemKey = `${item.id || item._id || 'item'}-${item.size || 'default'}`;
 
                return (
-              <div key={itemKey} className="bg-white rounded-lg shadow-sm p-2.5 sm:p-3.5 flex flex-col sm:flex-row items-start gap-2.5 sm:gap-3 border border-pink-100 hover:border-pink-300 transition-all">
-                <div className="w-full sm:w-20 md:w-24 h-36 sm:h-20 md:h-24 flex items-center justify-center overflow-hidden rounded-md cursor-pointer border border-pink-100 hover:border-pink-300 transition-all self-center sm:self-start bg-gray-50">
+              <div key={itemKey} className="bg-white rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row items-start gap-3 sm:gap-4 border border-line">
+                <div className="w-full sm:w-24 h-40 sm:h-24 flex items-center justify-center overflow-hidden rounded-md cursor-pointer border border-line self-center sm:self-start bg-canvas">
                   <img
                     src={imageUrl}
                     alt={displayName}
@@ -107,13 +102,13 @@ function Cart() {
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                     <div className="flex-1 min-w-0">
                       <h3 
-                        className="text-sm sm:text-base font-semibold text-gray-900 cursor-pointer hover:text-[#5c9404] transition-colors mb-1 line-clamp-2"
+                        className="text-sm sm:text-base font-medium text-ink cursor-pointer hover:text-accent transition-colors mb-1 line-clamp-2"
                         onClick={() => navigate(`/product/${item.id}`)}
                       >
                         {displayName}
                       </h3>
                       {item.size && (
-                        <p className="text-[#5c9404] font-semibold text-xs mb-1">Size: {item.size}</p>
+                        <p className="text-muted font-medium text-xs mb-1">Size: {item.size}</p>
                       )}
                       {(item.material || item.work) && (
                         <p className="text-gray-600 text-xs mb-1.5 line-clamp-1">
@@ -126,21 +121,21 @@ function Cart() {
                       </div>
                       
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0 mt-1">
-                        <div className="flex items-center border border-pink-300 rounded-md overflow-hidden">
+                        <div className="flex items-center border border-line rounded-md overflow-hidden">
                           <button 
                             onClick={() => handleQuantityChange(item.id, (item.quantity || 1) - 1, item.size)}
-                            className="px-2.5 sm:px-3 py-1.5 bg-pink-50 text-[#5c9404] hover:bg-pink-100 font-bold cursor-pointer transition-colors touch-manipulation"
+                            className="px-3 py-1.5 bg-canvas text-ink hover:bg-line font-medium cursor-pointer transition-colors touch-manipulation"
                             aria-label="Decrease quantity"
                           >
-                            <FaMinus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                            <FaMinus className="w-3 h-3" />
                           </button>
-                          <span className="px-3 sm:px-4 py-1.5 border-x border-pink-300 bg-white text-gray-900 font-semibold text-sm min-w-[2.25rem] text-center">{item.quantity || 1}</span>
+                          <span className="px-4 py-1.5 border-x border-line bg-white text-ink font-medium text-sm min-w-[2.25rem] text-center">{item.quantity || 1}</span>
                           <button 
                             onClick={() => handleQuantityChange(item.id, (item.quantity || 1) + 1, item.size)}
-                            className="px-2.5 sm:px-3 py-1.5 bg-pink-50 text-[#5c9404] hover:bg-pink-100 font-bold cursor-pointer transition-colors touch-manipulation"
+                            className="px-3 py-1.5 bg-canvas text-ink hover:bg-line font-medium cursor-pointer transition-colors touch-manipulation"
                             aria-label="Increase quantity"
                           >
-                            <FaPlus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                            <FaPlus className="w-3 h-3" />
                           </button>
                         </div>
                         
@@ -156,7 +151,7 @@ function Cart() {
                     
                     <div className="text-left sm:text-right w-full sm:w-auto flex sm:block items-center sm:items-end justify-between sm:justify-end gap-2">
                       <div>
-                        <p className="text-base sm:text-lg font-bold text-[#5c9404]">₹{(item.price * (item.quantity || 1)).toLocaleString()}</p>
+                        <p className="text-base sm:text-lg font-semibold text-ink">₹{(item.price * (item.quantity || 1)).toLocaleString()}</p>
                         <p className="text-[11px] text-gray-500">Line total</p>
                       </div>
                     </div>
@@ -169,47 +164,43 @@ function Cart() {
           
           {/* Order Summary */}
           <div className="lg:sticky lg:top-4 h-fit">
-            <div className="bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-5 md:p-6 border-2 border-pink-200 bg-gradient-to-br from-white to-pink-50/30">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
-                <span className="w-0.5 sm:w-1 h-5 sm:h-6 bg-gradient-to-b from-[#5c9404] to-[#8B2BE2] rounded-full"></span>
-                Order Summary
+            <div className="bg-white rounded-lg p-5 sm:p-6 border border-line">
+              <h2 className="section-title text-2xl text-ink mb-6">
+                Order summary
               </h2>
-              <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
-                <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-pink-100">
-                  <span className="text-gray-700 font-medium text-sm sm:text-base">Subtotal ({cartCount} {cartCount === 1 ? 'item' : 'items'})</span>
-                  <span className="font-semibold text-gray-900 text-sm sm:text-base">₹{cartTotal.toLocaleString()}</span>
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between items-center py-2 border-b border-line">
+                  <span className="text-muted text-sm">Subtotal ({cartCount} {cartCount === 1 ? 'item' : 'items'})</span>
+                  <span className="font-medium text-ink text-sm">₹{cartTotal.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-pink-100">
-                  <span className="text-gray-700 font-medium text-sm sm:text-base">Shipping</span>
-                  <span className={`text-sm sm:text-base ${cartTotal >= 1000 ? "text-[#5c9404] font-bold" : "text-gray-700 font-semibold"}`}>
-                    {cartTotal >= 1000 ? 'Free ✓' : '₹99'}
+                <div className="flex justify-between items-center py-2 border-b border-line">
+                  <span className="text-muted text-sm">Shipping</span>
+                  <span className={`text-sm ${cartTotal >= 1000 ? "text-accent font-medium" : "text-ink"}`}>
+                    {cartTotal >= 1000 ? 'Free' : '₹99'}
                   </span>
                 </div>
-                <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-pink-100">
-                  <span className="text-gray-700 font-medium text-sm sm:text-base">Tax (5%)</span>
-                  <span className="font-semibold text-gray-900 text-sm sm:text-base">₹{Math.round(cartTotal * 0.05).toLocaleString()}</span>
+                <div className="flex justify-between items-center py-2 border-b border-line">
+                  <span className="text-muted text-sm">Tax (5%)</span>
+                  <span className="font-medium text-ink text-sm">₹{Math.round(cartTotal * 0.05).toLocaleString()}</span>
                 </div>
-                <div className="border-t-2 border-pink-300 my-2 sm:my-3"></div>
-                <div className="flex justify-between items-center text-lg sm:text-xl font-bold bg-gradient-to-r from-pink-50 to-purple-50 p-3 sm:p-4 rounded-lg border border-pink-200">
-                  <span className="text-gray-900">Total</span>
-                  <span className="text-[#5c9404]">₹{(cartTotal + (cartTotal >= 1000 ? 0 : 99) + Math.round(cartTotal * 0.05)).toLocaleString()}</span>
+                <div className="flex justify-between items-center text-lg font-semibold bg-canvas p-4 rounded-md">
+                  <span className="text-ink">Total</span>
+                  <span className="text-ink">₹{(cartTotal + (cartTotal >= 1000 ? 0 : 99) + Math.round(cartTotal * 0.05)).toLocaleString()}</span>
                 </div>
               </div>
               
               <button 
                 onClick={() => navigate('/checkout/address')}
-                className="w-full text-black py-3 sm:py-4 px-3 sm:px-4 rounded-xl border-2 border-black transition-all font-bold shadow-lg transform hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base md:text-lg touch-manipulation"
-                style={{ backgroundColor: headerColor }}
+                className="w-full btn-primary"
               >
-                Proceed to Checkout
+                Proceed to checkout
               </button>
               
               <button 
                 onClick={clearCart}
-                className="w-full mt-3 sm:mt-4 text-black border-2 border-black py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl transition-all font-semibold cursor-pointer transform hover:scale-105 active:scale-95 text-sm sm:text-base touch-manipulation"
-                style={{ backgroundColor: headerColor }}
+                className="w-full mt-3 btn-secondary"
               >
-                Clear Cart
+                Clear cart
               </button>
               
               <p className="text-[10px] sm:text-xs text-gray-500 mt-4 sm:mt-6 text-center leading-relaxed px-1">

@@ -1,80 +1,94 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
-const HeroSlider = ({ slides = [], mobileSrc }) => {
-  const [index, setIndex] = useState(0);
-  const len = slides.length;
+const DESKTOP_HERO = encodeURI('/Home Page Banner.png');
+const MOBILE_HERO = encodeURI('/mobile home page banner.png');
 
-  // Auto-rotation disabled - banner only changes manually
-  // First banner (index 0) will always be shown initially
-
-  // Dispatch event when banner index changes
+const HeroSlider = () => {
   useEffect(() => {
-    const event = new CustomEvent('bannerChanged', { detail: { index, total: len } });
-    window.dispatchEvent(event);
-  }, [index, len]);
-
-  const prev = () => setIndex((i) => (i - 1 + len) % len);
-  const next = () => setIndex((i) => (i + 1) % len);
-
-  if (!len) return null;
+    window.dispatchEvent(new CustomEvent('bannerChanged', { detail: { index: 0, total: 1 } }));
+  }, []);
 
   return (
-    <section className="w-full m-0 p-0">
-      {/* Desktop slider */}
-      <div className="hidden md:block relative overflow-hidden">
+    <section className="relative w-full overflow-hidden bg-white">
+      {/* Mobile hero */}
+      <div className="md:hidden relative w-full">
+        <img
+          src={MOBILE_HERO}
+          alt="Shopzen grooming and wellness collection"
+          width={1024}
+          height={1536}
+          className="block w-full h-auto"
+          loading="eager"
+        />
+
         <div
-          className="flex transition-transform duration-500 ease-out"
-          style={{ transform: `translateX(-${index * 100}%)` }}
-        >
-          {slides.map((s, i) => (
-            <img
-              key={i}
-              src={s.desktop}
-              alt={s.alt || `Banner ${i + 1}`}
-              className="w-full h-auto object-cover block shrink-0 grow-0 basis-full"
-              loading="eager"
-              onError={(e) => {
-                e.currentTarget.src = s.fallback || s.desktop;
-              }}
-            />
-          ))}
-        </div>
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.62) 22%, rgba(255, 255, 255, 0.12) 42%, rgba(255, 255, 255, 0) 58%)',
+          }}
+        />
 
-        {/* Controls */}
-        <button
-          type="button"
-          onClick={prev}
-          className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center shadow"
-          aria-label="Previous"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/></svg>
-        </button>
-        <button
-          type="button"
-          onClick={next}
-          className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center shadow"
-          aria-label="Next"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
-        </button>
-
-        {/* Dots */}
-        <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setIndex(i)}
-              className={`${i === index ? 'w-8 bg-black/70' : 'w-4 bg-black/30'} h-1.5 rounded-full transition-all`}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
+        <div className="absolute inset-x-0 top-0 z-10 px-6 pt-8 pb-6 text-center">
+          <p className="section-kicker mb-3">Beauty &amp; wellness</p>
+          <h1 className="section-title text-[2.35rem] leading-[1.05] text-ink mb-3">
+            Rituals for
+            <br />
+            everyday glow.
+          </h1>
+          <p className="text-[13px] text-ink/70 leading-relaxed max-w-[16.5rem] mx-auto mb-6">
+            Authentic essentials for skin, hair, and daily care — chosen with care.
+          </p>
+          <Link
+            to="/category/beauty-and-hygiene"
+            className="btn-primary min-w-[10.5rem] inline-flex"
+          >
+            Shop the collection
+          </Link>
         </div>
       </div>
 
-      {/* Mobile single image */}
-      <div className="md:hidden block">
-        <img src={mobileSrc || slides[0]?.desktop} alt="Banner" className="w-full h-auto object-cover block" loading="lazy" />
+      {/* Desktop hero */}
+      <div className="hidden md:block relative w-full">
+        <img
+          src={DESKTOP_HERO}
+          alt="Shopzen beauty and wellness collection"
+          width={2084}
+          height={754}
+          className="block w-full h-auto"
+          loading="eager"
+        />
+
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(90deg, #ffffff 0%, #ffffff 32%, rgba(255, 255, 255, 0.72) 44%, rgba(255, 255, 255, 0.28) 56%, rgba(255, 255, 255, 0) 70%)',
+          }}
+        />
+
+        <div className="absolute inset-0 z-10 max-w-[1440px] mx-auto px-8 lg:px-12 flex items-center">
+          <div className="w-full max-w-[34rem]">
+            <p className="section-kicker mb-4">Beauty &amp; wellness</p>
+            <h1 className="section-title text-4xl lg:text-[3.5rem] text-ink leading-[1.08] mb-4">
+              Everyday care,
+              <br />
+              considered.
+            </h1>
+            <p className="text-sm sm:text-base text-ink/75 leading-relaxed max-w-md mb-6 lg:mb-8">
+              Thoughtfully chosen essentials for skin, hair, and daily rituals — authentic brands, fair prices, delivered across India.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link to="/category/beauty-and-hygiene" className="btn-primary min-w-[10.5rem]">
+                Shop collection
+              </Link>
+              <Link to="/category/beauty-and-hygiene/skin-care" className="btn-secondary min-w-[10.5rem]">
+                Explore skin care
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

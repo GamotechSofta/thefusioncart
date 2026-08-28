@@ -1,42 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
-import MobileHeader from './MobileHeader';
 import Footer from './Footer';
 
 const Layout = () => {
   const location = useLocation();
   const headerWrapRef = useRef(null);
-  const mobileHeaderRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
-  const [navbarHeight, setNavbarHeight] = useState(0);
   const hideFooter =
     location.pathname.startsWith('/category/') ||
     location.pathname.startsWith('/product/');
+  const showMobileNav = !location.pathname.includes('/product/');
 
   useEffect(() => {
     const updateHeight = () => {
-      let totalHeight = 0;
       if (headerWrapRef.current) {
-        const navHeight = headerWrapRef.current.offsetHeight;
-        setNavbarHeight(navHeight);
-        totalHeight += navHeight;
+        setHeaderHeight(headerWrapRef.current.offsetHeight);
       }
-      // Only add mobile header height if it's visible (mobile view)
-      if (mobileHeaderRef.current && window.innerWidth < 768) {
-        totalHeight += mobileHeaderRef.current.offsetHeight;
-      }
-      setHeaderHeight(totalHeight);
     };
     updateHeight();
     window.addEventListener('resize', updateHeight);
-    // Use MutationObserver to detect dynamic height changes
     const observer = new MutationObserver(updateHeight);
     if (headerWrapRef.current) {
       observer.observe(headerWrapRef.current, { childList: true, subtree: true, attributes: true });
-    }
-    if (mobileHeaderRef.current) {
-      observer.observe(mobileHeaderRef.current, { childList: true, subtree: true, attributes: true });
     }
     return () => {
       window.removeEventListener('resize', updateHeight);
@@ -45,30 +31,22 @@ const Layout = () => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ '--app-header-height': `${headerHeight}px` }}>
-      {/* Navbar - Fixed at top */}
-      <div ref={headerWrapRef} className="fixed top-0 left-0 right-0 z-50 bg-white">
+    <div
+      className={`flex flex-col min-h-screen bg-canvas ${
+        showMobileNav ? 'pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0' : ''
+      }`}
+      style={{ '--app-header-height': `${headerHeight}px` }}
+    >
+      <div ref={headerWrapRef} className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md">
         <Navbar />
       </div>
 
-      {/* Mobile Header - Fixed below Navbar, only visible on mobile */}
-      <div 
-        ref={mobileHeaderRef} 
-        className="fixed md:hidden left-0 right-0 z-[60]"
-        style={{ top: `${navbarHeight}px` }}
-      >
-        <MobileHeader />
-      </div>
+      <div aria-hidden="true" style={{ height: headerHeight }} className="bg-white" />
 
-      {/* Spacer equal to header height to avoid overlap */}
-      <div aria-hidden="true" style={{ height: headerHeight }} className="bg-white border-b border-gray-300" />
-
-      {/* Main Content Area with responsive padding */}
-      <main className="flex-grow" style={{ position: 'relative' }}>
+      <main className="flex-grow bg-canvas" style={{ position: 'relative' }}>
         <Outlet />
       </main>
 
-      {/* Footer */}
       {!hideFooter && <Footer />}
     </div>
   );

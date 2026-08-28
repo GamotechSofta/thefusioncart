@@ -1,6 +1,6 @@
 {
-  "name": "BuyNest",
-  "short_name": "BuyNest",
+  "name": "Shopzen",
+  "short_name": "Shopzen",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -13,7 +13,7 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#111827",
+  "theme_color": "#102030",
   "background_color": "#ffffff",
   "display": "standalone"
 }

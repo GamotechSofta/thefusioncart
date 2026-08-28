@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
-import brandLogo from '../assets/buynest.logo.jpeg';
+import brandLogo from '../assets/logo.jpeg';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -119,13 +119,13 @@ const SignUp = () => {
           {/* Header & Logo */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center p-2 rounded-2xl bg-pink-50/80 mb-3 border border-pink-100 shadow-sm">
-              <img src={brandLogo} alt="BuyNest" className="h-8 sm:h-9 w-auto object-contain" />
+              <img src={brandLogo} alt="Shopzen" className="h-10 sm:h-12 w-auto object-contain" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+            <h2 className="section-title text-3xl text-ink tracking-tight">
               Create Your Account
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              Join BuyNest for exclusive offers, fast checkout, and order tracking
+              Join Shopzen for exclusive offers, fast checkout, and order tracking
             </p>
           </div>
 
@@ -359,7 +359,7 @@ const SignUp = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-pink-500/25 flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>

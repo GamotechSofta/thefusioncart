@@ -9,15 +9,14 @@ export default function ShippingPolicy() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 text-gray-800">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-14 sm:py-16 px-4 text-center">
+    <div className="min-h-screen bg-canvas text-ink">
+      <div className="bg-ink text-white py-14 sm:py-16 px-4 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-white/90 text-xs font-semibold uppercase tracking-wider mb-4 border border-white/20">
             <Truck className="w-3.5 h-3.5 text-rose-400" />
             Shipping Information
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+          <h1 className="section-title text-4xl sm:text-5xl tracking-tight mb-4 text-white">
             Shipping Policy
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">

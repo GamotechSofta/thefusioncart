@@ -27,14 +27,26 @@ export const getProducts = async (req, res) => {
     const categoryLooseRe = buildLooseCategoryRegex(rawCategory || categorySlug.replace(/-/g, ' '));
     const subCategoryLooseRe = buildLooseCategoryRegex(rawSubCategory || subCategorySlug.replace(/-/g, ' '));
 
-    // Use _id sort (indexed by default) to avoid in-memory sort limit errors.
-    let products = await Product.find(query).sort({ _id: -1 });
+    const parsedLimit = Number.parseInt(req.query.limit, 10);
+    const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(parsedLimit, 24) : null;
+    const random = String(req.query.random || '').toLowerCase() === 'true';
+
+    const sampleOrFind = async (match) => {
+      if (random && limit) {
+        return Product.aggregate([{ $match: match }, { $sample: { size: limit } }]);
+      }
+      let productsQuery = Product.find(match).sort({ _id: -1 });
+      if (limit) productsQuery = productsQuery.limit(limit);
+      return productsQuery;
+    };
+
+    let products = await sampleOrFind(query);
 
     // Fallback for manually inserted raw dataset docs:
     // if strict 3-level match returns no rows, try relaxed leaf match.
     if (products.length === 0 && (subCategoryLooseRe || rawSubCategory)) {
       const leafRegex = subCategoryLooseRe || new RegExp(rawSubCategory, 'i');
-      products = await Product.find({
+      const fallbackMatch = {
         $or: [
           { 'taxonomy.subSubCategorySlug': subCategorySlug },
           { subSubCategory: { $regex: leafRegex } },
@@ -44,7 +56,8 @@ export const getProducts = async (req, res) => {
           { title: { $regex: leafRegex } },
           { 'SKU Name': { $regex: leafRegex } },
         ],
-      }).sort({ _id: -1 });
+      };
+      products = await sampleOrFind(fallbackMatch);
     }
 
     // Native Mongo fallback for raw-key docs inserted directly via Compass.
@@ -56,8 +69,15 @@ export const getProducts = async (req, res) => {
       if (subCategoryLooseRe) rawAnd.push({ 'Sub-sub-Category': { $regex: subCategoryLooseRe } });
 
       const rawQuery = rawAnd.length > 0 ? { $and: rawAnd } : {};
-      const rawDocs = await Product.collection.find(rawQuery).sort({ _id: -1 }).toArray();
-      products = rawDocs;
+      if (random && limit) {
+        products = await Product.collection.aggregate([
+          { $match: rawQuery },
+          { $sample: { size: limit } },
+        ]).toArray();
+      } else {
+        const rawDocs = await Product.collection.find(rawQuery).sort({ _id: -1 }).toArray();
+        products = limit ? rawDocs.slice(0, limit) : rawDocs;
+      }
     }
 
     // Process image URLs to ensure they're absolute
@@ -155,6 +175,8 @@ export const getProducts = async (req, res) => {
       
       return productObj;
     });
+
+    if (limit) products = products.slice(0, limit);
     
     res.json(products);
   } catch (error) {

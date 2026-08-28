@@ -94,8 +94,12 @@ function snapshotAndInlineStyles(element) {
     el.style.wordSpacing = '0px';
 
     if (el.tagName === 'IMG') {
-      el.style.height = computed.height;
-      el.style.width = computed.width;
+      el.style.objectFit = 'contain';
+      el.style.objectPosition = 'left center';
+      el.style.width = 'auto';
+      el.style.height = 'auto';
+      el.style.maxWidth = '96px';
+      el.style.maxHeight = '64px';
     } else {
       el.style.height = 'auto';
     }
@@ -294,6 +298,13 @@ export async function downloadInvoicePdf(element, filename) {
               node.style.fontFamily = SAFE_FONT;
               node.style.letterSpacing = '0px';
               node.style.wordSpacing = '0px';
+            });
+            clonedElement.querySelectorAll('img').forEach((img) => {
+              img.style.objectFit = 'contain';
+              img.style.width = 'auto';
+              img.style.height = 'auto';
+              img.style.maxWidth = '96px';
+              img.style.maxHeight = '64px';
             });
           },
         });

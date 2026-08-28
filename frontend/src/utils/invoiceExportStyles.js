@@ -42,14 +42,18 @@ export const INVOICE_EXPORT_CSS = `
   width: 100%;
 }
 .invoice-export-logo-cell {
-  width: 72px;
-  padding-right: 12px;
-  vertical-align: top;
+  width: 1%;
+  white-space: nowrap;
+  padding-right: 14px;
+  vertical-align: middle;
 }
 .invoice-export-logo {
-  height: 56px;
-  width: auto;
-  max-width: 64px;
+  width: auto !important;
+  height: auto !important;
+  max-width: 96px;
+  max-height: 64px;
+  object-fit: contain;
+  object-position: left center;
   display: block;
 }
 .invoice-export-brand-text {

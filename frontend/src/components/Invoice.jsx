@@ -74,7 +74,20 @@ const Invoice = ({ order, user, onPrint, totals: totalsOverride, invoiceNumber: 
                   <tbody>
                     <tr>
                       <td className="invoice-export-logo-cell">
-                        <img src={logoUrl} alt={COMPANY_INFO.brandName} className="invoice-export-logo" />
+                        <img
+                          src={logoUrl}
+                          alt={COMPANY_INFO.brandName}
+                          className="invoice-export-logo"
+                          style={{
+                            width: 'auto',
+                            height: 'auto',
+                            maxWidth: '96px',
+                            maxHeight: '64px',
+                            objectFit: 'contain',
+                            objectPosition: 'left center',
+                            display: 'block',
+                          }}
+                        />
                       </td>
                       <td className="invoice-export-brand-text">
                         <p className="invoice-export-title">{COMPANY_INFO.brandName}</p>
@@ -207,7 +220,7 @@ const Invoice = ({ order, user, onPrint, totals: totalsOverride, invoiceNumber: 
             <img
               src={logoUrl}
               alt={COMPANY_INFO.brandName}
-              className="h-16 w-auto max-w-[120px] object-contain shrink-0"
+              className="h-auto w-auto max-h-16 max-w-[120px] object-contain shrink-0"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = brandLogo;

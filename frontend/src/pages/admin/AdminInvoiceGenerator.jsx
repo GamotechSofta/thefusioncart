@@ -13,6 +13,9 @@ import {
   FiPrinter,
   FiDownload,
   FiCalendar,
+  FiUserPlus,
+  FiCheck,
+  FiList,
 } from 'react-icons/fi';
 import { api } from '../../utils/api';
 import Invoice from '../../components/Invoice';
@@ -43,14 +46,30 @@ const todayDateInputValue = () => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 
+const initialNewCustomerForm = {
+  name: '',
+  email: '',
+  phone: '',
+  address: '',
+  locality: '',
+  city: '',
+  state: '',
+  pincode: '',
+};
+
 const AdminInvoiceGenerator = () => {
   const [addresses, setAddresses] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Customer Management
+  const [customerMode, setCustomerMode] = useState('existing'); // 'existing' | 'new'
   const [customerSearch, setCustomerSearch] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [manualCustomers, setManualCustomers] = useState([]);
+  const [newCustomerForm, setNewCustomerForm] = useState(initialNewCustomerForm);
+  const [newCustomerError, setNewCustomerError] = useState('');
 
   const [mainCategory, setMainCategory] = useState('');
   const [subCategory, setSubCategory] = useState('');
@@ -86,6 +105,13 @@ const AdminInvoiceGenerator = () => {
 
   const customers = useMemo(() => {
     const map = new Map();
+
+    // Include manually added customers first
+    manualCustomers.forEach((c) => {
+      map.set(c.id, c);
+    });
+
+    // Include database addresses
     addresses.forEach((addr) => {
       const user = addr.userId;
       const uid = user?._id || user?.id || user;
@@ -104,7 +130,7 @@ const AdminInvoiceGenerator = () => {
     return Array.from(map.values()).sort((a, b) =>
       (a.name || '').localeCompare(b.name || '')
     );
-  }, [addresses]);
+  }, [addresses, manualCustomers]);
 
   const filteredCustomers = useMemo(() => {
     const q = customerSearch.trim().toLowerCase();
@@ -116,6 +142,59 @@ const AdminInvoiceGenerator = () => {
         c.phone?.includes(q)
     );
   }, [customers, customerSearch]);
+
+  const handleAddNewCustomer = (e) => {
+    e?.preventDefault?.();
+    setNewCustomerError('');
+
+    const { name, phone, address, city, state, pincode, email, locality } = newCustomerForm;
+
+    if (!name.trim()) {
+      setNewCustomerError('Customer / Business Name is required');
+      return;
+    }
+    if (!phone.trim()) {
+      setNewCustomerError('Phone number is required');
+      return;
+    }
+    if (!address.trim()) {
+      setNewCustomerError('Street address is required');
+      return;
+    }
+    if (!city.trim()) {
+      setNewCustomerError('City is required');
+      return;
+    }
+    if (!state.trim()) {
+      setNewCustomerError('State is required');
+      return;
+    }
+    if (!pincode.trim()) {
+      setNewCustomerError('Pincode is required');
+      return;
+    }
+
+    const newCustObj = {
+      id: `manual_${Date.now()}`,
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      address: {
+        fullName: name.trim(),
+        mobileNumber: phone.trim(),
+        address: address.trim(),
+        locality: locality.trim(),
+        city: city.trim(),
+        state: state.trim(),
+        pincode: pincode.trim(),
+      },
+      isManual: true,
+    };
+
+    setManualCustomers((prev) => [newCustObj, ...prev]);
+    setSelectedCustomer(newCustObj);
+    setCustomerMode('existing');
+  };
 
   const subcategories = useMemo(() => {
     const main = categoryTree.find((c) => c.name === mainCategory);
@@ -264,6 +343,9 @@ const AdminInvoiceGenerator = () => {
   const resetForm = () => {
     setSelectedCustomer(null);
     setCustomerSearch('');
+    setNewCustomerForm(initialNewCustomerForm);
+    setCustomerMode('existing');
+    setNewCustomerError('');
     setLineItems([]);
     setMainCategory('');
     setSubCategory('');
@@ -291,13 +373,13 @@ const AdminInvoiceGenerator = () => {
             Invoice Generator
           </h2>
           <p className="text-sm text-gray-500 mt-1">
-            Select customer, add products, and generate a printable invoice
+            Select or add customer, choose products, and generate a printable invoice
           </p>
         </div>
         <button
           type="button"
           onClick={resetForm}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold text-sm"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold text-sm transition-colors"
         >
           <FiRefreshCw className="w-4 h-4" />
           Reset
@@ -311,51 +393,269 @@ const AdminInvoiceGenerator = () => {
       )}
 
       <div className="max-w-3xl mx-auto space-y-6">
-        {/* Customer */}
+        {/* Customer Section */}
         <section className="bg-white border-2 border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-5 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white">
-            <h3 className="font-bold flex items-center gap-2">
+          <div className="px-5 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white flex items-center justify-between">
+            <h3 className="font-bold flex items-center gap-2 text-base">
               <FiUser className="w-5 h-5" />
-              1. Select Customer
+              1. Customer Information
             </h3>
+            <div className="flex items-center bg-white/20 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setCustomerMode('existing')}
+                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+                  customerMode === 'existing'
+                    ? 'bg-white text-pink-700 shadow-sm'
+                    : 'text-white hover:bg-white/10'
+                }`}
+              >
+                <FiList className="w-3.5 h-3.5" />
+                Select Existing
+              </button>
+              <button
+                type="button"
+                onClick={() => setCustomerMode('new')}
+                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+                  customerMode === 'new'
+                    ? 'bg-white text-pink-700 shadow-sm'
+                    : 'text-white hover:bg-white/10'
+                }`}
+              >
+                <FiUserPlus className="w-3.5 h-3.5" />
+                + Add New
+              </button>
+            </div>
           </div>
+
           <div className="p-5 space-y-4">
-            <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by name, email, or phone..."
-                value={customerSearch}
-                onChange={(e) => setCustomerSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-pink-500 focus:outline-none text-sm"
-              />
-            </div>
+            {/* Mode 1: Search Existing Customers */}
+            {customerMode === 'existing' && (
+              <div className="space-y-3">
+                <div className="relative">
+                  <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search customer by name, email, or phone..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-pink-500 focus:outline-none text-sm"
+                  />
+                </div>
 
-            <div className="max-h-48 overflow-y-auto border border-gray-100 rounded-xl divide-y">
-              {filteredCustomers.length === 0 ? (
-                <p className="p-4 text-sm text-gray-500 text-center">No customers found</p>
-              ) : (
-                filteredCustomers.map((c) => (
+                <div className="max-h-48 overflow-y-auto border border-gray-100 rounded-xl divide-y">
+                  {filteredCustomers.length === 0 ? (
+                    <div className="p-5 text-center space-y-2">
+                      <p className="text-sm text-gray-500">No customer found</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCustomerMode('new');
+                          if (customerSearch.trim()) {
+                            setNewCustomerForm((prev) => ({
+                              ...prev,
+                              name: customerSearch.trim(),
+                            }));
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-600 hover:text-pink-700 underline"
+                      >
+                        <FiUserPlus className="w-3.5 h-3.5" />
+                        Add as new customer
+                      </button>
+                    </div>
+                  ) : (
+                    filteredCustomers.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setSelectedCustomer(c)}
+                        className={`w-full text-left p-3 hover:bg-pink-50 transition-colors flex items-center justify-between ${
+                          selectedCustomer?.id === c.id ? 'bg-pink-50 border-l-4 border-pink-600' : ''
+                        }`}
+                      >
+                        <div>
+                          <p className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                            {c.name}
+                            {c.isManual && (
+                              <span className="px-1.5 py-0.5 text-[10px] bg-pink-100 text-pink-700 font-bold rounded">
+                                Added
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-xs text-gray-500">{c.email || 'No email'}</p>
+                          <p className="text-xs text-gray-500">{c.phone || 'No phone'}</p>
+                        </div>
+                        {selectedCustomer?.id === c.id && (
+                          <span className="text-pink-600 text-xs font-bold flex items-center gap-1">
+                            <FiCheck className="w-4 h-4" /> Selected
+                          </span>
+                        )}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Mode 2: Add New Customer Form */}
+            {customerMode === 'new' && (
+              <form onSubmit={handleAddNewCustomer} className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div className="flex items-center justify-between pb-2 border-b border-gray-200">
+                  <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    <FiUserPlus className="text-pink-600" />
+                    Enter New Customer Details
+                  </h4>
+                  <span className="text-xs text-gray-500">* Required fields</span>
+                </div>
+
+                {newCustomerError && (
+                  <div className="p-2.5 rounded-lg bg-red-100 border border-red-200 text-red-700 text-xs font-medium">
+                    {newCustomerError}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Customer / Business Name *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Ramesh Sharma / ABC Enterprises"
+                      value={newCustomerForm.name}
+                      onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-pink-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Phone / Mobile Number *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 9876543210"
+                      value={newCustomerForm.phone}
+                      onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-pink-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Email Address (Optional)
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="e.g. customer@example.com"
+                      value={newCustomerForm.email}
+                      onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-pink-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Street Address / Flat / Building *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Flat 402, Sunshine Heights, MG Road"
+                      value={newCustomerForm.address}
+                      onChange={(e) => setNewCustomerForm({ ...newCustomerForm, address: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-pink-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Locality / Area / Landmark
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Near City Mall"
+                      value={newCustomerForm.locality}
+                      onChange={(e) => setNewCustomerForm({ ...newCustomerForm, locality: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-pink-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      City *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Pune"
+                      value={newCustomerForm.city}
+                      onChange={(e) => setNewCustomerForm({ ...newCustomerForm, city: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-pink-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      State *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Maharashtra"
+                      value={newCustomerForm.state}
+                      onChange={(e) => setNewCustomerForm({ ...newCustomerForm, state: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-pink-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Pincode *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 411045"
+                      value={newCustomerForm.pincode}
+                      onChange={(e) => setNewCustomerForm({ ...newCustomerForm, pincode: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-pink-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
                   <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => setSelectedCustomer(c)}
-                    className={`w-full text-left p-3 hover:bg-pink-50 transition-colors ${
-                      selectedCustomer?.id === c.id ? 'bg-pink-50 border-l-4 border-pink-600' : ''
-                    }`}
+                    type="submit"
+                    className="flex-1 py-2.5 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl font-bold text-sm hover:from-pink-700 hover:to-rose-700 transition-all flex items-center justify-center gap-2 shadow-md"
                   >
-                    <p className="font-semibold text-gray-900 text-sm">{c.name}</p>
-                    <p className="text-xs text-gray-500">{c.email || 'No email'}</p>
-                    <p className="text-xs text-gray-500">{c.phone || 'No phone'}</p>
+                    <FiCheck className="w-4 h-4" />
+                    Set Customer for Invoice
                   </button>
-                ))
-              )}
-            </div>
+                  <button
+                    type="button"
+                    onClick={() => setCustomerMode('existing')}
+                    className="px-4 py-2.5 border border-gray-300 rounded-xl text-gray-700 font-semibold text-sm hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
 
+            {/* Selected Customer Preview Card */}
             {selectedCustomer && (
-              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-sm space-y-2">
-                <p className="font-bold text-gray-900">Customer Details</p>
-                <p className="flex items-center gap-2 text-gray-700">
+              <div className="p-4 bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl border-2 border-pink-200 text-sm space-y-2">
+                <div className="flex items-center justify-between pb-1 border-b border-pink-200">
+                  <p className="font-bold text-gray-900 flex items-center gap-2">
+                    <FiCheck className="text-pink-600 w-4 h-4" />
+                    Selected Customer
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCustomer(null)}
+                    className="text-xs font-semibold text-red-600 hover:text-red-700 underline"
+                  >
+                    Change Customer
+                  </button>
+                </div>
+                <p className="flex items-center gap-2 text-gray-800 font-semibold">
                   <FiUser className="w-4 h-4 text-pink-600 shrink-0" />
                   {selectedCustomer.name}
                 </p>
@@ -372,7 +672,7 @@ const AdminInvoiceGenerator = () => {
                   </p>
                 )}
                 {selectedCustomer.address && (
-                  <div className="pt-2 border-t border-gray-200">
+                  <div className="pt-2 border-t border-pink-200">
                     <p className="flex items-start gap-2 text-gray-700">
                       <FiMapPin className="w-4 h-4 text-pink-600 shrink-0 mt-0.5" />
                       <span>
@@ -394,7 +694,7 @@ const AdminInvoiceGenerator = () => {
           </div>
         </section>
 
-        {/* Products */}
+        {/* Products Section */}
         <section className="bg-white border-2 border-gray-200 rounded-2xl shadow-sm overflow-hidden">
           <div className="px-5 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
             <h3 className="font-bold flex items-center gap-2">

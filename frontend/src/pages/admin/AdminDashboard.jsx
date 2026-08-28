@@ -171,7 +171,7 @@ const AdminDashboard = () => {
               />
               <StatCard 
                 icon={FiBox} 
-                label="Total Products" 
+                label="Beauty & Hygiene Products" 
                 value={stats.totalProducts} 
                 gradient="from-purple-50 to-pink-100"
                 onClick={() => navigate('/admin/products')}

@@ -20,8 +20,12 @@ import {
 import { api } from '../../utils/api';
 import Invoice from '../../components/Invoice';
 import ScrollToTop from '../../components/ScrollToTop';
-import { categoryTree } from '../../data/categoryTree';
-import { downloadInvoicePdf } from '../../utils/downloadInvoicePdf';
+import {
+  categoryTree,
+  productMatchesMainCategory,
+  productMatchesSubcategory,
+} from '../../data/categoryTree';
+import { downloadInvoicePdf, printInvoiceElement } from '../../utils/downloadInvoicePdf';
 import {
   buildAdminInvoicePayload,
   GST_RATE,
@@ -204,16 +208,10 @@ const AdminInvoiceGenerator = () => {
   const filteredProducts = useMemo(() => {
     let list = [...products];
     if (mainCategory) {
-      list = list.filter((p) => {
-        const cat = (p.category || p.taxonomy?.mainCategory || '').toLowerCase();
-        return cat.includes(mainCategory.toLowerCase()) || mainCategory.toLowerCase().includes(cat);
-      });
+      list = list.filter((p) => productMatchesMainCategory(p, mainCategory));
     }
     if (subCategory) {
-      list = list.filter((p) => {
-        const sub = (p.subcategory || p.taxonomy?.subCategory || p.category || '').toLowerCase();
-        return sub.includes(subCategory.toLowerCase()) || subCategory.toLowerCase().includes(sub);
-      });
+      list = list.filter((p) => productMatchesSubcategory(p, subCategory));
     }
     const q = productSearch.trim().toLowerCase();
     if (q) {
@@ -309,7 +307,12 @@ const AdminInvoiceGenerator = () => {
       if (cancelled || !invoiceRef.current) return;
 
       if (exportAction === 'print') {
-        window.print();
+        try {
+          await printInvoiceElement(invoiceRef.current);
+        } catch (err) {
+          console.error('[Invoice print]', err);
+          alert(`Failed to print invoice: ${err.message || 'Unknown error'}`);
+        }
         return;
       }
 
@@ -727,7 +730,7 @@ const AdminInvoiceGenerator = () => {
               >
                 <option value="">All subcategories</option>
                 {subcategories.map((s) => (
-                  <option key={s.name} value={s.name}>
+                  <option key={s.slug || s.name} value={s.slug || s.name}>
                     {s.name}
                   </option>
                 ))}
@@ -943,25 +946,7 @@ const AdminInvoiceGenerator = () => {
           opacity: 0;
           z-index: -1;
           pointer-events: none;
-          overflow: hidden;
-        }
-        @media print {
-          body * {
-            visibility: hidden !important;
-          }
-          #admin-invoice-print-root,
-          #admin-invoice-print-root * {
-            visibility: visible !important;
-          }
-          #admin-invoice-print-root {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            opacity: 1 !important;
-            z-index: 99999 !important;
-            pointer-events: auto !important;
-          }
+          overflow: visible;
         }
       `}</style>
 

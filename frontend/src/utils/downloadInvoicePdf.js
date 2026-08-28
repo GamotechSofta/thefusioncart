@@ -1,6 +1,8 @@
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
+const SAFE_FONT = 'Arial, Helvetica, sans-serif';
+
 const STYLE_PROPS = [
   'color',
   'backgroundColor',
@@ -19,7 +21,6 @@ const STYLE_PROPS = [
   'borderRadius',
   'fontSize',
   'fontWeight',
-  'fontFamily',
   'lineHeight',
   'textAlign',
   'textTransform',
@@ -34,22 +35,15 @@ const STYLE_PROPS = [
   'marginBottom',
   'marginLeft',
   'width',
-  'height',
   'maxWidth',
   'minWidth',
   'display',
-  'flexDirection',
-  'alignItems',
-  'justifyContent',
-  'gap',
-  'gridTemplateColumns',
   'verticalAlign',
   'objectFit',
   'boxSizing',
   'overflow',
   'whiteSpace',
   'wordBreak',
-  'flexShrink',
 ];
 
 function waitForImages(element) {
@@ -93,6 +87,18 @@ function snapshotAndInlineStyles(element) {
         el.style[prop] = value;
       }
     });
+
+    // Force system fonts so html2canvas does not paint webfont glyphs on wrong metrics
+    el.style.fontFamily = SAFE_FONT;
+    el.style.letterSpacing = '0px';
+    el.style.wordSpacing = '0px';
+
+    if (el.tagName === 'IMG') {
+      el.style.height = computed.height;
+      el.style.width = computed.width;
+    } else {
+      el.style.height = 'auto';
+    }
   });
 
   return () => {
@@ -183,6 +189,66 @@ function createCaptureBackdrop() {
   return () => backdrop.remove();
 }
 
+export async function printInvoiceElement(element) {
+  if (!element) throw new Error('Invoice element not found');
+
+  const source = element.querySelector('.invoice-export') || element;
+  await waitForImages(source);
+
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute('aria-hidden', 'true');
+  iframe.style.cssText =
+    'position:fixed;top:0;left:0;width:210mm;height:297mm;border:0;opacity:0;pointer-events:none;z-index:-1;';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument;
+  doc.open();
+  doc.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Invoice</title>
+  <style>
+    @page { size: A4 portrait; margin: 12mm; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0;
+    }
+    .invoice-export { width: 100% !important; max-width: 100% !important; }
+  </style>
+</head>
+<body></body>
+</html>`);
+  doc.close();
+
+  const clone = source.cloneNode(true);
+  clone.style.width = '100%';
+  clone.style.maxWidth = '100%';
+  clone.style.fontFamily = SAFE_FONT;
+  clone.style.letterSpacing = '0px';
+  clone.querySelectorAll('*').forEach((node) => {
+    node.style.fontFamily = SAFE_FONT;
+    node.style.letterSpacing = '0px';
+  });
+  doc.body.appendChild(clone);
+
+  await waitForImages(doc.body);
+  await new Promise((resolve) => setTimeout(resolve, 150));
+
+  const cleanup = () => {
+    iframe.contentWindow?.removeEventListener('afterprint', cleanup);
+    iframe.remove();
+  };
+
+  iframe.contentWindow.addEventListener('afterprint', cleanup);
+  iframe.contentWindow.focus();
+  iframe.contentWindow.print();
+  setTimeout(cleanup, 180000);
+}
+
 export async function downloadInvoicePdf(element, filename) {
   if (!element) throw new Error('Invoice element not found');
 
@@ -207,16 +273,28 @@ export async function downloadInvoicePdf(element, filename) {
           backgroundColor: '#ffffff',
           logging: false,
           scrollX: 0,
-          scrollY: -window.scrollY,
-          width: captureTarget.scrollWidth,
+          scrollY: 0,
+          x: 0,
+          y: 0,
+          width: 794,
           height: captureTarget.scrollHeight,
-          windowWidth: captureTarget.scrollWidth,
+          windowWidth: 794,
           windowHeight: captureTarget.scrollHeight,
           onclone: (clonedDoc, clonedElement) => {
             stripDocumentStylesheets(clonedDoc, clonedElement);
+            clonedDoc.body.style.margin = '0';
+            clonedDoc.body.style.letterSpacing = '0';
+            clonedDoc.body.style.fontFamily = SAFE_FONT;
             clonedElement.style.background = '#ffffff';
             clonedElement.style.width = '794px';
             clonedElement.style.maxWidth = '794px';
+            clonedElement.style.fontFamily = SAFE_FONT;
+            clonedElement.style.letterSpacing = '0px';
+            clonedElement.querySelectorAll('*').forEach((node) => {
+              node.style.fontFamily = SAFE_FONT;
+              node.style.letterSpacing = '0px';
+              node.style.wordSpacing = '0px';
+            });
           },
         });
       } finally {

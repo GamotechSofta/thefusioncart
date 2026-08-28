@@ -2,6 +2,9 @@ import { Product } from '../models/product.js';
 import Order from '../models/Order.js';
 import { Address } from '../models/Address.js';
 import User from '../models/User.js';
+import { buildProductCategoryAndFilter } from '../utils/productCategoryFilter.js';
+
+const BEAUTY_HYGIENE_FILTER = buildProductCategoryAndFilter('Beauty & Hygiene', '', '');
 
 const slugify = (value = '') =>
   value
@@ -217,7 +220,10 @@ export async function updateOrderStatus(req, res) {
 
 export async function adminListProducts(req, res) {
   try {
-    const rawProducts = await Product.find({}).sort({ _id: -1 }).lean();
+    const rawProducts = await Product.collection
+      .find(BEAUTY_HYGIENE_FILTER)
+      .sort({ _id: -1 })
+      .toArray();
     const products = rawProducts.map((p) => {
       const title = p.title || p['SKU Name'] || p.name || p['Product Name'] || p.skuName || 'Product';
       const category = p.category || p['Category'] || p.taxonomy?.mainCategory || 'Uncategorized';
@@ -359,7 +365,7 @@ export async function adminStats(req, res) {
     const totalRevenue = revenueAgg?.total || 0;
     const totalOrders = revenueAgg?.count || 0;
     
-    const totalProducts = await Product.countDocuments();
+    const totalProducts = await Product.collection.countDocuments(BEAUTY_HYGIENE_FILTER);
     
     return res.json({ totalRevenue, totalOrders, totalProducts });
   } catch (err) {

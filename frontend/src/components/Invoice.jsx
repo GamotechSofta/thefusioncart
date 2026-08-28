@@ -66,56 +66,79 @@ const Invoice = ({ order, user, onPrint, totals: totalsOverride, invoiceNumber: 
       <div className="invoice-export">
         <style>{INVOICE_EXPORT_CSS}</style>
 
-        <div className="invoice-export-header">
-          <div className="invoice-export-brand">
-            <img src={logoUrl} alt={COMPANY_INFO.brandName} className="invoice-export-logo" />
-            <div>
-              <h1 className="invoice-export-title">{COMPANY_INFO.brandName}</h1>
-              <p className="invoice-export-subtitle">{COMPANY_INFO.legalName}</p>
-              <p className="invoice-export-muted">{COMPANY_INFO.registeredAddress}</p>
-              <p className="invoice-export-muted">GSTIN: {COMPANY_INFO.gstin} | CIN: {COMPANY_INFO.cin}</p>
-            </div>
-          </div>
-          <div className="invoice-export-meta">
-            <h2>INVOICE</h2>
-            <p><strong>Order #:</strong> {orderNumber}</p>
-            <p><strong>Date:</strong> {formattedDate}</p>
-            <p><strong>Payment:</strong> {paymentLabel}</p>
-            <p><strong>Status:</strong> {(order.status || 'Confirmed').replace(/_/g, ' ')}</p>
-          </div>
-        </div>
+        <table className="invoice-export-header">
+          <tbody>
+            <tr>
+              <td className="invoice-export-brand">
+                <table className="invoice-export-brand-inner">
+                  <tbody>
+                    <tr>
+                      <td className="invoice-export-logo-cell">
+                        <img src={logoUrl} alt={COMPANY_INFO.brandName} className="invoice-export-logo" />
+                      </td>
+                      <td className="invoice-export-brand-text">
+                        <p className="invoice-export-title">{COMPANY_INFO.brandName}</p>
+                        <p className="invoice-export-subtitle">{COMPANY_INFO.legalName}</p>
+                        <p className="invoice-export-muted">{COMPANY_INFO.registeredAddress}</p>
+                        <p className="invoice-export-muted">GSTIN: {COMPANY_INFO.gstin}</p>
+                        <p className="invoice-export-muted">CIN: {COMPANY_INFO.cin}</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+              <td className="invoice-export-meta">
+                <p className="invoice-export-meta-title">INVOICE</p>
+                <p><strong>Order #:</strong> {orderNumber}</p>
+                <p><strong>Date:</strong> {formattedDate}</p>
+                <p><strong>Payment:</strong> {paymentLabel}</p>
+                <p><strong>Status:</strong> {(order.status || 'Confirmed').replace(/_/g, ' ')}</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-        <div className="invoice-export-grid">
-          <div>
-            <h3 className="invoice-export-section-title">Customer Information</h3>
-            <div className="invoice-export-section-body">
-              {(shippingAddress.fullName || user?.name) && (
-                <p className="name">{shippingAddress.fullName || user?.name}</p>
-              )}
-              {user?.email && <p><strong>Email:</strong> {user.email}</p>}
-              {shippingAddress.mobileNumber && (
-                <p><strong>Phone:</strong> {shippingAddress.mobileNumber}</p>
-              )}
-            </div>
-          </div>
-          <div>
-            <h3 className="invoice-export-section-title">Shipping Address</h3>
-            <div className="invoice-export-section-body">
-              {shippingAddress.address && <p>{shippingAddress.address}</p>}
-              {shippingAddress.locality && <p>{shippingAddress.locality}</p>}
-              <p>
-                {[shippingAddress.city, shippingAddress.state].filter(Boolean).join(', ')}
-                {shippingAddress.pincode ? ` - ${shippingAddress.pincode}` : ''}
-              </p>
-              {shippingAddress.landmark && (
-                <p><strong>Landmark:</strong> {shippingAddress.landmark}</p>
-              )}
-            </div>
-          </div>
-        </div>
+        <table className="invoice-export-grid">
+          <tbody>
+            <tr>
+              <td>
+                <p className="invoice-export-section-title">Customer Information</p>
+                <div className="invoice-export-section-body">
+                  {(shippingAddress.fullName || user?.name) && (
+                    <p className="name">{shippingAddress.fullName || user?.name}</p>
+                  )}
+                  {user?.email && <p><strong>Email:</strong> {user.email}</p>}
+                  {shippingAddress.mobileNumber && (
+                    <p><strong>Phone:</strong> {shippingAddress.mobileNumber}</p>
+                  )}
+                </div>
+              </td>
+              <td>
+                <p className="invoice-export-section-title">Shipping Address</p>
+                <div className="invoice-export-section-body">
+                  {shippingAddress.address && <p>{shippingAddress.address}</p>}
+                  {shippingAddress.locality && <p>{shippingAddress.locality}</p>}
+                  <p>
+                    {[shippingAddress.city, shippingAddress.state].filter(Boolean).join(', ')}
+                    {shippingAddress.pincode ? ` - ${shippingAddress.pincode}` : ''}
+                  </p>
+                  {shippingAddress.landmark && (
+                    <p><strong>Landmark:</strong> {shippingAddress.landmark}</p>
+                  )}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-        <h3 className="invoice-export-items-title">Order Items</h3>
+        <p className="invoice-export-items-title">Order Items</p>
         <table className="invoice-export-table">
+          <colgroup>
+            <col className="col-item" />
+            <col className="col-qty" />
+            <col className="col-price" />
+            <col className="col-total" />
+          </colgroup>
           <thead>
             <tr>
               <th>Item</th>
@@ -143,27 +166,29 @@ const Invoice = ({ order, user, onPrint, totals: totalsOverride, invoiceNumber: 
           </tbody>
         </table>
 
-        <div className="invoice-export-totals">
-          <div className="invoice-export-totals-box">
-            <div className="invoice-export-totals-row">
-              <span>Subtotal:</span>
-              <span>{formatINR(subtotal)}</span>
-            </div>
-            {gst > 0 && (
-              <div className="invoice-export-totals-row">
-                <span>GST ({gstRate}%):</span>
-                <span>{formatINR(gst)}</span>
-              </div>
-            )}
-            <div className="invoice-export-totals-row">
-              <span>Shipping:</span>
-              <span>{shipping > 0 ? formatINR(shipping) : 'Free'}</span>
-            </div>
-            <div className="invoice-export-totals-grand">
-              <span>Total:</span>
-              <span>{formatINR(total)}</span>
-            </div>
-          </div>
+        <div className="invoice-export-totals-wrap">
+          <table className="invoice-export-totals">
+            <tbody>
+              <tr>
+                <td className="label">Subtotal:</td>
+                <td className="value">{formatINR(subtotal)}</td>
+              </tr>
+              {gst > 0 && (
+                <tr>
+                  <td className="label">GST ({gstRate}%):</td>
+                  <td className="value">{formatINR(gst)}</td>
+                </tr>
+              )}
+              <tr>
+                <td className="label">Shipping:</td>
+                <td className="value">{shipping > 0 ? formatINR(shipping) : 'Free'}</td>
+              </tr>
+              <tr className="grand">
+                <td className="label">Total:</td>
+                <td className="value">{formatINR(total)}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div className="invoice-export-footer">
@@ -178,7 +203,7 @@ const Invoice = ({ order, user, onPrint, totals: totalsOverride, invoiceNumber: 
     <div className="max-w-4xl mx-auto bg-white p-8">
       <div className="border-b-2 border-gray-200 pb-6 mb-6">
         <div className="flex justify-between items-start gap-6">
-          <div className="flex items-start gap-4 min-w-0">
+          <div className="flex items-start gap-4 min-w-0 flex-1">
             <img
               src={logoUrl}
               alt={COMPANY_INFO.brandName}
@@ -190,12 +215,13 @@ const Invoice = ({ order, user, onPrint, totals: totalsOverride, invoiceNumber: 
             />
             <div className="min-w-0">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{COMPANY_INFO.brandName}</h1>
-              <p className="text-gray-600 font-medium text-sm sm:text-base">{COMPANY_INFO.legalName}</p>
-              <p className="text-sm text-gray-500 mt-1 max-w-sm">{COMPANY_INFO.registeredAddress}</p>
-              <p className="text-sm text-gray-500 mt-1">GSTIN: {COMPANY_INFO.gstin} | CIN: {COMPANY_INFO.cin}</p>
+              <p className="text-gray-600 font-medium text-sm sm:text-base break-words">{COMPANY_INFO.legalName}</p>
+              <p className="text-sm text-gray-500 mt-1 break-words">{COMPANY_INFO.registeredAddress}</p>
+              <p className="text-sm text-gray-500 mt-1 break-words">GSTIN: {COMPANY_INFO.gstin}</p>
+              <p className="text-sm text-gray-500 break-words">CIN: {COMPANY_INFO.cin}</p>
             </div>
           </div>
-          <div className="text-right text-sm text-gray-600 space-y-1">
+          <div className="text-right text-sm text-gray-600 space-y-1 shrink-0 max-w-[42%]">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">INVOICE</h2>
             <p><span className="font-medium text-gray-900">Order #:</span> {orderNumber}</p>
             <p>

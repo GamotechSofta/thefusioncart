@@ -2,6 +2,22 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { api } from '../../utils/api';
 import { FiEdit, FiTrash2, FiX, FiPlus, FiSearch, FiImage, FiPackage, FiDollarSign, FiTag, FiEye } from 'react-icons/fi';
 import ScrollToTop from '../../components/ScrollToTop';
+import { categoryTree, getCategoryDisplayName, productSubSlug } from '../../data/categoryTree';
+
+const BEAUTY_MAIN = categoryTree[0];
+const BEAUTY_SUBS = BEAUTY_MAIN?.subcategories || [];
+
+const productSubLabel = (p) => {
+  const raw = p?.taxonomy?.subCategory || p?.subcategory || p?.['Sub-Category'] || '';
+  if (raw) return getCategoryDisplayName(raw);
+  const slug = productSubSlug(p);
+  if (slug) {
+    const known = BEAUTY_SUBS.find((s) => s.slug === slug);
+    if (known) return known.name;
+    return getCategoryDisplayName(slug);
+  }
+  return 'Uncategorized';
+};
 
 const AdminProducts = () => {
   const [form, setForm] = useState({
@@ -9,7 +25,8 @@ const AdminProducts = () => {
     mrp: '',
     discountPercent: 0,
     description: '',
-    category: '',
+    category: 'Beauty & Hygiene',
+    subcategory: '',
     images: { image1: '', image2: '', image3: '' },
     product_info: { 
       brand: '', 
@@ -52,11 +69,9 @@ const AdminProducts = () => {
   const [viewingProduct, setViewingProduct] = useState(null);
   const [toast, setToast] = useState({ show: false, text: '', type: 'success' });
   const [query, setQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [subcategoryFilter, setSubcategoryFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [categories, setCategories] = useState([]);
-  const [allCategories, setAllCategories] = useState([]);
 
   const load = async () => {
     try {
@@ -70,29 +85,8 @@ const AdminProducts = () => {
     }
   };
 
-  const loadCategories = async () => {
-    try {
-      const data = await api.getCategories();
-      if (data) {
-        setCategories(data.categories || []);
-        setAllCategories(data.allCategories || []);
-      }
-    } catch (e) {
-      console.error('Failed to load categories:', e);
-      // Fallback to hardcoded categories if API fails
-      setAllCategories([
-        { name: 'Kids Clothing', slug: 'kids-clothing' },
-        { name: 'Kids Accessories', slug: 'kids-accessories' },
-        { name: 'Footwear', slug: 'footwear' },
-        { name: 'Baby Care', slug: 'baby-care' },
-        { name: 'Toys', slug: 'toys' },
-      ]);
-    }
-  };
-
   useEffect(() => {
     load();
-    loadCategories();
   }, []);
 
   const onChange = (e) => {
@@ -123,7 +117,10 @@ const AdminProducts = () => {
         mrp: Number(form.mrp),
         discountPercent: Number(form.discountPercent) || 0,
         description: form.description,
-        category: form.category,
+        category: 'Beauty & Hygiene',
+        mainCategory: 'Beauty & Hygiene',
+        subcategory: form.subcategory,
+        subCategory: form.subcategory,
         images: form.images,
         product_info: form.product_info,
       };
@@ -147,7 +144,8 @@ const AdminProducts = () => {
       mrp: '',
       discountPercent: 0,
       description: '',
-      category: '',
+      category: 'Beauty & Hygiene',
+      subcategory: '',
       images: { image1: '', image2: '', image3: '' },
       product_info: { 
         brand: '', 
@@ -254,34 +252,52 @@ const AdminProducts = () => {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let arr = list;
-    if (categoryFilter !== 'all') {
-      arr = arr.filter(p => String(p.category || '').toLowerCase() === categoryFilter);
+    if (subcategoryFilter !== 'all') {
+      arr = arr.filter((p) => productSubSlug(p) === subcategoryFilter);
     }
     if (q) {
-      arr = arr.filter(p => 
+      arr = arr.filter((p) =>
         String(p.title || '').toLowerCase().includes(q) ||
-        String(p.category || '').toLowerCase().includes(q) ||
+        String(productSubLabel(p) || '').toLowerCase().includes(q) ||
+        String(p.subcategory || '').toLowerCase().includes(q) ||
         String(p.description || '').toLowerCase().includes(q)
       );
     }
     return arr.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-  }, [list, query, categoryFilter]);
+  }, [list, query, subcategoryFilter]);
 
   const totalPages = Math.max(1, Math.ceil((filtered.length || 0) / pageSize));
   const pageItems = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filtered.slice(start, start + pageSize);
   }, [filtered, page, pageSize]);
-  useEffect(() => { setPage(1); }, [query, categoryFilter, pageSize]);
+  useEffect(() => { setPage(1); }, [query, subcategoryFilter, pageSize]);
 
-  const filterCategories = ['all', 'kids-clothing', 'kids-accessories', 'footwear', 'baby-care', 'toys'];
-  const categoryStats = useMemo(() => {
-    const stats = {};
-    filterCategories.forEach(cat => {
-      stats[cat] = list.filter(p => cat === 'all' || String(p.category || '').toLowerCase() === cat).length;
+  const subcategoryOptions = useMemo(() => {
+    const options = BEAUTY_SUBS.map((s) => ({ slug: s.slug, name: s.name }));
+    const known = new Set(options.map((s) => s.slug));
+    list.forEach((p) => {
+      const slug = productSubSlug(p);
+      if (slug && !known.has(slug)) {
+        options.push({ slug, name: productSubLabel(p) });
+        known.add(slug);
+      }
+    });
+    return options;
+  }, [list]);
+
+  const subcategoryStats = useMemo(() => {
+    const stats = { all: list.length };
+    subcategoryOptions.forEach((sub) => {
+      stats[sub.slug] = list.filter((p) => productSubSlug(p) === sub.slug).length;
     });
     return stats;
-  }, [list]);
+  }, [list, subcategoryOptions]);
+
+  const subcategoryCount = useMemo(
+    () => new Set(list.map((p) => productSubSlug(p)).filter(Boolean)).size,
+    [list]
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -300,7 +316,7 @@ const AdminProducts = () => {
           <div className="flex flex-col gap-3 sm:gap-4 mb-4">
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2">Product Management</h1>
-              <p className="text-sm sm:text-base text-gray-600">Manage your product catalog and inventory</p>
+              <p className="text-sm sm:text-base text-gray-600">Beauty &amp; Hygiene catalog and inventory</p>
             </div>
             <button
               onClick={() => setIsCreateModalOpen(true)}
@@ -332,9 +348,9 @@ const AdminProducts = () => {
             <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-purple-200 shadow-md">
               <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
                 <FiTag className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 flex-shrink-0" />
-                <span className="text-xs font-semibold text-gray-600 uppercase truncate">Categories</span>
+                <span className="text-xs font-semibold text-gray-600 uppercase truncate">Subcategories</span>
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-gray-900">{new Set(list.map(p => p.category).filter(Boolean)).size}</div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">{subcategoryCount}</div>
             </div>
             <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-amber-200 shadow-md">
               <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
@@ -361,16 +377,16 @@ const AdminProducts = () => {
               </div>
               <div className="grid grid-cols-2 gap-3 sm:flex sm:gap-4">
                 <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  value={subcategoryFilter}
+                  onChange={(e) => setSubcategoryFilter(e.target.value)}
                   className="px-3 sm:px-4 py-2 text-sm sm:text-base border-2 border-gray-200 rounded-lg focus:border-pink-500 focus:outline-none"
                 >
-                  <option value="all">All ({categoryStats.all})</option>
-                  <option value="kids-clothing">Kids Clothing ({categoryStats['kids-clothing']})</option>
-                  <option value="kids-accessories">Kids Accessories ({categoryStats['kids-accessories']})</option>
-                  <option value="footwear">Footwear ({categoryStats.footwear})</option>
-                  <option value="baby-care">Baby Care ({categoryStats['baby-care']})</option>
-                  <option value="toys">Toys ({categoryStats.toys})</option>
+                  <option value="all">All subcategories ({subcategoryStats.all})</option>
+                  {subcategoryOptions.map((sub) => (
+                    <option key={sub.slug} value={sub.slug}>
+                      {sub.name} ({subcategoryStats[sub.slug] || 0})
+                    </option>
+                  ))}
                 </select>
                 <select
                   value={pageSize}
@@ -408,9 +424,9 @@ const AdminProducts = () => {
             <FiPackage className="h-16 w-16 mx-auto mb-4 text-gray-300" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">No Products Found</h3>
             <p className="text-gray-600 mb-6">
-              {query || categoryFilter !== 'all' ? 'Try adjusting your filters' : 'Get started by adding your first product'}
+              {query || subcategoryFilter !== 'all' ? 'Try adjusting your filters' : 'Get started by adding your first product'}
             </p>
-            {(!query && categoryFilter === 'all') && (
+            {(!query && subcategoryFilter === 'all') && (
               <button
                 onClick={() => setIsCreateModalOpen(true)}
                 className="px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
@@ -437,7 +453,7 @@ const AdminProducts = () => {
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Image</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Product</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Category</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Subcategory</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Price</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">MRP</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Discount</th>
@@ -463,7 +479,7 @@ const AdminProducts = () => {
                         </td>
                         <td className="px-4 py-3">
                           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
-                            {p.category || 'Uncategorized'}
+                            {productSubLabel(p)}
                           </span>
                         </td>
                         <td className="px-4 py-3">
@@ -564,7 +580,7 @@ const AdminProducts = () => {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">{p.title}</h3>
                         <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold mb-2">
-                          {p.category || 'Uncategorized'}
+                          {productSubLabel(p)}
                         </span>
                         {p.description && (
                           <p className="text-xs text-gray-500 line-clamp-2">{p.description}</p>
@@ -668,40 +684,28 @@ const AdminProducts = () => {
                     <input name="title" value={form.title} onChange={onChange} placeholder="Enter product title" className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none" required />
                   </div>
                   <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Category *</label>
-                    <select name="category" value={form.category} onChange={onChange} className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none" required>
-                      <option value="">Select Category</option>
-                      {categories.length > 0 ? (
-                        // Render categories with subcategories grouped
-                        categories.map((parent) => (
-                          <optgroup key={parent._id || parent.slug} label={parent.name}>
-                            <option value={parent.slug || parent.name.toLowerCase().replace(/\s+/g, '-')}>
-                              {parent.name}
-                            </option>
-                            {parent.subcategories && parent.subcategories.length > 0 && parent.subcategories.map((sub) => (
-                              <option key={sub._id || sub.slug} value={sub.slug || sub.name.toLowerCase().replace(/\s+/g, '-')}>
-                                {parent.name} - {sub.name}
-                              </option>
-                            ))}
-                          </optgroup>
-                        ))
-                      ) : allCategories.length > 0 ? (
-                        // Fallback: render all categories flat
-                        allCategories.map((cat) => (
-                          <option key={cat._id || cat.slug} value={cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-')}>
-                            {cat.name}
-                          </option>
-                        ))
-                      ) : (
-                        // Default fallback
-                        <>
-                          <option value="kids-clothing">Kids Clothing</option>
-                          <option value="kids-accessories">Kids Accessories</option>
-                          <option value="footwear">Footwear</option>
-                          <option value="baby-care">Baby Care</option>
-                          <option value="toys">Toys</option>
-                        </>
-                      )}
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Category</label>
+                    <input
+                      value="Beauty & Hygiene"
+                      readOnly
+                      className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 bg-gray-50 text-gray-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Subcategory *</label>
+                    <select
+                      name="subcategory"
+                      value={form.subcategory}
+                      onChange={onChange}
+                      className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none"
+                      required
+                    >
+                      <option value="">Select subcategory</option>
+                      {subcategoryOptions.map((sub) => (
+                        <option key={sub.slug} value={sub.slug}>
+                          {sub.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -901,7 +905,7 @@ const AdminProducts = () => {
                     <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 break-words">{viewingProduct.title}</h3>
                     <div className="mb-3 sm:mb-4">
                       <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs sm:text-sm font-semibold">
-                        {viewingProduct.category || 'Uncategorized'}
+                        {productSubLabel(viewingProduct)}
                       </span>
                     </div>
                     <div className="space-y-2 mb-3 sm:mb-4">

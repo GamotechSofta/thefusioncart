@@ -107,7 +107,7 @@ const Router = () => {
   const isAuthRoute = location.pathname === '/signin' || location.pathname === '/signup';
   const backgroundLocationFromState = location.state?.backgroundLocation;
   const fallbackBackgroundLocation = isAuthRoute
-    ? { ...location, pathname: '/', search: '', hash: '', state: null, key: 'auth-default-bg' }
+    ? { pathname: '/', search: '', hash: '', state: null, key: 'auth-default-bg' }
     : null;
   const backgroundLocation = backgroundLocationFromState || fallbackBackgroundLocation;
   const routesLocation = backgroundLocation || location;

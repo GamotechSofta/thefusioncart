@@ -105,7 +105,7 @@ export const CartProvider = ({ children }) => {
   const requireAuth = useCallback(() => {
     if (!hasToken()) {
       alert('Please login to access your cart');
-      navigate('/signin', { state: { from: location }, replace: true });
+      navigate('/signin', { state: { from: location, backgroundLocation: location }, replace: true });
       return false;
     }
     return true;
@@ -131,7 +131,7 @@ export const CartProvider = ({ children }) => {
           // Ignore localStorage errors
         }
         alert('Your session has expired. Please login again.');
-        navigate('/signin', { state: { from: location }, replace: true });
+        navigate('/signin', { state: { from: location, backgroundLocation: location }, replace: true });
         throw error; // Re-throw to let the caller handle it
       }
       throw error; // Re-throw other errors

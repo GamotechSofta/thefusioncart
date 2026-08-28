@@ -4,11 +4,33 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, Heart, ShoppingBag, User, Menu, X, ChevronRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { searchProducts } from '../services/api';
+import { searchProducts, fetchSarees } from '../services/api';
 import { placeholders, getProductImage } from '../utils/imagePlaceholder';
-import { navbarCategories } from '../data/categoryTree';
+import { navbarCategories, slugifyCategory } from '../data/categoryTree';
 import { api } from '../utils/api';
 import brandLogo from '../assets/logo.jpeg';
+
+import bathAndHandwashImg from '../assets/bath and handwash.png';
+import feminineHygieneImg from '../assets/Feminine Hygiene1.png';
+import fragrancesDeosImg from '../assets/Fragrances & Deos1.png';
+import haircareImg from '../assets/Hair Care1.png';
+import healthAndMedicineImg from '../assets/Health & Medicine1.png';
+import makeupImg from '../assets/Makeup1.png';
+import oralCareImg from '../assets/oral care1.png';
+import skinCareImg from '../assets/skin care1.png';
+
+const MAIN_CATEGORY_SLUG = slugifyCategory('Beauty & Hygiene');
+
+const categoryFallbackImage = {
+  'bath-and-hand-wash': bathAndHandwashImg,
+  'feminine-hygiene': feminineHygieneImg,
+  'fragrances-and-deos': fragrancesDeosImg,
+  'hair-care': haircareImg,
+  'health-and-medicine': healthAndMedicineImg,
+  makeup: makeupImg,
+  'oral-care': oralCareImg,
+  'skin-care': skinCareImg,
+};
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -312,7 +334,36 @@ const Navbar = () => {
   }, []);
 
   const categories = navbarCategories;
+  const [categoryImages, setCategoryImages] = useState(categoryFallbackImage);
   const isCategoryRoute = location.pathname.startsWith('/category/');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCategoryImages = async () => {
+      const entries = await Promise.all(
+        navbarCategories.map(async (category) => {
+          const products = await fetchSarees(category.slug, null, MAIN_CATEGORY_SLUG, 3);
+          const firstWithImage = (Array.isArray(products) ? products : []).find((product) => {
+            const url = getProductImage(product, 'image1');
+            return url && url !== placeholders.productList;
+          });
+          const productImage = firstWithImage ? getProductImage(firstWithImage, 'image1') : '';
+          const hasRealImage = productImage && productImage !== placeholders.productList;
+          return [category.slug, hasRealImage ? productImage : categoryFallbackImage[category.slug]];
+        })
+      );
+
+      if (!cancelled) {
+        setCategoryImages(Object.fromEntries(entries));
+      }
+    };
+
+    loadCategoryImages();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const CATEGORY_MENU_CLOSE_MS = 160;
 
@@ -442,7 +493,7 @@ const Navbar = () => {
 
                   {activeCategory === 'shop' && (
                     <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-[80]">
-                      <div className="bg-white border border-line rounded-lg shadow-[0_16px_40px_rgba(23,23,23,0.1)] min-w-[420px] p-3">
+                      <div className="bg-white border border-line rounded-xl shadow-[0_16px_40px_rgba(16,32,48,0.1)] min-w-[460px] p-3">
                         <p className="section-kicker px-3 pt-1 pb-2">Shop by category</p>
                         <div className="grid grid-cols-2 gap-0.5">
                           {categories.map((category) => {
@@ -451,7 +502,7 @@ const Navbar = () => {
                               <button
                                 key={category.name}
                                 type="button"
-                                className={`text-left px-3 py-2.5 rounded-md text-sm transition-colors ${
+                                className={`flex items-center gap-3 text-left px-2.5 py-2 rounded-lg text-sm transition-colors ${
                                   isActive
                                     ? 'bg-canvas text-ink font-medium'
                                     : 'text-ink/80 hover:bg-canvas hover:text-ink'
@@ -462,7 +513,18 @@ const Navbar = () => {
                                   window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }}
                               >
-                                {category.name}
+                                <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-canvas ring-1 ring-line">
+                                  <img
+                                    src={categoryImages[category.slug] || categoryFallbackImage[category.slug]}
+                                    alt=""
+                                    className="h-[82%] w-[82%] object-contain"
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = categoryFallbackImage[category.slug] || placeholders.productList;
+                                    }}
+                                  />
+                                </span>
+                                <span className="leading-snug">{category.name}</span>
                               </button>
                             );
                           })}
@@ -804,7 +866,7 @@ const Navbar = () => {
                         <button
                           key={cat.name}
                           type="button"
-                          className={`w-full flex items-center justify-between py-3 text-left text-sm border-b border-line ${
+                          className={`w-full flex items-center gap-3 py-3 text-left text-sm border-b border-line ${
                             isActive ? 'text-ink font-medium' : 'text-ink/80'
                           }`}
                           onClick={() => {
@@ -813,7 +875,18 @@ const Navbar = () => {
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
                         >
-                          {cat.name}
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-canvas ring-1 ring-line">
+                            <img
+                              src={categoryImages[cat.slug] || categoryFallbackImage[cat.slug]}
+                              alt=""
+                              className="h-[82%] w-[82%] object-contain"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = categoryFallbackImage[cat.slug] || placeholders.productList;
+                              }}
+                            />
+                          </span>
+                          <span className="flex-1">{cat.name}</span>
                           <ChevronRight className="w-4 h-4 text-muted" />
                         </button>
                       );

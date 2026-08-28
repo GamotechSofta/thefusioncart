@@ -43,21 +43,21 @@ const hasDisplayablePrice = (product) => resolveDisplayPrice(product) > 0;
 const LoginModal = ({ isOpen, onClose, backgroundLocation }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-lg p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-xl font-bold text-black mb-4">Login Required</h2>
-        <p className="text-black mb-6">Please login to continue.</p>
+    <div className="fixed inset-0 bg-ink/55 z-50 flex items-center justify-center p-4 backdrop-blur-[3px]" onClick={onClose}>
+      <div className="bg-white rounded-2xl p-6 max-w-md w-full border border-line" onClick={(e) => e.stopPropagation()}>
+        <h2 className="font-display text-2xl font-medium tracking-[-0.03em] text-ink mb-2">Sign in required</h2>
+        <p className="text-muted mb-6 text-sm">Please sign in to continue.</p>
         <div className="flex gap-3">
           <Link
             to="/signin"
             state={backgroundLocation ? { backgroundLocation } : undefined}
             className="flex-1 btn-primary"
           >
-            Login
+            Sign in
           </Link>
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-gray-200 text-black font-semibold rounded-lg hover:bg-gray-300 transition-all"
+            className="px-6 py-3 rounded-md border border-ink text-ink font-medium hover:bg-canvas transition-colors"
           >
             Cancel
           </button>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
 import brandLogo from '../assets/logo.jpeg';
+import { getAuthBackgroundState, getAuthClosePath } from '../utils/authModal';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -21,8 +22,21 @@ const SignUp = () => {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const backgroundLocation = location.state?.backgroundLocation;
-  const closePath = backgroundLocation?.pathname || '/';
+  const backgroundLocation = getAuthBackgroundState(location);
+
+  const handleClose = (event) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    navigate(getAuthClosePath(location), { replace: true, state: {} });
+  };
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') handleClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [location]);
 
   useEffect(() => {
     const scrollY = window.scrollY;
@@ -89,7 +103,7 @@ const SignUp = () => {
       
       setSuccess('Account created successfully! Redirecting to Sign In...');
       setTimeout(() => {
-        navigate('/signin', { replace: true, state: { backgroundLocation: backgroundLocation || location } });
+        navigate('/signin', { replace: true, state: { backgroundLocation } });
       }, 600);
     } catch (err) {
       setError(err.message || err.response?.message || 'Failed to create account. Please try again.');
@@ -99,33 +113,38 @@ const SignUp = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-gray-100 max-h-[92vh] overflow-y-auto custom-scrollbar relative transition-all duration-300">
-        
-        {/* Close Button */}
+    <div
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-ink/55 p-3 backdrop-blur-[3px] sm:p-4"
+      onClick={handleClose}
+      role="presentation"
+    >
+      <div
+        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-line bg-white shadow-[0_24px_60px_rgba(16,32,48,0.22)]"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="signup-title"
+      >
         <button
           type="button"
-          onClick={() => navigate(closePath)}
-          className="absolute top-4 right-4 p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all z-10"
+          onClick={handleClose}
+          className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-ink hover:bg-canvas"
           aria-label="Close"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
-        <div className="p-6 sm:p-8">
-          
-          {/* Header & Logo */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center p-2 rounded-2xl bg-pink-50/80 mb-3 border border-pink-100 shadow-sm">
-              <img src={brandLogo} alt="Shopzen" className="h-10 sm:h-12 w-auto object-contain" />
-            </div>
-            <h2 className="section-title text-3xl text-ink tracking-tight">
-              Create Your Account
+        <div className="max-h-[90vh] overflow-y-auto p-6 sm:p-8">
+          <div className="mb-6 text-center">
+            <img src={brandLogo} alt="Shopzen" className="mx-auto mb-4 h-9 w-auto object-contain sm:h-10" />
+            <p className="section-kicker mb-2">Account</p>
+            <h2 id="signup-title" className="font-display text-[1.75rem] font-medium tracking-[-0.03em] text-ink">
+              Create account
             </h2>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              Join Shopzen for exclusive offers, fast checkout, and order tracking
+            <p className="mt-1.5 text-[13px] text-muted">
+              Join Shopzen for faster checkout and order tracking
             </p>
           </div>
 
@@ -170,7 +189,7 @@ const SignUp = () => {
                     value={formData.firstName}
                     onChange={handleChange}
                     required
-                    className="w-full pl-10 sm:pl-11 pr-3.5 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/10 transition-all font-medium placeholder-gray-400"
+                    className="w-full pl-10 sm:pl-11 pr-3.5 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/10 transition-all font-medium placeholder-gray-400"
                     placeholder="First name"
                   />
                 </div>
@@ -192,7 +211,7 @@ const SignUp = () => {
                     value={formData.lastName}
                     onChange={handleChange}
                     required
-                    className="w-full pl-10 sm:pl-11 pr-3.5 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/10 transition-all font-medium placeholder-gray-400"
+                    className="w-full pl-10 sm:pl-11 pr-3.5 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/10 transition-all font-medium placeholder-gray-400"
                     placeholder="Last name"
                   />
                 </div>
@@ -216,7 +235,7 @@ const SignUp = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 sm:pl-11 pr-3.5 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/10 transition-all font-medium placeholder-gray-400"
+                  className="w-full pl-10 sm:pl-11 pr-3.5 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/10 transition-all font-medium placeholder-gray-400"
                   placeholder="name@example.com"
                 />
               </div>
@@ -242,7 +261,7 @@ const SignUp = () => {
                   }}
                   required
                   maxLength={10}
-                  className="w-full pl-12 sm:pl-14 pr-3.5 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/10 transition-all font-medium placeholder-gray-400"
+                  className="w-full pl-12 sm:pl-14 pr-3.5 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/10 transition-all font-medium placeholder-gray-400"
                   placeholder="10-digit mobile number"
                 />
               </div>
@@ -267,7 +286,7 @@ const SignUp = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="w-full pl-10 sm:pl-11 pr-10 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/10 transition-all font-medium placeholder-gray-400"
+                    className="w-full pl-10 sm:pl-11 pr-10 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/10 transition-all font-medium placeholder-gray-400"
                     placeholder="Min 6 characters"
                   />
                   <button
@@ -307,7 +326,7 @@ const SignUp = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
-                    className="w-full pl-10 sm:pl-11 pr-10 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/10 transition-all font-medium placeholder-gray-400"
+                    className="w-full pl-10 sm:pl-11 pr-10 py-2.5 sm:py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/10 transition-all font-medium placeholder-gray-400"
                     placeholder="Re-enter password"
                   />
                   <button
@@ -340,15 +359,15 @@ const SignUp = () => {
                 checked={formData.agreeToTerms}
                 onChange={handleChange}
                 required
-                className="h-4 w-4 text-pink-500 focus:ring-pink-400 border-gray-300 rounded mt-0.5 cursor-pointer accent-pink-500"
+                className="h-4 w-4 text-ink focus:ring-ink border-line rounded mt-0.5 cursor-pointer accent-ink"
               />
               <label htmlFor="agreeToTerms" className="ml-2 text-xs text-gray-600 cursor-pointer leading-tight">
                 I agree to the{' '}
-                <Link to="/terms" target="_blank" className="text-pink-600 hover:text-pink-700 font-semibold hover:underline">
+                <Link to="/terms" target="_blank" className="text-gold hover:text-ink font-medium hover:underline">
                   Terms & Conditions
                 </Link>{' '}
                 and{' '}
-                <Link to="/privacy" target="_blank" className="text-pink-600 hover:text-pink-700 font-semibold hover:underline">
+                <Link to="/privacy" target="_blank" className="text-gold hover:text-ink font-medium hover:underline">
                   Privacy Policy
                 </Link>
               </label>
@@ -379,8 +398,8 @@ const SignUp = () => {
               Already have an account?{' '}
               <Link
                 to="/signin"
-                state={{ backgroundLocation: backgroundLocation || location }}
-                className="text-pink-600 hover:text-pink-700 font-bold hover:underline"
+                state={{ backgroundLocation }}
+                className="font-medium text-gold hover:text-ink hover:underline"
               >
                 Sign in here
               </Link>
@@ -398,7 +417,7 @@ const SignUp = () => {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #fbcfe8;
+          background: #c8d0d8;
           border-radius: 2px;
         }
         @keyframes fadeIn {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
 import brandLogo from '../assets/logo.jpeg';
+import { getAuthBackgroundState, getAuthClosePath } from '../utils/authModal';
 
 const SignIn = () => {
   const [loginMode, setLoginMode] = useState('email'); // 'email' or 'mobile'
@@ -24,20 +25,26 @@ const SignIn = () => {
   const location = useLocation();
   const otpInputRefs = useRef([]);
 
-  const getTargetRedirect = () => {
-    const rawFrom = location.state?.from?.pathname || (typeof location.state?.from === 'string' ? location.state?.from : null);
-    const rawBg = location.state?.backgroundLocation?.pathname;
-    if (rawFrom && rawFrom !== '/signin' && rawFrom !== '/signup') return rawFrom;
-    if (rawBg && rawBg !== '/signin' && rawBg !== '/signup') return rawBg;
-    return '/';
+  const getTargetRedirect = () => getAuthClosePath(location);
+
+  const handleClose = (event) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    navigate(getAuthClosePath(location), { replace: true, state: {} });
   };
 
-  const closePath = getTargetRedirect();
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') handleClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [location]);
 
   // If already authenticated on mount, close immediately
   useEffect(() => {
     if (localStorage.getItem('auth_token')) {
-      navigate(closePath, { replace: true, state: {} });
+      navigate(getAuthClosePath(location), { replace: true, state: {} });
     }
   }, []);
 
@@ -332,59 +339,64 @@ const SignIn = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-[0_24px_60px_rgba(23,23,23,0.18)] border border-line overflow-hidden relative">
-        
-        {/* Close Button */}
+    <div
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-ink/55 p-3 backdrop-blur-[3px] sm:p-4"
+      onClick={handleClose}
+      role="presentation"
+    >
+      <div
+        className="relative w-full max-w-[26rem] overflow-hidden rounded-2xl border border-line bg-white shadow-[0_24px_60px_rgba(16,32,48,0.22)]"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="signin-title"
+      >
         <button
           type="button"
-          onClick={() => navigate(closePath, { replace: true, state: {} })}
-          className="absolute top-4 right-4 p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all z-10 cursor-pointer"
+          onClick={handleClose}
+          className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-ink hover:bg-canvas"
           aria-label="Close"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
-        <div className="p-6 sm:p-8">
-          
-          {/* Header & Logo */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center p-2 rounded-xl bg-canvas mb-3 border border-line">
-              <img src={brandLogo} alt="Shopzen" className="h-10 sm:h-12 w-auto object-contain" />
-            </div>
-            <h2 className="section-title text-3xl text-ink tracking-tight">
-              {step === 3 ? 'Welcome to Shopzen!' : 'Welcome Back'}
+        <div className="max-h-[90vh] overflow-y-auto p-6 sm:p-8">
+          <div className="mb-6 text-center">
+            <img src={brandLogo} alt="Shopzen" className="mx-auto mb-4 h-9 w-auto object-contain sm:h-10" />
+            <p className="section-kicker mb-2">Account</p>
+            <h2 id="signin-title" className="font-display text-[1.75rem] font-medium tracking-[-0.03em] text-ink">
+              {step === 3 ? 'Welcome to Shopzen' : 'Sign in'}
             </h2>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            <p className="mt-1.5 text-[13px] text-muted">
               {step === 3
-                ? 'Please enter your name and email to complete your registration'
-                : 'Sign in to manage your orders, wishlist, and profile'}
+                ? 'Add your name to finish setting up your account'
+                : 'Orders, wishlist, and faster checkout'}
             </p>
           </div>
 
           {/* Mode Switcher Pills (Only for steps 1 and 2) */}
           {step !== 3 && (
-            <div className="flex rounded-2xl bg-gray-100/90 p-1 mb-6">
+            <div className="mb-6 flex rounded-full border border-line bg-canvas p-1">
               <button
                 type="button"
                 onClick={() => { setLoginMode('email'); setError(''); setSuccess(''); }}
-                className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 cursor-pointer ${
+                className={`flex-1 rounded-full py-2 text-[12px] font-medium transition-colors ${
                   loginMode === 'email'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-800'
+                    ? 'bg-ink text-white'
+                    : 'text-muted hover:text-ink'
                 }`}
               >
-                Email & Password
+                Email
               </button>
               <button
                 type="button"
                 onClick={() => { setLoginMode('mobile'); setStep(1); setError(''); setSuccess(''); }}
-                className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 cursor-pointer ${
+                className={`flex-1 rounded-full py-2 text-[12px] font-medium transition-colors ${
                   loginMode === 'mobile'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-800'
+                    ? 'bg-ink text-white'
+                    : 'text-muted hover:text-ink'
                 }`}
               >
                 Mobile OTP
@@ -431,7 +443,7 @@ const SignIn = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full pl-11 pr-4 py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/10 transition-all font-medium placeholder-gray-400"
+                    className="w-full pl-11 pr-4 py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/10 transition-all font-medium placeholder-gray-400"
                     placeholder="name@example.com"
                   />
                 </div>
@@ -444,7 +456,7 @@ const SignIn = () => {
                   </label>
                   <Link
                     to="/forgot-password"
-                    className="text-xs text-pink-600 hover:text-pink-700 font-semibold hover:underline"
+                    className="text-xs text-gold hover:text-ink font-medium hover:underline"
                   >
                     Forgot password?
                   </Link>
@@ -461,7 +473,7 @@ const SignIn = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="w-full pl-11 pr-11 py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/10 transition-all font-medium placeholder-gray-400"
+                    className="w-full pl-11 pr-11 py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/10 transition-all font-medium placeholder-gray-400"
                     placeholder="Enter your password"
                   />
                   <button
@@ -519,7 +531,7 @@ const SignIn = () => {
                     required
                     maxLength={10}
                     inputMode="numeric"
-                    className="w-full pl-14 pr-4 py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/10 transition-all font-medium placeholder-gray-400"
+                    className="w-full pl-14 pr-4 py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/10 transition-all font-medium placeholder-gray-400"
                     placeholder="Enter 10-digit mobile number"
                     autoFocus
                   />
@@ -552,7 +564,7 @@ const SignIn = () => {
                   <button
                     type="button"
                     onClick={() => { setStep(1); setError(''); }}
-                    className="ml-2 text-xs font-semibold text-pink-600 hover:underline cursor-pointer"
+                    className="ml-2 text-xs font-medium text-gold hover:text-ink hover:underline cursor-pointer"
                   >
                     Edit
                   </button>
@@ -571,20 +583,20 @@ const SignIn = () => {
                       onChange={(e) => handleOtpChange(index, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(index, e)}
                       onPaste={handleOtpPaste}
-                      className="w-11 h-12 sm:w-12 sm:h-14 text-center text-xl font-bold border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/10 transition-all bg-gray-50 focus:bg-white text-gray-900"
+                      className="w-11 h-12 sm:w-12 sm:h-14 text-center text-xl font-bold border-2 border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:ring-4 focus:ring-ink/10 transition-all bg-gray-50 focus:bg-white text-gray-900"
                     />
                   ))}
                 </div>
 
                 <div className="text-xs text-gray-500 mb-2">
                   {resendTimer > 0 ? (
-                    <span>Resend OTP in <strong className="text-pink-600">{resendTimer}s</strong></span>
+                    <span>Resend OTP in <strong className="text-gold">{resendTimer}s</strong></span>
                   ) : (
                     <button
                       type="button"
                       onClick={handleResendOtp}
                       disabled={loading}
-                      className="text-pink-600 font-bold hover:underline cursor-pointer"
+                      className="text-gold font-medium hover:text-ink hover:underline cursor-pointer"
                     >
                       Resend OTP
                     </button>
@@ -612,15 +624,15 @@ const SignIn = () => {
           ) : (
             /* STEP 3: NEW USER NAME & EMAIL ONBOARDING FORM */
             <form onSubmit={handleCompleteRegistration} className="space-y-4 animate-fadeIn">
-              <div className="bg-pink-50/60 p-3 rounded-2xl border border-pink-100 mb-3 text-center">
-                <span className="text-xs text-pink-700 font-semibold">
+              <div className="bg-canvas p-3 rounded-xl border border-line mb-3 text-center">
+                <span className="text-xs text-ink font-medium">
                   📱 Mobile Verified: <strong>+91 {mobile}</strong>
                 </span>
               </div>
 
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
-                  Full Name <span className="text-pink-500">*</span>
+                  Full Name <span className="text-gold">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
@@ -633,7 +645,7 @@ const SignIn = () => {
                     value={newName}
                     onChange={(e) => { setNewName(e.target.value); setError(''); }}
                     required
-                    className="w-full pl-11 pr-4 py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/10 transition-all font-medium placeholder-gray-400"
+                    className="w-full pl-11 pr-4 py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/10 transition-all font-medium placeholder-gray-400"
                     placeholder="Enter your full name"
                     autoFocus
                   />
@@ -654,7 +666,7 @@ const SignIn = () => {
                     type="email"
                     value={newEmail}
                     onChange={(e) => { setNewEmail(e.target.value); setError(''); }}
-                    className="w-full pl-11 pr-4 py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/10 transition-all font-medium placeholder-gray-400"
+                    className="w-full pl-11 pr-4 py-3 text-sm bg-gray-50/70 border border-gray-200 rounded-xl focus:outline-none focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/10 transition-all font-medium placeholder-gray-400"
                     placeholder="name@example.com"
                   />
                 </div>
@@ -686,8 +698,8 @@ const SignIn = () => {
                 Don't have an account?{' '}
                 <Link
                   to="/signup"
-                  state={{ backgroundLocation: location.state?.backgroundLocation || location }}
-                  className="text-pink-600 hover:text-pink-700 font-bold hover:underline"
+                  state={{ backgroundLocation: getAuthBackgroundState(location) }}
+                  className="font-medium text-gold hover:text-ink hover:underline"
                 >
                   Create an account
                 </Link>

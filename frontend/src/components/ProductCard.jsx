@@ -61,7 +61,7 @@ const ProductCard = ({ product }) => {
 
   const requireLogin = () => {
     if (hasAuthToken()) return true;
-    navigate('/signin', { state: { from: location } });
+    navigate('/signin', { state: { from: location, backgroundLocation: location } });
     return false;
   };
 

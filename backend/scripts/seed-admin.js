@@ -10,38 +10,49 @@ async function seedAdmin() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    const adminEmail = 'admin@buynestventures.shop';
-    const adminPassword = 'Admin@buynest123';
-    const adminName = 'BuyNest Master Admin';
+    const adminAccounts = [
+      {
+        email: 'admin@shopzenventures.shop',
+        password: 'Admin@shopzen123',
+        name: 'Shopzen Master Admin',
+      },
+      {
+        email: 'admin@buynestventures.shop',
+        password: 'Admin@buynest123',
+        name: 'BuyNest Master Admin',
+      },
+    ];
 
     const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(adminPassword, salt);
 
-    let user = await User.findOne({ email: adminEmail });
+    for (const acc of adminAccounts) {
+      const passwordHash = await bcrypt.hash(acc.password, salt);
+      let user = await User.findOne({ email: acc.email });
 
-    if (user) {
-      user.name = adminName;
-      user.passwordHash = passwordHash;
-      user.isAdmin = true;
-      user.provider = 'local';
-      await user.save();
-      console.log('Existing admin updated successfully!');
-    } else {
-      user = await User.create({
-        name: adminName,
-        email: adminEmail,
-        passwordHash,
-        isAdmin: true,
-        provider: 'local',
-      });
-      console.log('New admin created successfully!');
+      if (user) {
+        user.name = acc.name;
+        user.passwordHash = passwordHash;
+        user.isAdmin = true;
+        user.provider = 'local';
+        await user.save();
+        console.log(`Existing admin updated: ${acc.email}`);
+      } else {
+        user = await User.create({
+          name: acc.name,
+          email: acc.email,
+          passwordHash,
+          isAdmin: true,
+          provider: 'local',
+        });
+        console.log(`New admin created: ${acc.email}`);
+      }
+
+      console.log('-------------------------------------------');
+      console.log('Admin Account:');
+      console.log('Email:', acc.email);
+      console.log('Password:', acc.password);
+      console.log('isAdmin:', user.isAdmin);
     }
-
-    console.log('-------------------------------------------');
-    console.log('Admin Account Seeded:');
-    console.log('Email:', adminEmail);
-    console.log('Password:', adminPassword);
-    console.log('isAdmin:', user.isAdmin);
     console.log('-------------------------------------------');
 
     process.exit(0);

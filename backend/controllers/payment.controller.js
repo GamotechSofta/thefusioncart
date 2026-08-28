@@ -162,6 +162,7 @@ export const verifyPayment = async (req, res) => {
       razorpayPaymentId: paymentId,
       razorpaySignature: signature,
       shippingAddress,
+      store: process.env.STORE_NAME || 'shopzen',
     });
 
     cart.items = [];
@@ -237,6 +238,7 @@ export const createCodOrder = async (req, res) => {
       status: 'created',
       paymentMethod: 'COD',
       shippingAddress,
+      store: process.env.STORE_NAME || 'shopzen',
     });
 
     cart.items = [];
@@ -330,10 +332,10 @@ export const initiatePayuPayment = async (req, res) => {
 
     if (!userName) userName = 'Customer';
     if (!userPhone) userPhone = '9999999999';
-    if (!userEmail) userEmail = 'customer@buynest.shop';
+    if (!userEmail) userEmail = 'customer@shopzenventures.shop';
 
-    const txnid = 'BN_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
-    const productinfo = 'BuyNest Order';
+    const txnid = 'SZ_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+    const productinfo = 'Shopzen Order';
 
     // Create pending order
     const order = await Order.create({
@@ -345,6 +347,7 @@ export const initiatePayuPayment = async (req, res) => {
       paymentMethod: 'PayU',
       payuTxnId: txnid,
       shippingAddress,
+      store: process.env.STORE_NAME || 'shopzen',
     });
 
     const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
@@ -355,14 +358,14 @@ export const initiatePayuPayment = async (req, res) => {
     const curl = `${backendUrl}/api/payment/payu/response`;
 
     const originHeader = req.get('origin') || req.get('referer');
-    let frontendBase = 'https://www.buynestventures.shop';
+    let frontendBase = process.env.FRONTEND_URL || 'https://www.shopzenventures.shop';
     if (originHeader) {
       try {
         const u = new URL(originHeader);
         if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') {
           frontendBase = `${u.protocol}//${u.host}`;
         } else {
-          frontendBase = 'https://www.buynestventures.shop';
+          frontendBase = process.env.FRONTEND_URL || 'https://www.shopzenventures.shop';
         }
       } catch {}
     }
@@ -412,7 +415,7 @@ const renderAutoRedirectHtml = (redirectUrl, message = 'Payment Processing') => 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="refresh" content="0;url=${redirectUrl}">
-  <title>BuyNest - Payment Status</title>
+  <title>Shopzen - Payment Status</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -453,7 +456,7 @@ const renderAutoRedirectHtml = (redirectUrl, message = 'Payment Processing') => 
   <div class="card">
     <div class="spinner"></div>
     <h2>${message}</h2>
-    <p>Redirecting you to BuyNest, please wait...</p>
+    <p>Redirecting you to Shopzen, please wait...</p>
     <a href="${redirectUrl}">Click here if not redirected automatically</a>
   </div>
   <script>
@@ -483,14 +486,14 @@ export const handlePayuResponse = async (req, res) => {
 
     const key = process.env.PAYU_KEY || 'rgt1q1';
     const salt = process.env.PAYU_SALT || 'ZhXv2CWaOELwsdjOb6L486lIlmfHPAbI';
-    let frontendUrl = 'https://www.buynestventures.shop';
+    let frontendUrl = process.env.FRONTEND_URL || 'https://www.shopzenventures.shop';
     if (data.udf3 && data.udf3.startsWith('http')) {
       try {
         const u = new URL(data.udf3);
         if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') {
           frontendUrl = `${u.protocol}//${u.host}`;
         } else {
-          frontendUrl = 'https://www.buynestventures.shop';
+          frontendUrl = process.env.FRONTEND_URL || 'https://www.shopzenventures.shop';
         }
       } catch {}
     }

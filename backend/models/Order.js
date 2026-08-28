@@ -41,6 +41,7 @@ const OrderSchema = new mongoose.Schema(
     payuMihpayid: { type: String },
     payuStatus: { type: String },
     shippingAddress: { type: ShippingAddressSchema },
+    store: { type: String, default: 'shopzen', index: true },
     invoiceEmailSentAt: { type: Date },
   },
   { timestamps: true }

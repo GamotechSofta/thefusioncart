@@ -193,7 +193,7 @@ export async function sendOrderInvoiceEmail(orderId, options = {}) {
   const { data, error } = await resend.emails.send({
     from,
     to: recipientEmail,
-    subject: `Your BuyNest Invoice — Order #${orderNumber}`,
+    subject: `Your ${COMPANY_INFO.brandName} Invoice — Order #${orderNumber}`,
     html,
   });
 

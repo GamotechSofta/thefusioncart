@@ -29,112 +29,131 @@ async function populateOrderItems(items) {
   );
 }
 
-function buildInvoiceHtml({ order, items, customerName }) {
-  const orderNumber = order._id.toString().slice(-8).toUpperCase();
-  const orderDate = new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-  const shipping = order.shippingAddress || {};
-  const paymentLabel =
-    order.paymentMethod === 'COD'
-      ? 'Cash on Delivery'
-      : order.paymentMethod === 'PayU'
-        ? 'PayU (Online)'
-        : order.paymentMethod === 'Razorpay'
-          ? 'Razorpay (Online)'
-          : 'Online Payment';
-
-  const itemRows = items
-    .map(
-      (item) => `
-        <tr>
-          <td style="padding:12px;border-bottom:1px solid #e5e7eb;">
-            ${item.title}${item.size ? `<br><span style="color:#6b7280;font-size:12px;">Size: ${item.size}</span>` : ''}
-          </td>
-          <td style="padding:12px;border-bottom:1px solid #e5e7eb;text-align:center;">${item.quantity}</td>
-          <td style="padding:12px;border-bottom:1px solid #e5e7eb;text-align:right;">${formatINR(item.price)}</td>
-          <td style="padding:12px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;">${formatINR(item.price * item.quantity)}</td>
-        </tr>`
-    )
-    .join('');
-
-  const addressLines = [
-    shipping.fullName,
+function formatEmailAddress(shipping = {}) {
+  return [
     shipping.address,
     shipping.locality,
-    [shipping.city, shipping.state, shipping.pincode].filter(Boolean).join(', '),
-    shipping.mobileNumber ? `Phone: ${shipping.mobileNumber}` : '',
+    shipping.city,
+    shipping.state,
+    shipping.pincode,
   ]
     .filter(Boolean)
-    .map((line) => `<p style="margin:0 0 4px;color:#4b5563;">${line}</p>`)
+    .join(', ');
+}
+
+function buildInvoiceHtml({ order, items, customerName, customerEmail }) {
+  const rawId = order._id.toString();
+  const shortId = rawId.slice(-8).toUpperCase();
+  const invoiceNo = `INV${shortId}`;
+  const d = new Date(order.createdAt || Date.now());
+  const orderDate = d.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  const shipping = order.shippingAddress || {};
+  const name = customerName || shipping.fullName || 'Customer';
+  const addressText = formatEmailAddress(shipping) || '—';
+  const placeOfSupply =
+    [shipping.city, shipping.state].filter(Boolean).join(', ') || 'Gurugram, Haryana';
+  const paymentMode =
+    order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod === 'Manual' ? 'Manual' : 'Online';
+  const paymentStatus =
+    order.status === 'failed' ? 'Failed' : order.paymentMethod === 'COD' ? 'Pending' : 'Paid';
+
+  const itemRows = items
+    .map((item, index) => {
+      const title = item.size ? `${item.title} (Size: ${item.size})` : item.title;
+      return `
+        <tr>
+          <td style="padding:12px;border-bottom:1px solid #eef0f2;text-align:center;">${index + 1}</td>
+          <td style="padding:12px;border-bottom:1px solid #eef0f2;">${title}</td>
+          <td style="padding:12px;border-bottom:1px solid #eef0f2;text-align:center;">${item.quantity}</td>
+          <td style="padding:12px;border-bottom:1px solid #eef0f2;text-align:right;">${formatINR(item.price)}</td>
+          <td style="padding:12px;border-bottom:1px solid #eef0f2;text-align:right;">${formatINR(item.price * item.quantity)}</td>
+        </tr>`;
+    })
     .join('');
+
+  const field = (label, value) =>
+    `<td style="padding:10px 12px;font-weight:700;border-bottom:1px solid #eef0f2;border-right:1px solid #e5e7eb;width:18%;">${label}</td>
+     <td style="padding:10px 12px;border-bottom:1px solid #eef0f2;width:32%;">${value}</td>`;
 
   return `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#f9fafb;font-family:Arial,sans-serif;color:#111827;">
-  <div style="max-width:640px;margin:0 auto;padding:24px;">
-    <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;">
-      <div style="border-bottom:2px solid #e5e7eb;padding-bottom:20px;margin-bottom:24px;">
-        <h1 style="margin:0 0 4px;font-size:24px;">${COMPANY_INFO.brandName}</h1>
-        <p style="margin:0 0 8px;color:#4b5563;font-size:14px;">${COMPANY_INFO.legalName}</p>
-        <p style="margin:0;color:#6b7280;font-size:12px;">${COMPANY_INFO.registeredAddress}</p>
-        <p style="margin:8px 0 0;color:#6b7280;font-size:12px;">GSTIN: ${COMPANY_INFO.gstin} | CIN: ${COMPANY_INFO.cin}</p>
-      </div>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111111;">
+  <div style="max-width:640px;margin:0 auto;padding:24px;background:#ffffff;">
+    <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
+      <tr>
+        <td style="vertical-align:top;width:62%;">
+          <p style="margin:0 0 6px;font-size:13px;font-weight:700;text-transform:uppercase;">${COMPANY_INFO.legalName}</p>
+          <p style="margin:0 0 4px;font-size:12px;line-height:20px;">${COMPANY_INFO.registeredAddress}</p>
+          <p style="margin:0;font-size:12px;line-height:20px;">${COMPANY_INFO.email} · GSTIN: ${COMPANY_INFO.gstin}</p>
+        </td>
+        <td style="vertical-align:top;text-align:right;font-size:28px;font-weight:700;text-transform:uppercase;">INVOICE</td>
+      </tr>
+    </table>
 
-      <p style="margin:0 0 16px;font-size:15px;">Hi ${customerName || 'Customer'},</p>
-      <p style="margin:0 0 24px;color:#4b5563;">Thank you for your order! Here is your invoice.</p>
+    <table style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e5e7eb;border-radius:10px;margin:0 0 14px;">
+      <tr><td style="background:#f8f9fa;font-weight:700;padding:10px 14px;border-bottom:1px solid #e5e7eb;">Invoice Details</td></tr>
+      <tr>
+        <td style="padding:0;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <tr>${field('Invoice No', invoiceNo)}${field('Place of Supply', placeOfSupply)}</tr>
+            <tr>${field('Order No', shortId)}${field('Invoice Date', orderDate)}</tr>
+            <tr>${field('Order Status', order.status || 'confirmed')}${field('Payment Status', paymentStatus)}</tr>
+            <tr>${field('Payment Mode', paymentMode)}<td></td><td></td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
 
-      <table style="width:100%;margin-bottom:24px;font-size:14px;">
-        <tr>
-          <td style="vertical-align:top;width:50%;padding-right:12px;">
-            <p style="margin:0 0 8px;font-weight:700;text-transform:uppercase;font-size:12px;">Order Information</p>
-            <p style="margin:0 0 4px;color:#4b5563;">Order #: <strong>${orderNumber}</strong></p>
-            <p style="margin:0 0 4px;color:#4b5563;">Date: ${orderDate}</p>
-            <p style="margin:0 0 4px;color:#4b5563;">Payment: ${paymentLabel}</p>
-            <p style="margin:0;color:#4b5563;">Status: ${order.status || 'confirmed'}</p>
-          </td>
-          <td style="vertical-align:top;width:50%;padding-left:12px;">
-            <p style="margin:0 0 8px;font-weight:700;text-transform:uppercase;font-size:12px;">Shipping Address</p>
-            ${addressLines || '<p style="margin:0;color:#4b5563;">Not provided</p>'}
-          </td>
-        </tr>
-      </table>
+    <table style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e5e7eb;border-radius:10px;margin:0 0 14px;">
+      <tr><td style="background:#f8f9fa;font-weight:700;padding:10px 14px;border-bottom:1px solid #e5e7eb;">Bill To</td></tr>
+      <tr>
+        <td style="padding:12px 14px;font-size:13px;line-height:20px;">
+          <p style="margin:0 0 8px;font-weight:700;text-transform:uppercase;">${name}</p>
+          <p style="margin:0 0 4px;"><strong>Email:</strong> ${customerEmail || '—'}</p>
+          <p style="margin:0 0 4px;"><strong>Phone:</strong> ${shipping.mobileNumber || '—'}</p>
+          <p style="margin:0;"><strong>Address:</strong> ${addressText}</p>
+        </td>
+      </tr>
+    </table>
 
-      <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px;">
-        <thead>
-          <tr style="background:#f9fafb;">
-            <th style="padding:12px;text-align:left;border-bottom:2px solid #e5e7eb;">Item</th>
-            <th style="padding:12px;text-align:center;border-bottom:2px solid #e5e7eb;">Qty</th>
-            <th style="padding:12px;text-align:right;border-bottom:2px solid #e5e7eb;">Price</th>
-            <th style="padding:12px;text-align:right;border-bottom:2px solid #e5e7eb;">Total</th>
-          </tr>
-        </thead>
-        <tbody>${itemRows}</tbody>
-      </table>
+    <table style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e5e7eb;border-radius:10px;margin:0 0 14px;">
+      <tr><td style="background:#f8f9fa;font-weight:700;padding:10px 14px;border-bottom:1px solid #e5e7eb;">Order Details</td></tr>
+      <tr>
+        <td style="padding:0;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr>
+                <th style="padding:10px 12px;text-align:center;border-bottom:1px solid #e5e7eb;">SR NO</th>
+                <th style="padding:10px 12px;text-align:left;border-bottom:1px solid #e5e7eb;">ITEM NAME</th>
+                <th style="padding:10px 12px;text-align:center;border-bottom:1px solid #e5e7eb;">QTY</th>
+                <th style="padding:10px 12px;text-align:right;border-bottom:1px solid #e5e7eb;">RATE</th>
+                <th style="padding:10px 12px;text-align:right;border-bottom:1px solid #e5e7eb;">AMOUNT</th>
+              </tr>
+            </thead>
+            <tbody>${itemRows}</tbody>
+          </table>
+          <table style="width:260px;margin:8px 12px 12px auto;border-collapse:collapse;font-size:13px;">
+            <tr><td style="padding:6px 0;">Sub Total</td><td style="padding:6px 0;text-align:right;">${formatINR(order.amount)}</td></tr>
+            <tr><td style="padding:6px 0;">GST (18%)</td><td style="padding:6px 0;text-align:right;">₹0</td></tr>
+            <tr><td style="padding:6px 0;">Shipping Charges</td><td style="padding:6px 0;text-align:right;">₹0</td></tr>
+            <tr>
+              <td style="padding:10px 0 0;font-weight:700;border-top:2px solid #d1d5db;">Total Amount</td>
+              <td style="padding:10px 0 0;font-weight:700;text-align:right;border-top:2px solid #d1d5db;">${formatINR(order.amount)}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
 
-      <table style="width:100%;max-width:280px;margin-left:auto;font-size:14px;">
-        <tr>
-          <td style="padding:4px 0;color:#6b7280;">Subtotal</td>
-          <td style="padding:4px 0;text-align:right;">${formatINR(order.amount)}</td>
-        </tr>
-        <tr>
-          <td style="padding:4px 0;color:#6b7280;">Shipping</td>
-          <td style="padding:4px 0;text-align:right;">Free</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0 0;font-size:16px;font-weight:700;border-top:1px solid #e5e7eb;">Total</td>
-          <td style="padding:8px 0 0;font-size:16px;font-weight:700;text-align:right;border-top:1px solid #e5e7eb;">${formatINR(order.amount)}</td>
-        </tr>
-      </table>
-
-      <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e7eb;text-align:center;color:#6b7280;font-size:13px;">
-        <p style="margin:0 0 8px;">Need help? Contact us at ${COMPANY_INFO.email} or ${COMPANY_INFO.phone}</p>
-        <p style="margin:0;">© ${new Date().getFullYear()} ${COMPANY_INFO.legalName}</p>
-      </div>
+    <div style="margin-top:8px;padding-top:16px;border-top:1px dashed #c4c4c4;text-align:center;">
+      <p style="margin:0 0 6px;font-size:13px;">Thank you for your order!</p>
+      <p style="margin:0;font-size:12px;color:#4b5563;">For any queries, contact us at ${COMPANY_INFO.email} or ${COMPANY_INFO.phone}</p>
     </div>
   </div>
 </body>
@@ -184,7 +203,12 @@ export async function sendOrderInvoiceEmail(orderId, options = {}) {
   }
 
   const items = await populateOrderItems(order.items);
-  const html = buildInvoiceHtml({ order, items, customerName });
+  const html = buildInvoiceHtml({
+    order,
+    items,
+    customerName,
+    customerEmail: recipientEmail,
+  });
   const orderNumber = order._id.toString().slice(-8).toUpperCase();
   const from =
     process.env.RESEND_FROM || `${COMPANY_INFO.brandName} <onboarding@resend.dev>`;

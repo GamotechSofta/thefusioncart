@@ -1,11 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { getProductImage } from '../utils/imagePlaceholder';
 import { COMPANY_INFO } from '../config/companyInfo';
 import brandLogo from '../assets/logo.jpeg';
 import { api } from '../utils/api';
 import { INVOICE_EXPORT_CSS } from '../utils/invoiceExportStyles';
 
-const Invoice = ({ order, user, onPrint, totals: totalsOverride, invoiceNumber: invoiceNumberOverride, forExport = false }) => {
+const formatINR = (amount) => `₹${Number(amount || 0).toLocaleString('en-IN')}`;
+
+const formatAddressBlock = (addr = {}) =>
+  [
+    addr.address,
+    addr.locality,
+    addr.city,
+    addr.state,
+    addr.pincode,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
+const paymentModeLabel = (method) => {
+  if (method === 'COD') return 'Cash on Delivery';
+  if (method === 'Manual') return 'Manual';
+  return 'Online';
+};
+
+const paymentStatusLabel = (order) => {
+  if (order.status === 'failed') return 'Failed';
+  if (order.paymentMethod === 'COD') return 'Pending';
+  return 'Paid';
+};
+
+const FieldRow = ({ leftLabel, leftValue, rightLabel, rightValue }) => (
+  <tr>
+    <td className="lbl">{leftLabel}</td>
+    <td className="val">{leftValue || '—'}</td>
+    <td className="lbl">{rightLabel || ''}</td>
+    <td className="val">{rightLabel ? (rightValue || '—') : ''}</td>
+  </tr>
+);
+
+const Invoice = ({
+  order,
+  user,
+  onPrint,
+  totals: totalsOverride,
+  invoiceNumber: invoiceNumberOverride,
+  forExport = false,
+}) => {
   const [logoUrl, setLogoUrl] = useState(brandLogo);
 
   useEffect(() => {
@@ -25,349 +65,256 @@ const Invoice = ({ order, user, onPrint, totals: totalsOverride, invoiceNumber: 
     );
   }
 
-  const formatINR = (amount) => `₹${Number(amount || 0).toLocaleString('en-IN')}`;
   const orderDate = order.createdAt ? new Date(order.createdAt) : new Date();
-  const orderNumber = invoiceNumberOverride
-    || (order._id ? order._id.toString().slice(-8).toUpperCase() : 'N/A');
+  const rawId = invoiceNumberOverride || (order._id ? String(order._id) : '');
+  const shortId = rawId.replace(/^INV/i, '').slice(-8).toUpperCase() || 'N/A';
+  const invoiceNo = rawId.toUpperCase().startsWith('INV') ? rawId.toUpperCase() : `INV${shortId}`;
+  const orderNo = shortId;
 
-  const lineSubtotal = order.items?.reduce((sum, item) => {
+  const items = order.items || [];
+  const lineSubtotal = items.reduce((sum, item) => {
     const itemPrice = item.price || item.product?.price || 0;
     const quantity = item.quantity || 1;
-    return sum + (itemPrice * quantity);
-  }, 0) || 0;
+    return sum + itemPrice * quantity;
+  }, 0);
+
+  const discountFromLines = items.reduce((sum, item) => {
+    const qty = item.quantity || 1;
+    const price = item.price || item.product?.price || 0;
+    const mrp = item.product?.mrp || item.mrp || price;
+    return sum + Math.max(0, (Number(mrp) - Number(price)) * qty);
+  }, 0);
 
   const subtotal = totalsOverride?.subtotal ?? lineSubtotal ?? order.amount ?? 0;
   const gst = totalsOverride?.gst ?? 0;
-  const shipping = totalsOverride?.shipping ?? 0;
-  const total = totalsOverride?.total ?? order.amount ?? (subtotal + gst + shipping);
   const gstRate = totalsOverride?.gstRate ?? 18;
+  const shipping = totalsOverride?.shipping ?? 0;
+  const discount = totalsOverride?.discount ?? discountFromLines;
+  const total = totalsOverride?.total ?? order.amount ?? (subtotal - discount + gst + shipping);
   const shippingAddress = order.shippingAddress || {};
 
-  const formattedDate = orderDate.toLocaleDateString('en-IN', {
-    year: 'numeric',
-    month: 'long',
+  const formattedDate = orderDate.toLocaleDateString('en-GB', {
     day: 'numeric',
+    month: 'long',
+    year: 'numeric',
   });
 
-  const paymentLabel =
-    order.paymentMethod === 'COD' ? 'Cash on Delivery' :
-    order.paymentMethod === 'PayU' ? 'PayU (Online)' :
-    order.paymentMethod === 'Manual' ? 'Manual Invoice' :
-    order.paymentMethod === 'Razorpay' ? 'Razorpay (Online)' :
-    'Online Payment';
+  const customerName = shippingAddress.fullName || user?.name || '';
+  const customerPhone = shippingAddress.mobileNumber || user?.phone || '';
+  const customerEmail = user?.email || '';
+  const addressText = formatAddressBlock(shippingAddress);
+  const placeOfSupply =
+    [shippingAddress.city, shippingAddress.state].filter(Boolean).join(', ')
+    || 'Gurugram, Haryana';
 
   const getItemTitle = (item) => {
     const product = item.product || {};
-    return item.name || product.title || product['SKU Name'] || product.name || 'Product';
+    const title = item.name || product.title || product['SKU Name'] || product.name || 'Product';
+    return item.size ? `${title} (Size: ${item.size})` : title;
   };
 
-  if (forExport) {
-    return (
-      <div className="invoice-export">
-        <style>{INVOICE_EXPORT_CSS}</style>
+  const invoiceMarkup = (
+    <div className="invoice-export">
+      <style>{INVOICE_EXPORT_CSS}</style>
 
-        <table className="invoice-export-header">
-          <tbody>
-            <tr>
-              <td className="invoice-export-brand">
-                <table className="invoice-export-brand-inner">
+      <table className="invoice-export-top">
+        <tbody>
+          <tr>
+            <td className="invoice-export-brand">
+              <img
+                src={logoUrl}
+                alt={COMPANY_INFO.brandName}
+                className="invoice-export-logo"
+                style={{
+                  width: 'auto',
+                  height: 'auto',
+                  maxWidth: '200px',
+                  maxHeight: '56px',
+                  objectFit: 'contain',
+                  objectPosition: 'left center',
+                  display: 'block',
+                  background: 'transparent',
+                }}
+              />
+              <p className="invoice-export-company">{COMPANY_INFO.legalName}</p>
+              <p className="invoice-export-contact">{COMPANY_INFO.registeredAddress}</p>
+              <p className="invoice-export-contact">
+                {COMPANY_INFO.email} · GSTIN: {COMPANY_INFO.gstin}
+              </p>
+            </td>
+            <td className="invoice-export-meta">
+              <p className="invoice-export-doc-title">Invoice</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table className="invoice-card">
+        <tbody>
+          <tr>
+            <td className="invoice-card-head">Invoice Details</td>
+          </tr>
+          <tr>
+            <td className="invoice-card-body">
+              <table className="invoice-fields">
+                <tbody>
+                  <FieldRow
+                    leftLabel="Invoice No"
+                    leftValue={invoiceNo}
+                    rightLabel="Place of Supply"
+                    rightValue={placeOfSupply}
+                  />
+                  <FieldRow
+                    leftLabel="Order No"
+                    leftValue={orderNo}
+                    rightLabel="Invoice Date"
+                    rightValue={formattedDate}
+                  />
+                  <FieldRow
+                    leftLabel="Order Status"
+                    leftValue={(order.status || 'confirmed').replace(/_/g, ' ')}
+                    rightLabel="Payment Status"
+                    rightValue={paymentStatusLabel(order)}
+                  />
+                  <FieldRow
+                    leftLabel="Payment Mode"
+                    leftValue={paymentModeLabel(order.paymentMethod)}
+                  />
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table className="invoice-card">
+        <tbody>
+          <tr>
+            <td className="invoice-card-head">Bill To</td>
+          </tr>
+          <tr>
+            <td className="invoice-card-body">
+              <table className="invoice-bill">
+                <tbody>
+                  <tr>
+                    <td className="bill-name" colSpan={2}>{customerName || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td className="bill-label">Email:</td>
+                    <td className="bill-value">{customerEmail || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td className="bill-label">Phone:</td>
+                    <td className="bill-value">{customerPhone || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td className="bill-label">Address:</td>
+                    <td className="bill-value">{addressText || '—'}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table className="invoice-card">
+        <tbody>
+          <tr>
+            <td className="invoice-card-head">Order Details</td>
+          </tr>
+          <tr>
+            <td className="invoice-card-body">
+              <table className="invoice-items">
+                <colgroup>
+                  <col className="col-sr" />
+                  <col className="col-item" />
+                  <col className="col-qty" />
+                  <col className="col-rate" />
+                  <col className="col-amt" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th className="center">SR NO</th>
+                    <th>Item Name</th>
+                    <th className="center">Qty</th>
+                    <th className="right">Rate</th>
+                    <th className="right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.length === 0 ? (
+                    <tr>
+                      <td className="empty" colSpan={5}>No billable items selected.</td>
+                    </tr>
+                  ) : (
+                    items.map((item, index) => {
+                      const itemPrice = item.price || item.product?.price || item.product?.mrp || 0;
+                      const quantity = item.quantity || 1;
+                      return (
+                        <tr key={index}>
+                          <td className="center">{index + 1}</td>
+                          <td>{getItemTitle(item)}</td>
+                          <td className="center">{quantity}</td>
+                          <td className="right">{formatINR(itemPrice)}</td>
+                          <td className="right">{formatINR(itemPrice * quantity)}</td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+              <div className="invoice-totals-wrap">
+                <table className="invoice-totals">
                   <tbody>
                     <tr>
-                      <td className="invoice-export-logo-cell">
-                        <img
-                          src={logoUrl}
-                          alt={COMPANY_INFO.brandName}
-                          className="invoice-export-logo"
-                          style={{
-                            width: 'auto',
-                            height: 'auto',
-                            maxWidth: '96px',
-                            maxHeight: '64px',
-                            objectFit: 'contain',
-                            objectPosition: 'left center',
-                            display: 'block',
-                          }}
-                        />
-                      </td>
-                      <td className="invoice-export-brand-text">
-                        <p className="invoice-export-title">{COMPANY_INFO.brandName}</p>
-                        <p className="invoice-export-subtitle">{COMPANY_INFO.legalName}</p>
-                        <p className="invoice-export-muted">{COMPANY_INFO.registeredAddress}</p>
-                        <p className="invoice-export-muted">GSTIN: {COMPANY_INFO.gstin}</p>
-                        <p className="invoice-export-muted">CIN: {COMPANY_INFO.cin}</p>
-                      </td>
+                      <td className="label">Sub Total</td>
+                      <td className="value">{formatINR(subtotal)}</td>
+                    </tr>
+                    {discount > 0 && (
+                      <tr>
+                        <td className="label">Discount</td>
+                        <td className="value">{formatINR(discount)}</td>
+                      </tr>
+                    )}
+                    <tr>
+                      <td className="label">GST ({gstRate}%)</td>
+                      <td className="value">{formatINR(gst)}</td>
+                    </tr>
+                    <tr>
+                      <td className="label">Shipping Charges</td>
+                      <td className="value">{formatINR(shipping)}</td>
+                    </tr>
+                    <tr className="grand">
+                      <td className="label">Total Amount</td>
+                      <td className="value">{formatINR(total)}</td>
                     </tr>
                   </tbody>
                 </table>
-              </td>
-              <td className="invoice-export-meta">
-                <p className="invoice-export-meta-title">INVOICE</p>
-                <p><strong>Order #:</strong> {orderNumber}</p>
-                <p><strong>Date:</strong> {formattedDate}</p>
-                <p><strong>Payment:</strong> {paymentLabel}</p>
-                <p><strong>Status:</strong> {(order.status || 'Confirmed').replace(/_/g, ' ')}</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-        <table className="invoice-export-grid">
-          <tbody>
-            <tr>
-              <td>
-                <p className="invoice-export-section-title">Customer Information</p>
-                <div className="invoice-export-section-body">
-                  {(shippingAddress.fullName || user?.name) && (
-                    <p className="name">{shippingAddress.fullName || user?.name}</p>
-                  )}
-                  {user?.email && <p><strong>Email:</strong> {user.email}</p>}
-                  {shippingAddress.mobileNumber && (
-                    <p><strong>Phone:</strong> {shippingAddress.mobileNumber}</p>
-                  )}
-                </div>
-              </td>
-              <td>
-                <p className="invoice-export-section-title">Shipping Address</p>
-                <div className="invoice-export-section-body">
-                  {shippingAddress.address && <p>{shippingAddress.address}</p>}
-                  {shippingAddress.locality && <p>{shippingAddress.locality}</p>}
-                  <p>
-                    {[shippingAddress.city, shippingAddress.state].filter(Boolean).join(', ')}
-                    {shippingAddress.pincode ? ` - ${shippingAddress.pincode}` : ''}
-                  </p>
-                  {shippingAddress.landmark && (
-                    <p><strong>Landmark:</strong> {shippingAddress.landmark}</p>
-                  )}
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <p className="invoice-export-items-title">Order Items</p>
-        <table className="invoice-export-table">
-          <colgroup>
-            <col className="col-item" />
-            <col className="col-qty" />
-            <col className="col-price" />
-            <col className="col-total" />
-          </colgroup>
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th className="center">Quantity</th>
-              <th className="right">Price</th>
-              <th className="right">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {order.items?.map((item, index) => {
-              const itemPrice = item.price || item.product?.price || item.product?.mrp || 0;
-              const quantity = item.quantity || 1;
-              return (
-                <tr key={index}>
-                  <td className="item-name">
-                    {getItemTitle(item)}
-                    {item.size ? ` (Size: ${item.size})` : ''}
-                  </td>
-                  <td className="center">{quantity}</td>
-                  <td className="right">{formatINR(itemPrice)}</td>
-                  <td className="right total-cell">{formatINR(itemPrice * quantity)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        <div className="invoice-export-totals-wrap">
-          <table className="invoice-export-totals">
-            <tbody>
-              <tr>
-                <td className="label">Subtotal:</td>
-                <td className="value">{formatINR(subtotal)}</td>
-              </tr>
-              {gst > 0 && (
-                <tr>
-                  <td className="label">GST ({gstRate}%):</td>
-                  <td className="value">{formatINR(gst)}</td>
-                </tr>
-              )}
-              <tr>
-                <td className="label">Shipping:</td>
-                <td className="value">{shipping > 0 ? formatINR(shipping) : 'Free'}</td>
-              </tr>
-              <tr className="grand">
-                <td className="label">Total:</td>
-                <td className="value">{formatINR(total)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div className="invoice-export-footer">
-          <p>Thank you for your order!</p>
-          <p>For any queries, contact us at {COMPANY_INFO.email} or {COMPANY_INFO.phone}</p>
-        </div>
+      <div className="invoice-export-footer">
+        <p>Thank you for your order!</p>
+        <p className="muted">
+          For any queries, contact us at {COMPANY_INFO.email} or {COMPANY_INFO.phone}
+        </p>
       </div>
-    );
+    </div>
+  );
+
+  if (forExport) {
+    return invoiceMarkup;
   }
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-8">
-      <div className="border-b-2 border-gray-200 pb-6 mb-6">
-        <div className="flex justify-between items-start gap-6">
-          <div className="flex items-start gap-4 min-w-0 flex-1">
-            <img
-              src={logoUrl}
-              alt={COMPANY_INFO.brandName}
-              className="h-auto w-auto max-h-16 max-w-[120px] object-contain shrink-0"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = brandLogo;
-              }}
-            />
-            <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{COMPANY_INFO.brandName}</h1>
-              <p className="text-gray-600 font-medium text-sm sm:text-base break-words">{COMPANY_INFO.legalName}</p>
-              <p className="text-sm text-gray-500 mt-1 break-words">{COMPANY_INFO.registeredAddress}</p>
-              <p className="text-sm text-gray-500 mt-1 break-words">GSTIN: {COMPANY_INFO.gstin}</p>
-              <p className="text-sm text-gray-500 break-words">CIN: {COMPANY_INFO.cin}</p>
-            </div>
-          </div>
-          <div className="text-right text-sm text-gray-600 space-y-1 shrink-0 max-w-[42%]">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">INVOICE</h2>
-            <p><span className="font-medium text-gray-900">Order #:</span> {orderNumber}</p>
-            <p>
-              <span className="font-medium text-gray-900">Date:</span> {formattedDate}
-            </p>
-            <p>
-              <span className="font-medium text-gray-900">Payment:</span> {paymentLabel}
-            </p>
-            <p>
-              <span className="font-medium text-gray-900">Status:</span>{' '}
-              <span className="capitalize">{order.status || 'Confirmed'}</span>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-8 mb-6">
-        <div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-2 uppercase">
-            Customer Information
-          </h3>
-          <div className="space-y-1 text-sm text-gray-600 pt-1">
-            {(shippingAddress.fullName || user?.name) && (
-              <p className="font-medium text-gray-900">{shippingAddress.fullName || user?.name}</p>
-            )}
-            {user?.email && (
-              <p><span className="font-medium">Email:</span> {user.email}</p>
-            )}
-            {shippingAddress.mobileNumber && (
-              <p><span className="font-medium">Phone:</span> {shippingAddress.mobileNumber}</p>
-            )}
-          </div>
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-2 uppercase">
-            Shipping Address
-          </h3>
-          <div className="text-sm text-gray-600 pt-1 space-y-0.5">
-            {shippingAddress.address && <p>{shippingAddress.address}</p>}
-            {shippingAddress.locality && <p>{shippingAddress.locality}</p>}
-            <p>
-              {[shippingAddress.city, shippingAddress.state].filter(Boolean).join(', ')}
-              {shippingAddress.pincode ? ` - ${shippingAddress.pincode}` : ''}
-            </p>
-            {shippingAddress.landmark && (
-              <p><span className="font-medium">Landmark:</span> {shippingAddress.landmark}</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase">Order Items</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-50 border-b-2 border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Item</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-gray-900">Quantity</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900">Price</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {order.items?.map((item, index) => {
-                const product = item.product || {};
-                const productTitle = getItemTitle(item);
-                const productImage = getProductImage(product, 'image1');
-                const itemPrice = item.price || product.price || product.mrp || 0;
-                const quantity = item.quantity || 1;
-                const itemTotal = itemPrice * quantity;
-
-                return (
-                  <tr key={index} className="border-b border-gray-200">
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={productImage}
-                          alt={productTitle}
-                          className="w-16 h-16 object-cover rounded border border-gray-200"
-                          onError={(e) => { e.target.src = getProductImage(null); }}
-                        />
-                        <div>
-                          <p className="font-medium text-gray-900">{productTitle}</p>
-                          {item.size && (
-                            <p className="text-xs text-gray-500">Size: {item.size}</p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="text-center py-4 px-4 text-gray-600">{quantity}</td>
-                    <td className="text-right py-4 px-4 text-gray-600">{formatINR(itemPrice)}</td>
-                    <td className="text-right py-4 px-4 font-semibold text-gray-900">{formatINR(itemTotal)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="border-t-2 border-gray-200 pt-4">
-        <div className="flex justify-end">
-          <div className="w-64 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Subtotal:</span>
-              <span className="text-gray-900">{formatINR(subtotal)}</span>
-            </div>
-            {gst > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">GST ({gstRate}%):</span>
-                <span className="text-gray-900">{formatINR(gst)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Shipping:</span>
-              <span className="text-gray-900">{shipping > 0 ? formatINR(shipping) : 'Free'}</span>
-            </div>
-            <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
-              <span className="text-gray-900">Total:</span>
-              <span className="text-gray-900">{formatINR(total)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-8 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
-        <p className="mb-2">Thank you for your order!</p>
-        <p>For any queries, contact us at {COMPANY_INFO.email} or {COMPANY_INFO.phone}</p>
-      </div>
-
+    <div className="max-w-4xl mx-auto bg-white">
+      {invoiceMarkup}
       {onPrint && (
-        <div className="mt-6 text-center">
+        <div className="px-6 py-5 text-center">
           <button
             onClick={onPrint}
             className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"

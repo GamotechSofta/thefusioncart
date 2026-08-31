@@ -1769,7 +1769,7 @@ export default function FlipkartAccountSettings() {
                 <FiX className="w-6 h-6" />
               </button>
             </div>
-            <div className="p-6">
+            <div className="overflow-x-auto">
               {loadingInvoice ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-100 border-t-transparent mx-auto mb-4"></div>

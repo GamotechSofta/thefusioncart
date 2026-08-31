@@ -82,25 +82,42 @@ function snapshotAndInlineStyles(element) {
 
     const computed = window.getComputedStyle(el);
     STYLE_PROPS.forEach((prop) => {
+      if (prop === 'lineHeight' || prop === 'letterSpacing' || prop === 'fontFamily' || prop === 'wordBreak') return;
       const value = computed[prop];
       if (value && value !== 'initial' && value !== 'normal' && value !== 'auto') {
         el.style[prop] = value;
       }
     });
 
-    // Force system fonts so html2canvas does not paint webfont glyphs on wrong metrics
     el.style.fontFamily = SAFE_FONT;
     el.style.letterSpacing = '0px';
     el.style.wordSpacing = '0px';
+    el.style.wordBreak = 'normal';
+    el.style.overflowWrap = 'break-word';
+    el.style.fontKerning = 'none';
+    const size = parseFloat(computed.fontSize) || 13;
+    el.style.lineHeight = `${Math.ceil(size * 1.6)}px`;
 
     if (el.tagName === 'IMG') {
+      const isQr = String(el.className || '').includes('invoice-export-qr');
       el.style.objectFit = 'contain';
-      el.style.objectPosition = 'left center';
-      el.style.width = 'auto';
-      el.style.height = 'auto';
-      el.style.maxWidth = '96px';
-      el.style.maxHeight = '64px';
-    } else {
+      el.style.background = '#ffffff';
+      if (isQr) {
+        el.style.width = '112px';
+        el.style.height = '112px';
+        el.style.maxWidth = '112px';
+        el.style.maxHeight = '112px';
+        el.style.objectPosition = 'center';
+      } else {
+        el.style.objectPosition = 'left center';
+        el.style.width = 'auto';
+        el.style.height = 'auto';
+        el.style.maxWidth = '200px';
+        el.style.maxHeight = '56px';
+        el.style.borderRadius = '0';
+        el.style.background = 'transparent';
+      }
+    } else if (el.tagName !== 'TABLE' && el.tagName !== 'COL' && el.tagName !== 'COLGROUP') {
       el.style.height = 'auto';
     }
   });
@@ -295,16 +312,35 @@ export async function downloadInvoicePdf(element, filename) {
             clonedElement.style.fontFamily = SAFE_FONT;
             clonedElement.style.letterSpacing = '0px';
             clonedElement.querySelectorAll('*').forEach((node) => {
+              const view = clonedDoc.defaultView || window;
               node.style.fontFamily = SAFE_FONT;
               node.style.letterSpacing = '0px';
               node.style.wordSpacing = '0px';
+              node.style.wordBreak = 'normal';
+              node.style.overflowWrap = 'break-word';
+              node.style.fontKerning = 'none';
+              const size = parseFloat(view.getComputedStyle(node).fontSize) || 13;
+              node.style.lineHeight = `${Math.ceil(size * 1.6)}px`;
             });
             clonedElement.querySelectorAll('img').forEach((img) => {
+              const isQr = String(img.className || '').includes('invoice-export-qr');
               img.style.objectFit = 'contain';
-              img.style.width = 'auto';
-              img.style.height = 'auto';
-              img.style.maxWidth = '96px';
-              img.style.maxHeight = '64px';
+              if (isQr) {
+                img.style.width = '112px';
+                img.style.height = '112px';
+                img.style.maxWidth = '112px';
+                img.style.maxHeight = '112px';
+                img.style.objectPosition = 'center';
+                img.style.background = '#ffffff';
+              } else {
+                img.style.objectPosition = 'left center';
+                img.style.width = 'auto';
+                img.style.height = 'auto';
+                img.style.maxWidth = '200px';
+                img.style.maxHeight = '56px';
+                img.style.borderRadius = '0';
+                img.style.background = 'transparent';
+              }
             });
           },
         });

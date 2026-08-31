@@ -262,7 +262,7 @@ const OrderSuccess = () => {
                 </svg>
               </button>
             </div>
-            <div className="p-6">
+            <div className="overflow-x-auto">
               {order ? (
                 <Invoice 
                   order={order} 

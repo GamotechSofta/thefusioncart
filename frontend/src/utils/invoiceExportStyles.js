@@ -6,7 +6,7 @@ export const INVOICE_EXPORT_CSS = `
   margin: 0 auto;
   background: #ffffff;
   color: #111111;
-  padding: 28px 32px 24px;
+  padding: 48px 36px 56px;
   font-family: Arial, Helvetica, sans-serif !important;
   font-size: 13px;
   line-height: 20px;
@@ -209,31 +209,42 @@ export const INVOICE_EXPORT_CSS = `
 
 .invoice-totals-wrap {
   width: 100%;
-  padding: 8px 12px 12px;
+  padding: 16px 12px 16px;
 }
 .invoice-totals {
-  width: 280px;
+  width: 320px;
   margin-left: auto;
   table-layout: fixed;
+  border-collapse: collapse;
+  border: 1px solid #d1d5db;
 }
+.invoice-totals th,
 .invoice-totals td {
-  padding: 6px 0;
+  padding: 9px 12px;
   font-size: 13px;
   line-height: 20px;
   color: #111111;
-  border: 0;
+  border: 1px solid #d1d5db;
 }
-.invoice-totals td.label { text-align: left; font-weight: 400; width: 60%; }
-.invoice-totals td.value { text-align: right; font-weight: 400; width: 40%; }
+.invoice-totals th {
+  background: #f8f9fa;
+  font-weight: 700;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.invoice-totals th.right,
+.invoice-totals td.right { text-align: right; }
+.invoice-totals col.col-label { width: 60%; }
+.invoice-totals col.col-value { width: 40%; }
 .invoice-totals tr.grand td {
   font-weight: 700;
-  padding-top: 10px;
-  border-top: 2px solid #d1d5db;
+  background: #f8f9fa;
 }
 
 .invoice-export-footer {
-  margin-top: 8px;
-  padding-top: 16px;
+  margin-top: 20px;
+  padding-top: 18px;
   border-top: 1px dashed #c4c4c4;
   text-align: center;
   font-size: 13px;
@@ -250,7 +261,7 @@ export const INVOICE_EXPORT_CSS = `
   .invoice-export {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 0 !important;
+    padding: 24px 8px 32px !important;
   }
 }
 `;

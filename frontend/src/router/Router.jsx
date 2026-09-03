@@ -103,6 +103,16 @@ const CategoryLeafRedirect = () => {
   return <Navigate to={`/category/${mainCategory}/${categoryName}`} replace />;
 };
 
+const HIDDEN_SUBCATEGORY_SLUGS = new Set(['health-and-medicine', 'health-and-wellness']);
+
+const HiddenSubcategoryRedirect = () => {
+  const { categoryName, subCategoryName } = useParams();
+  if (HIDDEN_SUBCATEGORY_SLUGS.has(String(subCategoryName || '').toLowerCase())) {
+    return <Navigate to={`/category/${categoryName}`} replace />;
+  }
+  return <ProductList />;
+};
+
 const Router = () => {
   const location = useLocation();
   const isAuthRoute = location.pathname === '/signin' || location.pathname === '/signup';
@@ -136,7 +146,7 @@ const Router = () => {
           {/* Dynamic category routes: main only, or main + sub (no third / leaf segment) */}
           <Route path="category/:mainCategory/:categoryName/:subCategoryName" element={<CategoryLeafRedirect />} />
           {/* /category/:main/:sub */}
-          <Route path="category/:categoryName/:subCategoryName" element={<ProductList />} />
+          <Route path="category/:categoryName/:subCategoryName" element={<HiddenSubcategoryRedirect />} />
           {/* Handle 1-segment paths: /category/shoes */}
           <Route path="category/:categoryName" element={<ProductList />} />
           {/* Product Detail - Using ID for better reliability */}

@@ -84,7 +84,7 @@ function buildInvoiceHtml({ order, items, customerName, customerEmail }) {
 <html>
 <head><meta charset="utf-8"></head>
 <body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111111;">
-  <div style="max-width:640px;margin:0 auto;padding:24px;background:#ffffff;">
+  <div style="max-width:640px;margin:0 auto;padding:40px 28px 48px;background:#ffffff;">
     <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
       <tr>
         <td style="vertical-align:top;width:62%;">
@@ -138,13 +138,26 @@ function buildInvoiceHtml({ order, items, customerName, customerEmail }) {
             </thead>
             <tbody>${itemRows}</tbody>
           </table>
-          <table style="width:260px;margin:8px 12px 12px auto;border-collapse:collapse;font-size:13px;">
-            <tr><td style="padding:6px 0;">Sub Total</td><td style="padding:6px 0;text-align:right;">${formatINR(order.amount)}</td></tr>
-            <tr><td style="padding:6px 0;">GST (18%)</td><td style="padding:6px 0;text-align:right;">₹0</td></tr>
-            <tr><td style="padding:6px 0;">Shipping Charges</td><td style="padding:6px 0;text-align:right;">₹0</td></tr>
+          <table style="width:320px;margin:16px 12px 16px auto;border-collapse:collapse;font-size:13px;border:1px solid #d1d5db;">
             <tr>
-              <td style="padding:10px 0 0;font-weight:700;border-top:2px solid #d1d5db;">Total Amount</td>
-              <td style="padding:10px 0 0;font-weight:700;text-align:right;border-top:2px solid #d1d5db;">${formatINR(order.amount)}</td>
+              <th style="padding:9px 12px;text-align:left;background:#f8f9fa;border:1px solid #d1d5db;font-size:12px;text-transform:uppercase;">Particulars</th>
+              <th style="padding:9px 12px;text-align:right;background:#f8f9fa;border:1px solid #d1d5db;font-size:12px;text-transform:uppercase;">Amount</th>
+            </tr>
+            <tr>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;">Sub Total</td>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;">${formatINR(order.amount)}</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;">GST (18%)</td>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;">₹0</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;">Shipping Charges</td>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;">₹0</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;font-weight:700;background:#f8f9fa;">Total Amount</td>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;font-weight:700;background:#f8f9fa;">${formatINR(order.amount)}</td>
             </tr>
           </table>
         </td>

@@ -19,7 +19,6 @@ export const categoryTree = [
       { name: 'Scents & Deos', slug: 'fragrances-and-deos' },
       { name: 'Dental Care', slug: 'oral-care' },
       { name: 'Feminine Care', slug: 'feminine-hygiene' },
-      { name: 'Health & Wellness', slug: 'health-and-medicine' },
     ],
   },
 ];

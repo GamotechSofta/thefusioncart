@@ -4,6 +4,13 @@ import { categoryTaxonomy, flattenedTaxonomy } from '../data/categoryTaxonomy.js
 import { navCategoryTree } from '../data/navCategoryTree.js';
 import { slugify, buildProductCategoryAndFilter } from '../utils/productCategoryFilter.js';
 
+const HIDDEN_SUBCATEGORY_RE = /health\s*(&|and)\s*(wellness|medicine)/i;
+
+function isHiddenSubcategory(item = {}) {
+  const name = String(item.name || item.slug || '');
+  return HIDDEN_SUBCATEGORY_RE.test(name) || /health-and-(wellness|medicine)/i.test(name);
+}
+
 /** Match ProductList URL segments → API query params */
 function mainCategoryQueryParamFromSlug(mainSlug) {
   return mainSlug
@@ -71,6 +78,7 @@ export const getAllCategories = async (req, res) => {
     // Group subcategories by parentId
     const subcategoriesByParent = {};
     subcategories.forEach(sub => {
+      if (isHiddenSubcategory(sub)) return;
       const parentId = sub.parentId ? String(sub.parentId._id || sub.parentId) : String(sub.parentId);
       if (!subcategoriesByParent[parentId]) {
         subcategoriesByParent[parentId] = [];
@@ -103,11 +111,13 @@ export const getAllCategories = async (req, res) => {
       });
     }
 
+    const visibleSubcategories = subcategories.filter((sub) => !isHiddenSubcategory(sub));
+
     return res.json({
       categories: categoriesWithSubs,
       allCategories: [
         ...parentCategories,
-        ...subcategories
+        ...visibleSubcategories
       ].sort((a, b) => {
         // Sort by name
         return a.name.localeCompare(b.name);

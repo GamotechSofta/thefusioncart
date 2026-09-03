@@ -230,7 +230,7 @@ export async function printInvoiceElement(element) {
   <meta charset="utf-8" />
   <title>Invoice</title>
   <style>
-    @page { size: A4 portrait; margin: 12mm; }
+    @page { size: A4 portrait; margin: 18mm 14mm; }
     html, body {
       margin: 0;
       padding: 0;
@@ -353,7 +353,7 @@ export async function downloadInvoicePdf(element, filename) {
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 10;
+    const margin = 16;
     const contentWidth = pageWidth - margin * 2;
     const contentHeight = (canvas.height * contentWidth) / canvas.width;
     const printableHeight = pageHeight - margin * 2;

@@ -17,7 +17,6 @@ export const categoryTaxonomy = [
       { name: 'Feminine Hygiene', subSubcategories: ['Hair Removal', 'Intimate Wash & Care', 'Panty Liners', 'Sanitary Napkins', 'Tampons & Menstrual Cups'] },
       { name: 'Fragrances & Deos', subSubcategories: ['Attar', 'Body Sprays & Mists', 'Eau De Cologne', 'Eau De Parfum', 'Eau De Toilette', 'Gift Sets', "Men's Deodorants", "Women's Deodorants", 'Perfume'] },
       { name: 'Hair Care', subSubcategories: ['Dry Shampoo & Conditioner', 'Hair & Scalp Treatment', 'Hair Color', 'Hair Oil & Serum', 'Hair Styling', 'Shampoo & Conditioner', 'Tools & Accessories'] },
-      { name: 'Health & Medicine', subSubcategories: ['Antiseptics & Bandages', 'Cotton & Ear Buds', 'Devices', 'Everyday Medicine', 'Face Masks & Safety Gears', 'Sexual Wellness', 'Slimming Products', 'Supplements & Proteins'] },
       { name: 'Makeup', subSubcategories: ['Eyes', 'Face', 'Lips', 'Makeup Accessories', 'Makeup Kits & Gift Sets', 'Nails'] },
       { name: "Men's Grooming", subSubcategories: ['Bath & Shower', 'Combos & Gift Sets', 'Deodorant', 'Face & Body', 'Hair Care & Styling', 'Moustache & Beard Care', 'Shaving Care', 'Talc'] },
       { name: 'Oral Care', subSubcategories: [] },

@@ -51,7 +51,7 @@ const Footer = () => {
     { name: 'Hair Essentials', path: '/category/beauty-and-hygiene/hair-care' },
     { name: 'Colour & Makeup', path: '/category/beauty-and-hygiene/makeup' },
     { name: 'Bath & Hands', path: '/category/beauty-and-hygiene/bath-and-hand-wash' },
-    { name: 'Health & Wellness', path: '/category/beauty-and-hygiene/health-and-medicine' },
+    { name: 'Dental Care', path: '/category/beauty-and-hygiene/oral-care' },
   ];
 
   const legalLinks = [

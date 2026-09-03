@@ -11,7 +11,6 @@ import bathAndHandwashImg from '../assets/bath and handwash.png';
 import feminineHygieneImg from '../assets/Feminine Hygiene1.png';
 import fragrancesDeosImg from '../assets/Fragrances & Deos1.png';
 import haircareImg from '../assets/Hair Care1.png';
-import healthAndMedicineImg from '../assets/Health & Medicine1.png';
 import makeupImg from '../assets/Makeup1.png';
 import oralCareImg from '../assets/oral care1.png';
 import skinCareImg from '../assets/skin care1.png';
@@ -65,12 +64,6 @@ const HOME_CATEGORIES = [
     image: feminineHygieneImg,
     path: '/category/beauty-and-hygiene/feminine-hygiene',
     slug: 'feminine-hygiene',
-  },
-  {
-    name: 'Health & Wellness',
-    image: healthAndMedicineImg,
-    path: '/category/beauty-and-hygiene/health-and-medicine',
-    slug: 'health-and-medicine',
   },
 ];
 

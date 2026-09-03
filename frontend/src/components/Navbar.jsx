@@ -14,7 +14,6 @@ import bathAndHandwashImg from '../assets/bath and handwash.png';
 import feminineHygieneImg from '../assets/Feminine Hygiene1.png';
 import fragrancesDeosImg from '../assets/Fragrances & Deos1.png';
 import haircareImg from '../assets/Hair Care1.png';
-import healthAndMedicineImg from '../assets/Health & Medicine1.png';
 import makeupImg from '../assets/Makeup1.png';
 import oralCareImg from '../assets/oral care1.png';
 import skinCareImg from '../assets/skin care1.png';
@@ -26,7 +25,6 @@ const categoryFallbackImage = {
   'feminine-hygiene': feminineHygieneImg,
   'fragrances-and-deos': fragrancesDeosImg,
   'hair-care': haircareImg,
-  'health-and-medicine': healthAndMedicineImg,
   makeup: makeupImg,
   'oral-care': oralCareImg,
   'skin-care': skinCareImg,

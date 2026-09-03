@@ -266,28 +266,34 @@ const Invoice = ({
               </table>
               <div className="invoice-totals-wrap">
                 <table className="invoice-totals">
+                  <thead>
+                    <tr>
+                      <th>Particulars</th>
+                      <th className="right">Amount</th>
+                    </tr>
+                  </thead>
                   <tbody>
                     <tr>
-                      <td className="label">Sub Total</td>
-                      <td className="value">{formatINR(subtotal)}</td>
+                      <td>Sub Total</td>
+                      <td className="right">{formatINR(subtotal)}</td>
                     </tr>
                     {discount > 0 && (
                       <tr>
-                        <td className="label">Discount</td>
-                        <td className="value">{formatINR(discount)}</td>
+                        <td>Discount</td>
+                        <td className="right">{formatINR(discount)}</td>
                       </tr>
                     )}
                     <tr>
-                      <td className="label">GST ({gstRate}%)</td>
-                      <td className="value">{formatINR(gst)}</td>
+                      <td>GST ({gstRate}%)</td>
+                      <td className="right">{formatINR(gst)}</td>
                     </tr>
                     <tr>
-                      <td className="label">Shipping Charges</td>
-                      <td className="value">{formatINR(shipping)}</td>
+                      <td>Shipping Charges</td>
+                      <td className="right">{formatINR(shipping)}</td>
                     </tr>
                     <tr className="grand">
-                      <td className="label">Total Amount</td>
-                      <td className="value">{formatINR(total)}</td>
+                      <td>Total Amount</td>
+                      <td className="right">{formatINR(total)}</td>
                     </tr>
                   </tbody>
                 </table>

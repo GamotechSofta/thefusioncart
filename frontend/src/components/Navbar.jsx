@@ -4,9 +4,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, Heart, ShoppingBag, User, Menu, X, ChevronRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { searchProducts, fetchSarees } from '../services/api';
+import { searchProducts } from '../services/api';
 import { placeholders, getProductImage } from '../utils/imagePlaceholder';
-import { navbarCategories, slugifyCategory } from '../data/categoryTree';
+import { navbarCategories } from '../data/categoryTree';
 import { api } from '../utils/api';
 import brandLogo from '../assets/logo.jpeg';
 
@@ -17,8 +17,6 @@ import haircareImg from '../assets/Hair Care1.png';
 import makeupImg from '../assets/Makeup1.png';
 import oralCareImg from '../assets/oral care1.png';
 import skinCareImg from '../assets/skin care1.png';
-
-const MAIN_CATEGORY_SLUG = slugifyCategory('Beauty & Hygiene');
 
 const categoryFallbackImage = {
   'bath-and-hand-wash': bathAndHandwashImg,
@@ -332,36 +330,7 @@ const Navbar = () => {
   }, []);
 
   const categories = navbarCategories;
-  const [categoryImages, setCategoryImages] = useState(categoryFallbackImage);
   const isCategoryRoute = location.pathname.startsWith('/category/');
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadCategoryImages = async () => {
-      const entries = await Promise.all(
-        navbarCategories.map(async (category) => {
-          const products = await fetchSarees(category.slug, null, MAIN_CATEGORY_SLUG, 3);
-          const firstWithImage = (Array.isArray(products) ? products : []).find((product) => {
-            const url = getProductImage(product, 'image1');
-            return url && url !== placeholders.productList;
-          });
-          const productImage = firstWithImage ? getProductImage(firstWithImage, 'image1') : '';
-          const hasRealImage = productImage && productImage !== placeholders.productList;
-          return [category.slug, hasRealImage ? productImage : categoryFallbackImage[category.slug]];
-        })
-      );
-
-      if (!cancelled) {
-        setCategoryImages(Object.fromEntries(entries));
-      }
-    };
-
-    loadCategoryImages();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const CATEGORY_MENU_CLOSE_MS = 160;
 
@@ -513,7 +482,7 @@ const Navbar = () => {
                               >
                                 <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-canvas ring-1 ring-line">
                                   <img
-                                    src={categoryImages[category.slug] || categoryFallbackImage[category.slug]}
+                                    src={categoryFallbackImage[category.slug]}
                                     alt=""
                                     className="h-[82%] w-[82%] object-contain"
                                     onError={(e) => {
@@ -610,6 +579,7 @@ const Navbar = () => {
                               src={getProductImage(p, 'image1') || p.image || placeholders.thumbnail}
                               alt={p.title || p.name || 'Product'}
                               className="w-11 h-14 object-cover rounded-md border border-line flex-shrink-0 bg-canvas"
+                              referrerPolicy="no-referrer"
                               onError={(e) => { e.target.onerror = null; e.target.src = placeholders.thumbnail; }}
                             />
                             <div className="min-w-0 flex-1">
@@ -692,6 +662,7 @@ const Navbar = () => {
                             src={getProductImage(p, 'image1') || p.image || placeholders.thumbnail}
                             alt={p.title || p.name || 'Product'}
                             className="w-10 h-12 object-cover rounded-md border border-line flex-shrink-0"
+                            referrerPolicy="no-referrer"
                             onError={(e) => { e.target.onerror = null; e.target.src = placeholders.thumbnail; }}
                           />
                           <div className="min-w-0 flex-1">
@@ -875,7 +846,7 @@ const Navbar = () => {
                         >
                           <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-canvas ring-1 ring-line">
                             <img
-                              src={categoryImages[cat.slug] || categoryFallbackImage[cat.slug]}
+                              src={categoryFallbackImage[cat.slug]}
                               alt=""
                               className="h-[82%] w-[82%] object-contain"
                               onError={(e) => {

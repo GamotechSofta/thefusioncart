@@ -115,6 +115,7 @@ const ProductCard = ({ product }) => {
             src={getProductImage(product, 'image1') || product.image || placeholders.productList}
             alt={title}
             className="relative z-[1] h-full w-full object-contain p-3 sm:p-4"
+            referrerPolicy="no-referrer"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = placeholders.productList;

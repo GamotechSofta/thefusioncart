@@ -3,7 +3,50 @@ import {
   buildProductCategoryAndFilter,
   slugify,
   buildLooseCategoryRegex,
+  withHiddenSubcategoriesExcluded,
+  isHiddenSubcategoryValue,
 } from '../utils/productCategoryFilter.js';
+import { toPublicImageUrl, getPublicBaseUrl } from '../utils/imageUrl.js';
+
+const applyPublicImageUrls = (productObj) => {
+  const baseUrl = getPublicBaseUrl();
+
+  if (productObj['Image Link']) {
+    productObj['Image Link'] = toPublicImageUrl(productObj['Image Link'], baseUrl);
+  }
+  if (typeof productObj.image === 'string') {
+    productObj.image = toPublicImageUrl(productObj.image, baseUrl);
+  }
+  if (productObj.imageLink) {
+    productObj.imageLink = toPublicImageUrl(productObj.imageLink, baseUrl);
+  }
+
+  if (productObj.images) {
+    if (Array.isArray(productObj.images)) {
+      const imagesObj = {};
+      productObj.images.forEach((img, index) => {
+        if (img && img.url) {
+          imagesObj[`image${index + 1}`] = toPublicImageUrl(img.url, baseUrl);
+        } else if (typeof img === 'string') {
+          imagesObj[`image${index + 1}`] = toPublicImageUrl(img, baseUrl);
+        }
+      });
+      if (Object.keys(imagesObj).length > 0) {
+        productObj.images = imagesObj;
+      }
+    } else if (typeof productObj.images === 'object') {
+      const processedImages = {};
+      ['image1', 'image2', 'image3'].forEach((key) => {
+        if (productObj.images[key]) {
+          processedImages[key] = toPublicImageUrl(productObj.images[key], baseUrl);
+        }
+      });
+      productObj.images = processedImages;
+    }
+  }
+
+  return productObj;
+};
 
 const parseRupeeToNumber = (value) => {
   if (typeof value === 'number') return value;
@@ -19,7 +62,9 @@ export const getProducts = async (req, res) => {
     const rawCategory = (req.query.category || '').toString();
     const rawSubCategory = (req.query.subcategory || req.query.subCategory || req.query.subSubCategory || '').toString();
 
-    const query = buildProductCategoryAndFilter(rawMain, rawCategory, rawSubCategory);
+    const query = withHiddenSubcategoriesExcluded(
+      buildProductCategoryAndFilter(rawMain, rawCategory, rawSubCategory)
+    );
     const mainSlug = slugify(rawMain);
     const categorySlug = slugify(rawCategory);
     const subCategorySlug = slugify(rawSubCategory);
@@ -80,6 +125,16 @@ export const getProducts = async (req, res) => {
       }
     }
 
+    products = products.filter((product) => {
+      const productObj = typeof product?.toObject === 'function' ? product.toObject() : product;
+      return !isHiddenSubcategoryValue(
+        productObj?.taxonomy?.subCategorySlug ||
+          productObj?.taxonomy?.subCategory ||
+          productObj?.subcategory ||
+          productObj?.['Sub-Category']
+      );
+    });
+
     // Process image URLs to ensure they're absolute
     products = products.map(product => {
       const productObj = typeof product?.toObject === 'function' ? product.toObject() : { ...product };
@@ -115,64 +170,8 @@ export const getProducts = async (req, res) => {
       if (!productObj.images.image1 && productObj['Image Link']) {
         productObj.images.image1 = productObj['Image Link'];
       }
-      // Get base URL from environment - use production URL or fallback to localhost for development
-      const baseUrl = process.env.BASE_URL || 
-                     process.env.BACKEND_URL || 
-                     (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
-      
-      // Helper function to ensure URL is absolute
-      const ensureAbsoluteUrl = (url) => {
-        if (!url || typeof url !== 'string') return url;
-        
-        // Already absolute URL (http://, https://, or //)
-        if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
-          return url;
-        }
-        
-        // Cloudinary or other CDN URLs (usually already absolute)
-        if (url.includes('cloudinary.com') || url.includes('amazonaws.com') || url.includes('cdn')) {
-          // If it's missing protocol, add https
-          if (!url.startsWith('http')) {
-            return `https://${url}`;
-          }
-          return url;
-        }
-        
-        // Relative URL - prepend baseUrl only if baseUrl is set
-        if (baseUrl) {
-          return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
-        }
-        
-        // If no baseUrl in production and relative URL, return as-is (assume same domain)
-        return url;
-      };
-      
-      // Handle both image structures: array of objects OR object with image1/image2/image3
-      if (productObj.images) {
-        if (Array.isArray(productObj.images)) {
-          // Array structure - convert back to object format for frontend consistency
-          const imagesObj = {};
-          productObj.images.forEach((img, index) => {
-            if (img && img.url) {
-              imagesObj[`image${index + 1}`] = ensureAbsoluteUrl(img.url);
-            }
-          });
-          // If array is empty but we have object structure, keep original
-          if (Object.keys(imagesObj).length > 0) {
-            productObj.images = imagesObj;
-          }
-        } else if (typeof productObj.images === 'object') {
-          // Object structure with image1, image2, image3 - ensure URLs are absolute
-          const processedImages = {};
-          ['image1', 'image2', 'image3'].forEach(key => {
-            if (productObj.images[key]) {
-              processedImages[key] = ensureAbsoluteUrl(productObj.images[key]);
-            }
-          });
-          productObj.images = processedImages;
-        }
-      }
-      
+
+      applyPublicImageUrls(productObj);
       return productObj;
     });
 
@@ -235,63 +234,8 @@ export const getProductById = async (req, res) => {
     if (!productObj.images.image1 && productObj['Image Link']) {
       productObj.images.image1 = productObj['Image Link'];
     }
-    
-    // Get base URL from environment - use production URL or fallback to localhost for development
-    const baseUrl = process.env.BASE_URL || 
-                   process.env.BACKEND_URL || 
-                   (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
-    
-    // Helper function to ensure URL is absolute
-    const ensureAbsoluteUrl = (url) => {
-      if (!url || typeof url !== 'string') return url;
-      
-      // Already absolute URL (http://, https://, or //)
-      if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
-        return url;
-      }
-      
-      // Cloudinary or other CDN URLs (usually already absolute)
-      if (url.includes('cloudinary.com') || url.includes('amazonaws.com') || url.includes('cdn')) {
-        // If it's missing protocol, add https
-        if (!url.startsWith('http')) {
-          return `https://${url}`;
-        }
-        return url;
-      }
-      
-      // Relative URL - prepend baseUrl only if baseUrl is set
-      if (baseUrl) {
-        return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
-      }
-      
-      // If no baseUrl in production and relative URL, return as-is (assume same domain)
-      return url;
-    };
-    
-    // Process image URLs to ensure they're absolute and maintain object structure
-    if (productObj.images) {
-      if (Array.isArray(productObj.images)) {
-        // Array structure - convert back to object format for frontend consistency
-        const imagesObj = {};
-        productObj.images.forEach((img, index) => {
-          if (img && img.url) {
-            imagesObj[`image${index + 1}`] = ensureAbsoluteUrl(img.url);
-          }
-        });
-        if (Object.keys(imagesObj).length > 0) {
-          productObj.images = imagesObj;
-        }
-      } else if (typeof productObj.images === 'object') {
-        // Object structure with image1, image2, image3 - ensure URLs are absolute
-        const processedImages = {};
-        ['image1', 'image2', 'image3'].forEach(key => {
-          if (productObj.images[key]) {
-            processedImages[key] = ensureAbsoluteUrl(productObj.images[key]);
-          }
-        });
-        productObj.images = processedImages;
-      }
-    }
+
+    applyPublicImageUrls(productObj);
     
     res.json(productObj);
   } catch (error) {

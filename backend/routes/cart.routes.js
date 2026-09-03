@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import auth from '../middleware/auth.js';
 import Cart from '../models/Cart.js';
 import { Product } from '../models/product.js';
+import { toPublicImageUrl } from '../utils/imageUrl.js';
 
 const router = Router();
 
@@ -57,11 +58,13 @@ async function populateCartItems(items) {
         if (!image && product.imageUrl) image = product.imageUrl;
         if (!image && product.imageLink) image = product.imageLink;
         if (!image && product.sourceData?.imageLink) image = product.sourceData.imageLink;
+        image = toPublicImageUrl(image);
 
         const imagesObj = {
           ...(product.images && typeof product.images === 'object' && !Array.isArray(product.images) ? product.images : {}),
           image1: image || product.images?.image1 || null,
         };
+        if (imagesObj.image1) imagesObj.image1 = toPublicImageUrl(imagesObj.image1);
 
         return {
           ...rawItem,

@@ -97,3 +97,27 @@ export function buildProductCategoryAndFilter(rawMain, rawCategory, rawSubCatego
 
   return andConditions.length > 0 ? { $and: andConditions } : {};
 }
+
+export const HIDDEN_SUBCATEGORY_SLUGS = ['health-and-medicine', 'health-and-wellness'];
+export const HIDDEN_SUBCATEGORY_RE = /health\s*(&|and)\s*(wellness|medicine)/i;
+
+export const isHiddenSubcategoryValue = (value = '') => {
+  const slug = slugify(value);
+  return HIDDEN_SUBCATEGORY_SLUGS.includes(slug) || HIDDEN_SUBCATEGORY_RE.test(String(value));
+};
+
+export const hiddenSubcategoryExclusion = () => ({
+  $nor: [
+    { 'taxonomy.subCategorySlug': { $in: HIDDEN_SUBCATEGORY_SLUGS } },
+    { 'taxonomy.subCategory': { $regex: HIDDEN_SUBCATEGORY_RE } },
+    { subcategory: { $regex: HIDDEN_SUBCATEGORY_RE } },
+    { 'Sub-Category': { $regex: HIDDEN_SUBCATEGORY_RE } },
+  ],
+});
+
+export const withHiddenSubcategoriesExcluded = (filter = {}) => {
+  const extra = hiddenSubcategoryExclusion();
+  if (!filter || Object.keys(filter).length === 0) return extra;
+  if (Array.isArray(filter.$and)) return { ...filter, $and: [...filter.$and, extra] };
+  return { $and: [filter, extra] };
+};

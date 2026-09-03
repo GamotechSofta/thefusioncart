@@ -29,6 +29,7 @@ import AdminAddresses from '../pages/admin/AdminAddresses';
 import AdminContactInfo from '../pages/admin/AdminContactInfo';
 import AdminLogos from '../pages/admin/AdminLogos';
 import AdminInvoiceGenerator from '../pages/admin/AdminInvoiceGenerator';
+import { HIDDEN_SUBCATEGORY_SLUGS } from '../data/categoryTree';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
 import TermsAndConditions from '../pages/TermsAndConditions';
 import ShippingPolicy from '../pages/ShippingPolicy';
@@ -102,8 +103,6 @@ const CategoryLeafRedirect = () => {
   const { mainCategory, categoryName } = useParams();
   return <Navigate to={`/category/${mainCategory}/${categoryName}`} replace />;
 };
-
-const HIDDEN_SUBCATEGORY_SLUGS = new Set(['health-and-medicine', 'health-and-wellness']);
 
 const HiddenSubcategoryRedirect = () => {
   const { categoryName, subCategoryName } = useParams();

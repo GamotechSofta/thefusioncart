@@ -1,5 +1,6 @@
 import Order from '../models/Order.js';
 import { Product } from '../models/product.js';
+import { toPublicImageUrl } from '../utils/imageUrl.js';
 
 const parseRupeeToNumber = (value) => {
   if (typeof value === 'number') return value;
@@ -51,6 +52,12 @@ async function populateOrderItems(items) {
           if (!productObj.images) productObj.images = {};
           if (!productObj.images.image1 && productObj['Image Link']) {
             productObj.images.image1 = productObj['Image Link'];
+          }
+          if (productObj.images.image1) {
+            productObj.images.image1 = toPublicImageUrl(productObj.images.image1);
+          }
+          if (productObj['Image Link']) {
+            productObj['Image Link'] = toPublicImageUrl(productObj['Image Link']);
           }
           if (!productObj.price) {
             productObj.price = productObj.mrp || parseRupeeToNumber(productObj['MRP']) || 0;

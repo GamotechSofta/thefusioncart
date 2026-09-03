@@ -77,6 +77,7 @@ const Wishlist = () => {
                     src={item.image}
                     alt={item.name}
                     className="w-full h-full object-contain p-3"
+                    referrerPolicy="no-referrer"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = placeholders.productList;

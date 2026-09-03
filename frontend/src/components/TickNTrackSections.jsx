@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaTruck, FaAward, FaShieldAlt, FaUndo } from 'react-icons/fa';
 import { Sparkles, Truck, RotateCcw } from 'lucide-react';
 import { fetchSarees } from '../services/api';
-import { getProductImage, placeholders } from '../utils/imagePlaceholder';
+import { placeholders } from '../utils/imagePlaceholder';
 import { slugifyCategory } from '../data/categoryTree';
 import ProductCard from './ProductCard';
 
@@ -226,43 +226,6 @@ const BuyNestSections = () => {
 
   // Shop by Category Section
   const MainCategories = () => {
-    const [categories, setCategories] = useState(HOME_CATEGORIES);
-
-    useEffect(() => {
-      let cancelled = false;
-
-      const loadCategoryImages = async () => {
-        const withProductImages = await Promise.all(
-          HOME_CATEGORIES.map(async (category) => {
-            const products = await fetchSarees(
-              category.slug,
-              null,
-              MAIN_CATEGORY_SLUG,
-              3
-            );
-            const firstWithImage = (Array.isArray(products) ? products : []).find((product) => {
-              const url = getProductImage(product, 'image1');
-              return url && url !== placeholders.productList;
-            });
-            const productImage = firstWithImage ? getProductImage(firstWithImage, 'image1') : '';
-            const hasRealImage = productImage && productImage !== placeholders.productList;
-
-            return {
-              ...category,
-              image: hasRealImage ? productImage : category.image,
-            };
-          })
-        );
-
-        if (!cancelled) setCategories(withProductImages);
-      };
-
-      loadCategoryImages();
-      return () => {
-        cancelled = true;
-      };
-    }, []);
-
     return (
       <section className="relative overflow-hidden bg-white pt-12 pb-8 sm:pt-16 sm:pb-10 lg:pt-20 lg:pb-12">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-line" />
@@ -282,8 +245,8 @@ const BuyNestSections = () => {
             </div>
           </div>
 
-          <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-x-6 sm:gap-y-10 sm:overflow-visible sm:px-0 lg:grid-cols-8">
-            {categories.map((category) => (
+          <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-x-6 sm:gap-y-10 sm:overflow-visible sm:px-0 lg:grid-cols-7">
+            {HOME_CATEGORIES.map((category) => (
               <button
                 key={category.name}
                 type="button"

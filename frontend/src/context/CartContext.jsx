@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
+import { rewriteProductImageUrl } from '../utils/imagePlaceholder';
 
 const CartContext = createContext();
 
@@ -55,7 +56,7 @@ export const CartProvider = ({ children }) => {
       if (!imageUrl && i.image) imageUrl = typeof i.image === 'string' ? i.image : i.image?.url;
 
       if (imageUrl && typeof imageUrl === 'string') {
-        imageUrl = imageUrl.trim();
+        imageUrl = rewriteProductImageUrl(imageUrl.trim());
       }
       
       return {

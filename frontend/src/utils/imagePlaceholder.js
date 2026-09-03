@@ -37,6 +37,24 @@ export const placeholders = {
   product: getPlaceholderImage(300, 400, 'Image Not Available'), // Alias for productList
 };
 
+/** Prefer CDN hosts that allow embedding (BigBasket hotlinks often fail). */
+export const rewriteProductImageUrl = (url = '') => {
+  if (!url || typeof url !== 'string') return '';
+  let next = url.trim();
+  if (!next || next === 'null' || next === 'undefined') return '';
+  next = next.replace(/^http:\/\//i, 'https://');
+  next = next.replace(/https?:\/\/(?:www\.)?bigbasket\.com\/media\//i, 'https://www.bbassets.com/media/');
+  return next;
+};
+
+const firstUsableUrl = (...candidates) => {
+  for (const value of candidates) {
+    const url = rewriteProductImageUrl(value);
+    if (url) return url;
+  }
+  return '';
+};
+
 /**
  * Safely gets image URL from product object
  * Handles both object format (image1, image2, image3) and array format
@@ -49,72 +67,43 @@ export const getProductImage = (product, imageKey = 'image1') => {
     return placeholders.productList;
   }
 
-  // First check if product has direct image property (legacy support)
-  if (product.image && typeof product.image === 'string') {
-    return product.image;
-  }
-
-  if (product['Image Link'] && typeof product['Image Link'] === 'string') {
-    return product['Image Link'];
-  }
-
-  if (product.imageLink && typeof product.imageLink === 'string') {
-    return product.imageLink;
-  }
-
-  // Check sourceData.imageLink for raw product data
-  if (product.sourceData?.imageLink && typeof product.sourceData.imageLink === 'string') {
-    return product.sourceData.imageLink;
-  }
-
-  if (!product.images) {
-    return placeholders.productList;
-  }
-
-  // Handle object format: { image1: "url", image2: "url" }
-  if (typeof product.images === 'object' && !Array.isArray(product.images)) {
-    // Try the requested image key first
-    const imageUrl = product.images[imageKey];
-    if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim() !== '') {
-      return imageUrl;
+  const fromImagesObject = () => {
+    if (!product.images || typeof product.images !== 'object' || Array.isArray(product.images)) {
+      return '';
     }
-    // Fallback to image1 if requested image doesn't exist
-    if (imageKey !== 'image1' && product.images.image1 && typeof product.images.image1 === 'string' && product.images.image1.trim() !== '') {
-      return product.images.image1;
-    }
-    // Try other image keys in order
-    const fallbackKeys = ['image2', 'image3'];
-    for (const key of fallbackKeys) {
-      if (product.images[key] && typeof product.images[key] === 'string' && product.images[key].trim() !== '') {
-        return product.images[key];
-      }
-    }
-  }
+    return firstUsableUrl(
+      product.images[imageKey],
+      product.images.image1,
+      product.images.image2,
+      product.images.image3,
+      product.images.url
+    );
+  };
 
-  // Handle array format: [{ url: "url1" }, { url: "url2" }] or ["url1", "url2"]
-  if (Array.isArray(product.images) && product.images.length > 0) {
-    const imageIndex = imageKey === 'image1' ? 0 : imageKey === 'image2' ? 1 : imageKey === 'image3' ? 2 : 0;
-    const image = product.images[imageIndex] || product.images[0];
-    if (image) {
-      // Handle both { url: "..." } and direct string
-      if (typeof image === 'string' && image.trim() !== '') {
-        return image;
-      }
-      if (typeof image === 'object' && image.url && typeof image.url === 'string' && image.url.trim() !== '') {
-        return image.url;
-      }
-    }
-    // Fallback to first available image
-    for (const img of product.images) {
-      if (typeof img === 'string' && img.trim() !== '') {
-        return img;
-      }
-      if (typeof img === 'object' && img.url && typeof img.url === 'string' && img.url.trim() !== '') {
-        return img.url;
-      }
-    }
-  }
+  const fromImagesArray = () => {
+    if (!Array.isArray(product.images) || product.images.length === 0) return '';
+    const imageIndex = imageKey === 'image2' ? 1 : imageKey === 'image3' ? 2 : 0;
+    const ordered = [product.images[imageIndex], ...product.images];
+    const candidates = ordered.flatMap((img) => {
+      if (!img) return [];
+      if (typeof img === 'string') return [img];
+      if (typeof img === 'object') return [img.url, img.image1, img.src];
+      return [];
+    });
+    return firstUsableUrl(...candidates);
+  };
 
-  return placeholders.productList;
+  const url =
+    fromImagesObject() ||
+    fromImagesArray() ||
+    firstUsableUrl(
+      product.image,
+      product['Image Link'],
+      product.imageLink,
+      product.imageUrl,
+      product.sourceData?.imageLink
+    );
+
+  return url || placeholders.productList;
 };
 

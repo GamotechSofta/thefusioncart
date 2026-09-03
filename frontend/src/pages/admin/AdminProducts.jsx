@@ -2,13 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { api } from '../../utils/api';
 import { FiEdit, FiTrash2, FiX, FiPlus, FiSearch, FiImage, FiPackage, FiDollarSign, FiTag, FiEye } from 'react-icons/fi';
 import ScrollToTop from '../../components/ScrollToTop';
-import { categoryTree, getCategoryDisplayName, productSubSlug } from '../../data/categoryTree';
+import { categoryTree, getCategoryDisplayName, productSubSlug, isHiddenSubcategory, isHiddenSubcategoryProduct } from '../../data/categoryTree';
+import { rewriteProductImageUrl } from '../../utils/imagePlaceholder';
 
 const BEAUTY_MAIN = categoryTree[0];
 const BEAUTY_SUBS = BEAUTY_MAIN?.subcategories || [];
 
 const productSubLabel = (p) => {
   const raw = p?.taxonomy?.subCategory || p?.subcategory || p?.['Sub-Category'] || '';
+  if (raw && isHiddenSubcategory(raw)) return 'Uncategorized';
   if (raw) return getCategoryDisplayName(raw);
   const slug = productSubSlug(p);
   if (slug) {
@@ -247,11 +249,16 @@ const AdminProducts = () => {
     setViewingProduct(null);
   };
 
+  const catalog = useMemo(
+    () => (Array.isArray(list) ? list.filter((p) => !isHiddenSubcategoryProduct(p)) : []),
+    [list]
+  );
+
   const priceFor = (p) => Math.round((p.mrp || 0) - ((p.mrp || 0) * (p.discountPercent || 0) / 100));
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    let arr = list;
+    let arr = catalog;
     if (subcategoryFilter !== 'all') {
       arr = arr.filter((p) => productSubSlug(p) === subcategoryFilter);
     }
@@ -264,7 +271,7 @@ const AdminProducts = () => {
       );
     }
     return arr.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-  }, [list, query, subcategoryFilter]);
+  }, [catalog, query, subcategoryFilter]);
 
   const totalPages = Math.max(1, Math.ceil((filtered.length || 0) / pageSize));
   const pageItems = useMemo(() => {
@@ -276,27 +283,27 @@ const AdminProducts = () => {
   const subcategoryOptions = useMemo(() => {
     const options = BEAUTY_SUBS.map((s) => ({ slug: s.slug, name: s.name }));
     const known = new Set(options.map((s) => s.slug));
-    list.forEach((p) => {
+    catalog.forEach((p) => {
       const slug = productSubSlug(p);
-      if (slug && !known.has(slug)) {
+      if (slug && !known.has(slug) && !isHiddenSubcategory(slug) && !isHiddenSubcategory(productSubLabel(p))) {
         options.push({ slug, name: productSubLabel(p) });
         known.add(slug);
       }
     });
     return options;
-  }, [list]);
+  }, [catalog]);
 
   const subcategoryStats = useMemo(() => {
-    const stats = { all: list.length };
+    const stats = { all: catalog.length };
     subcategoryOptions.forEach((sub) => {
-      stats[sub.slug] = list.filter((p) => productSubSlug(p) === sub.slug).length;
+      stats[sub.slug] = catalog.filter((p) => productSubSlug(p) === sub.slug).length;
     });
     return stats;
-  }, [list, subcategoryOptions]);
+  }, [catalog, subcategoryOptions]);
 
   const subcategoryCount = useMemo(
-    () => new Set(list.map((p) => productSubSlug(p)).filter(Boolean)).size,
-    [list]
+    () => new Set(catalog.map((p) => productSubSlug(p)).filter(Boolean)).size,
+    [catalog]
   );
 
   return (
@@ -334,7 +341,7 @@ const AdminProducts = () => {
                 <FiPackage className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
                 <span className="text-xs font-semibold text-gray-600 uppercase truncate">Total</span>
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-gray-900">{list.length}</div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">{catalog.length}</div>
             </div>
             <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-green-200 shadow-md">
               <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
@@ -342,7 +349,7 @@ const AdminProducts = () => {
                 <span className="text-xs font-semibold text-gray-600 uppercase truncate">Avg Price</span>
               </div>
               <div className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
-                ₹{list.length > 0 ? Math.round(list.reduce((sum, p) => sum + priceFor(p), 0) / list.length).toLocaleString('en-IN') : '0'}
+                ₹{catalog.length > 0 ? Math.round(catalog.reduce((sum, p) => sum + priceFor(p), 0) / catalog.length).toLocaleString('en-IN') : '0'}
               </div>
             </div>
             <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-purple-200 shadow-md">
@@ -358,7 +365,7 @@ const AdminProducts = () => {
                 <span className="text-xs font-semibold text-gray-600 uppercase truncate">With Images</span>
               </div>
               <div className="text-xl sm:text-2xl font-bold text-gray-900">
-                {list.filter(p => p.images?.image1 || p.image).length}
+                {catalog.filter(p => p.images?.image1 || p.image).length}
               </div>
             </div>
           </div>
@@ -466,7 +473,7 @@ const AdminProducts = () => {
                         <td className="px-4 py-3">
                           <div className="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200">
                             <img
-                              src={p?.images?.image1 || p?.image || 'https://via.placeholder.com/150'}
+                              src={rewriteProductImageUrl(p?.images?.image1 || p?.image) || 'https://via.placeholder.com/150'}
                               alt={p.title}
                               className="w-full h-full object-cover"
                               onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
@@ -571,7 +578,7 @@ const AdminProducts = () => {
                     <div className="flex gap-3 mb-3">
                       <div className="w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 flex-shrink-0">
                         <img
-                          src={p?.images?.image1 || p?.image || 'https://via.placeholder.com/150'}
+                          src={rewriteProductImageUrl(p?.images?.image1 || p?.image) || 'https://via.placeholder.com/150'}
                           alt={p.title}
                           className="w-full h-full object-cover"
                           onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
@@ -895,7 +902,7 @@ const AdminProducts = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <img
-                      src={viewingProduct?.images?.image1 || viewingProduct?.image || 'https://via.placeholder.com/400'}
+                      src={rewriteProductImageUrl(viewingProduct?.images?.image1 || viewingProduct?.image) || 'https://via.placeholder.com/400'}
                       alt={viewingProduct.title}
                       className="w-full h-48 sm:h-64 object-contain rounded-lg border-2 border-gray-200"
                       onError={(e) => { e.target.src = 'https://via.placeholder.com/400'; }}

@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { fetchSareeById, fetchSarees } from '../services/api';
 import { useWishlist } from '../context/WishlistContext';
-import { placeholders, getProductImage } from '../utils/imagePlaceholder';
+import { placeholders, getProductImage, rewriteProductImageUrl } from '../utils/imagePlaceholder';
 import { FaRupeeSign, FaSpinner, FaStar, FaRegStar, FaHeart, FaRegHeart } from 'react-icons/fa';
 import ScrollToTop from './ScrollToTop';
 
@@ -39,6 +39,26 @@ const resolveDisplayPrice = (product) => {
 };
 const hasDisplayablePrice = (product) => resolveDisplayPrice(product) > 0;
 
+const collectProductImageUrls = (product) => {
+  if (!product) return [placeholders.productDetail];
+  const raw = [];
+  const { images } = product;
+  if (images && typeof images === 'object' && !Array.isArray(images)) {
+    raw.push(images.image1, images.image2, images.image3);
+  } else if (Array.isArray(images)) {
+    for (const img of images) {
+      raw.push(typeof img === 'string' ? img : img?.url);
+    }
+  }
+  raw.push(product.image, product['Image Link'], product.imageLink);
+  const urls = [];
+  for (const value of raw) {
+    const url = rewriteProductImageUrl(value);
+    if (url && !urls.includes(url)) urls.push(url);
+  }
+  return urls.length ? urls : [placeholders.productDetail];
+};
+
 // Simple LoginModal Component
 const LoginModal = ({ isOpen, onClose, backgroundLocation }) => {
   if (!isOpen) return null;
@@ -70,10 +90,7 @@ const LoginModal = ({ isOpen, onClose, backgroundLocation }) => {
 // Simple ProductCard Component
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
-  const productImages = product.images || (product.image ? [product.image] : []);
-  const imageUrl = Array.isArray(productImages) && productImages.length > 0 
-    ? (typeof productImages[0] === 'string' ? productImages[0] : productImages[0].url || placeholders.productList)
-    : getProductImage(product, 'image1');
+  const imageUrl = getProductImage(product, 'image1');
   const finalPrice = resolveDisplayPrice(product);
   const ratingValue = (() => {
     const r =
@@ -112,6 +129,7 @@ const ProductCard = ({ product }) => {
           src={imageUrl}
           alt={product.name || product.title || 'Product'}
           className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+          referrerPolicy="no-referrer"
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = placeholders.productList;
@@ -312,9 +330,7 @@ const ProductDetail = () => {
         ...p,
         id: p._id || p.id,
         images: p.images || (p.image ? [p.image] : []),
-        image: Array.isArray(p.images) && p.images.length > 0 
-          ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url)
-          : p.image || getProductImage(p, 'image1'),
+        image: getProductImage(p, 'image1'),
         price: resolveDisplayPrice(p),
         originalPrice: p.originalPrice || p.mrp || p.price || 0,
       }));
@@ -348,9 +364,7 @@ const ProductDetail = () => {
             ...p,
             id: p._id || p.id,
             images: p.images || (p.image ? [p.image] : []),
-            image: Array.isArray(p.images) && p.images.length > 0 
-              ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url)
-              : p.image || getProductImage(p, 'image1'),
+            image: getProductImage(p, 'image1'),
             price: resolveDisplayPrice(p),
             originalPrice: p.originalPrice || p.mrp || p.price || 0,
           }));
@@ -385,9 +399,7 @@ const ProductDetail = () => {
         ...p,
         id: p._id || p.id,
         images: p.images || (p.image ? [p.image] : []),
-        image: Array.isArray(p.images) && p.images.length > 0 
-          ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url)
-          : p.image || getProductImage(p, 'image1'),
+        image: getProductImage(p, 'image1'),
         price: resolveDisplayPrice(p),
         originalPrice: p.originalPrice || p.mrp || p.price || 0,
       }));
@@ -447,9 +459,7 @@ const ProductDetail = () => {
         ...p,
         id: p._id || p.id,
         images: p.images || (p.image ? [p.image] : []),
-        image: Array.isArray(p.images) && p.images.length > 0 
-          ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url)
-          : p.image || getProductImage(p, 'image1'),
+        image: getProductImage(p, 'image1'),
         price: resolveDisplayPrice(p),
         originalPrice: p.originalPrice || p.mrp || p.price || 0,
       }));
@@ -483,24 +493,20 @@ const ProductDetail = () => {
   };
 
   const handlePrevImage = () => {
-    const productImages = product.images || (product.image ? [product.image] : []);
-    const images = Array.isArray(productImages) ? productImages : Object.values(productImages || {});
+    const images = collectProductImageUrls(product);
     setSelectedImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   const handleNextImage = () => {
-    const productImages = product.images || (product.image ? [product.image] : []);
-    const images = Array.isArray(productImages) ? productImages : Object.values(productImages || {});
+    const images = collectProductImageUrls(product);
     setSelectedImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
   if (loading) return <LoadingState />;
   if (!product) return <NotFoundState />;
 
-  const productImages = product.images || (product.image ? [product.image] : []);
-  const images = Array.isArray(productImages) ? productImages : Object.values(productImages || {});
-  const currentImage = images[selectedImageIndex] || images[0] || placeholders.productDetail;
-  const imageUrl = typeof currentImage === 'string' ? currentImage : (currentImage?.url || placeholders.productDetail);
+  const images = collectProductImageUrls(product);
+  const imageUrl = images[selectedImageIndex] || images[0] || placeholders.productDetail;
   
   // Product pricing: robust fallback across different backend payload shapes.
   const finalPrice = resolveDisplayPrice(product);
@@ -577,6 +583,7 @@ const ProductDetail = () => {
                           src={thumbUrl}
                           alt={`Thumbnail ${idx + 1}`}
                           className="w-full h-full object-contain"
+                          referrerPolicy="no-referrer"
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = placeholders.thumbnail;
@@ -593,6 +600,7 @@ const ProductDetail = () => {
                       src={imageUrl}
                       alt={productTitle}
                       className="max-w-full max-h-full object-contain p-3 sm:p-4"
+                      referrerPolicy="no-referrer"
                       onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = placeholders.productDetail;

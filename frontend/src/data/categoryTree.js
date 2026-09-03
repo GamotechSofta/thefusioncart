@@ -37,10 +37,27 @@ const displayBySlug = Object.fromEntries(
   beautyMain.subcategories.map((sub) => [sub.slug, sub.name])
 );
 
+export const HIDDEN_SUBCATEGORY_SLUGS = new Set(['health-and-medicine', 'health-and-wellness']);
+
+export const isHiddenSubcategory = (value = '') => {
+  const slug = slugifyCategory(value);
+  return HIDDEN_SUBCATEGORY_SLUGS.has(slug) || /health\s*(&|and)\s*(wellness|medicine)/i.test(String(value));
+};
+
+export const isHiddenSubcategoryProduct = (product = {}) => {
+  const candidates = [
+    product?.taxonomy?.subCategorySlug,
+    product?.taxonomy?.subCategory,
+    product?.subcategory,
+    product?.['Sub-Category'],
+  ];
+  return candidates.some((value) => value && isHiddenSubcategory(value));
+};
+
 /** Map display names ("Hair Essentials") and catalog names ("Hair Care") to the same slug. */
 export const canonicalSubSlug = (value = '') => {
   const slug = slugifyCategory(value);
-  if (!slug || slug === beautyMainSlug) return '';
+  if (!slug || slug === beautyMainSlug || isHiddenSubcategory(slug)) return '';
   const bySlug = beautySubs.find((s) => s.slug === slug);
   if (bySlug) return bySlug.slug;
   const byName = beautySubs.find((s) => slugifyCategory(s.name) === slug);
@@ -49,7 +66,7 @@ export const canonicalSubSlug = (value = '') => {
 };
 
 export const getCategoryDisplayName = (value = '') => {
-  if (!value) return '';
+  if (!value || isHiddenSubcategory(value)) return '';
   const slug = slugifyCategory(value);
   return displayBySlug[slug] || displayBySlug[canonicalSubSlug(value)] || value;
 };

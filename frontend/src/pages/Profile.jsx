@@ -1279,6 +1279,7 @@ export default function FlipkartAccountSettings() {
                                         src={productImage} 
                                         alt={productTitle} 
                                         className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0" 
+                                        referrerPolicy="no-referrer"
                                         onError={(e) => { e.target.src = getProductImage(null); }}
                                       />
                                       <div className="flex-1 min-w-0">

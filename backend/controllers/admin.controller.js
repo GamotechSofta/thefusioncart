@@ -2,9 +2,16 @@ import { Product } from '../models/product.js';
 import Order from '../models/Order.js';
 import { Address } from '../models/Address.js';
 import User from '../models/User.js';
-import { buildProductCategoryAndFilter } from '../utils/productCategoryFilter.js';
+import {
+  buildProductCategoryAndFilter,
+  isHiddenSubcategoryValue,
+  withHiddenSubcategoriesExcluded,
+} from '../utils/productCategoryFilter.js';
+import { toPublicImageUrl } from '../utils/imageUrl.js';
 
-const BEAUTY_HYGIENE_FILTER = buildProductCategoryAndFilter('Beauty & Hygiene', '', '');
+const BEAUTY_HYGIENE_FILTER = withHiddenSubcategoriesExcluded(
+  buildProductCategoryAndFilter('Beauty & Hygiene', '', '')
+);
 
 const slugify = (value = '') =>
   value
@@ -94,6 +101,10 @@ export async function createProduct(req, res) {
 
     if (!title || !mrpValue || !mainCategory) {
       return res.status(400).json({ message: 'title (or SKU Name), mrp, and category are required' });
+    }
+
+    if (isHiddenSubcategoryValue(subCategory) || isHiddenSubcategoryValue(subSubCategory)) {
+      return res.status(400).json({ message: 'Health & Medicines is not a valid subcategory' });
     }
 
     const payload = {
@@ -243,6 +254,7 @@ export async function adminListProducts(req, res) {
       if (!image && p.image) image = typeof p.image === 'string' ? p.image : p.image?.url;
       if (!image && p.imageUrl) image = p.imageUrl;
       if (!image && p.sourceData?.imageLink) image = p.sourceData.imageLink;
+      image = toPublicImageUrl(image);
 
       return {
         ...p,

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { api } from '../../utils/api';
 import { FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign, FiSearch, FiEye, FiUser, FiMapPin, FiShoppingBag } from 'react-icons/fi';
 import ScrollToTop from '../../components/ScrollToTop';
+import { rewriteProductImageUrl } from '../../utils/imagePlaceholder';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -569,7 +570,7 @@ const AdminOrders = () => {
                       <div key={idx} className="bg-gray-50 p-3 sm:p-4 rounded-lg border-2 border-gray-200 flex items-start gap-3 sm:gap-4">
                         <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 border-gray-300 flex-shrink-0">
                           <img
-                            src={item.product?.images?.image1 || item.product?.image || 'https://via.placeholder.com/150'}
+                            src={rewriteProductImageUrl(item.product?.images?.image1 || item.product?.image) || 'https://via.placeholder.com/150'}
                             alt={item.product?.title}
                             className="w-full h-full object-cover"
                             onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}

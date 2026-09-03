@@ -72,7 +72,7 @@ const CategoryRail = () => {
                   active ? 'bg-white shadow-sm ring-1 ring-accent/20' : 'bg-canvas'
                 }`}
               >
-                <img src={imageBySlug[slug]} alt="" className="h-[78%] w-[78%] object-contain" />
+                <img src={imageBySlug[slug] || skinCareImg} alt="" className="h-[78%] w-[78%] object-contain" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = skinCareImg; }} />
               </span>
               <span
                 className={`w-full px-0.5 text-[10px] leading-tight line-clamp-2 ${

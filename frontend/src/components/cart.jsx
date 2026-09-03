@@ -74,11 +74,7 @@ function Cart() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
           <div className="lg:col-span-2 space-y-2.5 sm:space-y-3">
              {cart.map((item) => {
-               // Get image URL - robust resolution
-               let imageUrl = item.image;
-               if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
-                 imageUrl = getProductImage(item) || placeholders.productList;
-               }
+               const imageUrl = getProductImage(item) || placeholders.productList;
                
                const displayName = item.name || item.title || 'Product';
                const itemKey = `${item.id || item._id || 'item'}-${item.size || 'default'}`;
@@ -90,6 +86,7 @@ function Cart() {
                     src={imageUrl}
                     alt={displayName}
                     className="w-full h-full object-contain"
+                    referrerPolicy="no-referrer"
                     onClick={() => navigate(`/product/${item.id}`)}
                     onError={(e) => {
                       e.currentTarget.onerror = null;

@@ -24,6 +24,8 @@ import {
   categoryTree,
   productMatchesMainCategory,
   productMatchesSubcategory,
+  isHiddenSubcategoryProduct,
+  getCategoryDisplayName,
 } from '../../data/categoryTree';
 import { downloadInvoicePdf, printInvoiceElement } from '../../utils/downloadInvoicePdf';
 import {
@@ -206,7 +208,7 @@ const AdminInvoiceGenerator = () => {
   }, [mainCategory]);
 
   const filteredProducts = useMemo(() => {
-    let list = [...products];
+    let list = products.filter((p) => !isHiddenSubcategoryProduct(p));
     if (mainCategory) {
       list = list.filter((p) => productMatchesMainCategory(p, mainCategory));
     }
@@ -765,7 +767,9 @@ const AdminInvoiceGenerator = () => {
                         </p>
                         <p className="text-xs text-gray-500">
                           {formatINR(parsePrice(p))}
-                          {p.subcategory || p.category ? ` · ${p.subcategory || p.category}` : ''}
+                          {getCategoryDisplayName(p.subcategory) || p.category
+                            ? ` · ${getCategoryDisplayName(p.subcategory) || p.category}`
+                            : ''}
                         </p>
                       </div>
                       <button

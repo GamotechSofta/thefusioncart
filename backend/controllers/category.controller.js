@@ -2,13 +2,10 @@ import { Category } from '../models/Category.js';
 import { Product } from '../models/product.js';
 import { categoryTaxonomy, flattenedTaxonomy } from '../data/categoryTaxonomy.js';
 import { navCategoryTree } from '../data/navCategoryTree.js';
-import { slugify, buildProductCategoryAndFilter } from '../utils/productCategoryFilter.js';
-
-const HIDDEN_SUBCATEGORY_RE = /health\s*(&|and)\s*(wellness|medicine)/i;
+import { slugify, buildProductCategoryAndFilter, isHiddenSubcategoryValue } from '../utils/productCategoryFilter.js';
 
 function isHiddenSubcategory(item = {}) {
-  const name = String(item.name || item.slug || '');
-  return HIDDEN_SUBCATEGORY_RE.test(name) || /health-and-(wellness|medicine)/i.test(name);
+  return isHiddenSubcategoryValue(item.name || item.slug || '');
 }
 
 /** Match ProductList URL segments → API query params */

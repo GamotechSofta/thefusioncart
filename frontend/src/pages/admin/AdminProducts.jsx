@@ -72,13 +72,14 @@ const AdminProducts = () => {
   const [toast, setToast] = useState({ show: false, text: '', type: 'success' });
   const [query, setQuery] = useState('');
   const [subcategoryFilter, setSubcategoryFilter] = useState('all');
+  const [priceFilter, setPriceFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const load = async () => {
+  const load = async (fetchAllZero = false) => {
     try {
       setLoading(true);
-      const data = await api.admin.listProducts();
+      const data = await api.admin.listProducts(fetchAllZero ? { fetchAllZero: true } : undefined);
       setList(data || []);
     } catch (e) {
       setError(e.message || 'Failed to load products');
@@ -88,8 +89,8 @@ const AdminProducts = () => {
   };
 
   useEffect(() => {
-    load();
-  }, []);
+    load(priceFilter === 'zero');
+  }, [priceFilter]);
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -130,7 +131,7 @@ const AdminProducts = () => {
       setToast({ show: true, text: 'Product created successfully!', type: 'success' });
       setIsCreateModalOpen(false);
       resetForm();
-      await load();
+      await load(priceFilter === 'zero');
     } catch (e) {
       setError(e.message || 'Failed to create product');
       setToast({ show: true, text: e.message || 'Failed to create product', type: 'error' });
@@ -181,7 +182,7 @@ const AdminProducts = () => {
     try {
       await api.admin.deleteProduct(id);
       setToast({ show: true, text: 'Product deleted successfully!', type: 'success' });
-      await load();
+      await load(priceFilter === 'zero');
     } catch (e) {
       setToast({ show: true, text: e.message || 'Failed to delete product', type: 'error' });
     } finally {
@@ -229,7 +230,7 @@ const AdminProducts = () => {
       });
       setToast({ show: true, text: 'Product updated successfully!', type: 'success' });
       closeEditModal();
-      await load();
+      await load(priceFilter === 'zero');
     } catch (e) {
       setError(e.message || 'Failed to update product');
       setToast({ show: true, text: e.message || 'Failed to update product', type: 'error' });
@@ -250,8 +251,8 @@ const AdminProducts = () => {
   };
 
   const catalog = useMemo(
-    () => (Array.isArray(list) ? list.filter((p) => !isHiddenSubcategoryProduct(p)) : []),
-    [list]
+    () => (Array.isArray(list) ? list.filter((p) => priceFilter === 'zero' || !isHiddenSubcategoryProduct(p)) : []),
+    [list, priceFilter]
   );
 
   const priceFor = (p) => Math.round((p.mrp || 0) - ((p.mrp || 0) * (p.discountPercent || 0) / 100));
@@ -262,6 +263,11 @@ const AdminProducts = () => {
     if (subcategoryFilter !== 'all') {
       arr = arr.filter((p) => productSubSlug(p) === subcategoryFilter);
     }
+    if (priceFilter === 'zero') {
+      arr = arr.filter((p) => priceFor(p) === 0);
+    } else if (priceFilter === 'non-zero') {
+      arr = arr.filter((p) => priceFor(p) > 0);
+    }
     if (q) {
       arr = arr.filter((p) =>
         String(p.title || '').toLowerCase().includes(q) ||
@@ -271,14 +277,14 @@ const AdminProducts = () => {
       );
     }
     return arr.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-  }, [catalog, query, subcategoryFilter]);
+  }, [catalog, query, subcategoryFilter, priceFilter]);
 
   const totalPages = Math.max(1, Math.ceil((filtered.length || 0) / pageSize));
   const pageItems = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filtered.slice(start, start + pageSize);
   }, [filtered, page, pageSize]);
-  useEffect(() => { setPage(1); }, [query, subcategoryFilter, pageSize]);
+  useEffect(() => { setPage(1); }, [query, subcategoryFilter, priceFilter, pageSize]);
 
   const subcategoryOptions = useMemo(() => {
     const options = BEAUTY_SUBS.map((s) => ({ slug: s.slug, name: s.name }));
@@ -382,7 +388,7 @@ const AdminProducts = () => {
                   className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border-2 border-gray-200 rounded-lg focus:border-pink-500 focus:outline-none"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:flex sm:gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:flex sm:gap-4">
                 <select
                   value={subcategoryFilter}
                   onChange={(e) => setSubcategoryFilter(e.target.value)}
@@ -394,6 +400,15 @@ const AdminProducts = () => {
                       {sub.name} ({subcategoryStats[sub.slug] || 0})
                     </option>
                   ))}
+                </select>
+                <select
+                  value={priceFilter}
+                  onChange={(e) => setPriceFilter(e.target.value)}
+                  className="px-3 sm:px-4 py-2 text-sm sm:text-base border-2 border-gray-200 rounded-lg focus:border-pink-500 focus:outline-none"
+                >
+                  <option value="all">All Prices</option>
+                  <option value="zero">Price = 0</option>
+                  <option value="non-zero">Price &gt; 0</option>
                 </select>
                 <select
                   value={pageSize}

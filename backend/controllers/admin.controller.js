@@ -231,16 +231,40 @@ export async function updateOrderStatus(req, res) {
 
 export async function adminListProducts(req, res) {
   try {
+    const fetchAllZero = req.query.fetchAllZero === 'true';
+    
+    let dbFilter = BEAUTY_HYGIENE_FILTER;
+    if (fetchAllZero) {
+      // Fetch all products across the whole DB where mrp/price might be 0
+      // We'll fetch all and filter in memory, or use a broad DB query
+      // For safety, let's just fetch everything or use a query for zero/missing price
+      dbFilter = { 
+        $or: [
+          { mrp: 0 }, 
+          { price: 0 }, 
+          { MRP: 0 },
+          { MRP: "0" },
+          { mrp: "0" },
+          { price: "0" }
+        ] 
+      };
+    }
+
     const rawProducts = await Product.collection
-      .find(BEAUTY_HYGIENE_FILTER)
+      .find(dbFilter)
       .sort({ _id: -1 })
       .toArray();
     const products = rawProducts.map((p) => {
       const title = p.title || p['SKU Name'] || p.name || p['Product Name'] || p.skuName || 'Product';
       const category = p.category || p['Category'] || p.taxonomy?.mainCategory || 'Uncategorized';
       const subcategory = p.subcategory || p['Sub-Category'] || '';
-      const mrp = typeof p.mrp === 'number' && p.mrp > 0 ? p.mrp : parseCurrency(p['MRP'] || p.mrp || 149);
-      const price = typeof p.price === 'number' && p.price > 0 ? p.price : (mrp || 149);
+      const rawMrp = p['MRP'] !== undefined ? p['MRP'] : p.mrp;
+      let mrp = parseCurrency(rawMrp);
+      if (Number.isNaN(mrp) || mrp === null || rawMrp === undefined) mrp = 149;
+      
+      const rawPrice = p.price !== undefined ? p.price : rawMrp;
+      let price = parseCurrency(rawPrice);
+      if (Number.isNaN(price) || price === null || rawPrice === undefined) price = mrp;
       const discountPercent = p.discountPercent || 0;
 
       let image = null;

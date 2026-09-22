@@ -3,13 +3,14 @@
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Fraunces", Georgia, "Times New Roman", serif;
-  --color-canvas: #ffffff;
-  --color-ink: #102030;
-  --color-muted: #5d6a75;
-  --color-line: #e2e6ea;
-  --color-accent: #102030;
-  --color-accent-dark: #0a1520;
+  --color-canvas: #fdfaf0;
+  --color-ink: #1c1a17;
+  --color-muted: #6b635a;
+  --color-line: #e6dec8;
+  --color-accent: #1c1a17;
+  --color-accent-dark: #0d0c0a;
   --color-gold: #c39662;
+  --color-white: #fdfaf0;
 }
 
 html, body {
@@ -56,10 +57,10 @@ main {
   --theme-accent-green-300-rgb: 139 151 163;
   --theme-accent-green-400-rgb: 195 150 98;
 
-  --canvas: #ffffff;
-  --ink: #102030;
-  --muted: #5d6a75;
-  --line: #e2e6ea;
+  --canvas: #fdfaf0;
+  --ink: #1c1a17;
+  --muted: #6b635a;
+  --line: #e6dec8;
   --gold: #c39662;
 }
 
@@ -93,21 +94,21 @@ button, input, select, textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #102030;
-  color: #fff;
+  background: #1c1a17;
+  color: #fdfaf0;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.75rem;
   padding: 0.85rem 1.4rem;
   border-radius: 0.25rem;
-  border: 1px solid #102030;
+  border: 1px solid #1c1a17;
   transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: #0a1520;
-  border-color: #0a1520;
+  background: #0d0c0a;
+  border-color: #0d0c0a;
 }
 
 .btn-primary:active {
@@ -124,24 +125,24 @@ button, input, select, textarea {
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: #102030;
+  color: #1c1a17;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.75rem;
   padding: 0.85rem 1.4rem;
   border-radius: 0.25rem;
-  border: 1px solid #102030;
+  border: 1px solid #1c1a17;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
 .btn-secondary:hover {
-  background: #102030;
-  color: #fff;
+  background: #1c1a17;
+  color: #fdfaf0;
 }
 
 .product-card {
-  background: #fff;
+  background: var(--canvas);
   border: 1px solid var(--line);
   border-radius: 1.05rem;
   overflow: hidden;

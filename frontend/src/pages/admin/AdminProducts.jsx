@@ -3,7 +3,7 @@ import { api } from '../../utils/api';
 import { FiEdit, FiTrash2, FiX, FiPlus, FiSearch, FiImage, FiPackage, FiDollarSign, FiTag, FiEye } from 'react-icons/fi';
 import ScrollToTop from '../../components/ScrollToTop';
 import { categoryTree, getCategoryDisplayName, productSubSlug, isHiddenSubcategory, isHiddenSubcategoryProduct } from '../../data/categoryTree';
-import { rewriteProductImageUrl } from '../../utils/imagePlaceholder';
+import { rewriteProductImageUrl, getProductImage, placeholders } from '../../utils/imagePlaceholder';
 
 const BEAUTY_MAIN = categoryTree[0];
 const BEAUTY_SUBS = BEAUTY_MAIN?.subcategories || [];
@@ -488,10 +488,10 @@ const AdminProducts = () => {
                         <td className="px-4 py-3">
                           <div className="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200">
                             <img
-                              src={rewriteProductImageUrl(p?.images?.image1 || p?.image) || 'https://via.placeholder.com/150'}
+                              src={getProductImage(p)}
                               alt={p.title}
                               className="w-full h-full object-cover"
-                              onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
+                              onError={(e) => { e.target.src = placeholders.productList; }}
                             />
                           </div>
                         </td>
@@ -593,10 +593,10 @@ const AdminProducts = () => {
                     <div className="flex gap-3 mb-3">
                       <div className="w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 flex-shrink-0">
                         <img
-                          src={rewriteProductImageUrl(p?.images?.image1 || p?.image) || 'https://via.placeholder.com/150'}
+                          src={getProductImage(p)}
                           alt={p.title}
                           className="w-full h-full object-cover"
-                          onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
+                          onError={(e) => { e.target.src = placeholders.productList; }}
                         />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -917,10 +917,10 @@ const AdminProducts = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <img
-                      src={rewriteProductImageUrl(viewingProduct?.images?.image1 || viewingProduct?.image) || 'https://via.placeholder.com/400'}
+                      src={getProductImage(viewingProduct)}
                       alt={viewingProduct.title}
                       className="w-full h-48 sm:h-64 object-contain rounded-lg border-2 border-gray-200"
-                      onError={(e) => { e.target.src = 'https://via.placeholder.com/400'; }}
+                      onError={(e) => { e.target.src = placeholders.productDetail; }}
                     />
                   </div>
                   <div>

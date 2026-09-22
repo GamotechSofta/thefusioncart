@@ -441,7 +441,7 @@ const BuyNestSections = () => {
     return (
       <section 
         className="py-8 sm:py-10 md:py-12 lg:py-16 px-2 sm:px-4 md:px-6 lg:px-8 w-full" 
-        style={{ backgroundColor: '#FFFFFF' }}
+        style={{ backgroundColor: '#fdfaf0' }}
       >
         <div className="w-full">
           <div className="text-center mb-8 sm:mb-10 md:mb-12 px-2 sm:px-4">
@@ -635,7 +635,6 @@ const BuyNestSections = () => {
 
   return (
     <div className="bg-canvas">
-      <OffersNews />
       <MainCategories />
       <CategoryProductShelves />
       <PremiumCollection />

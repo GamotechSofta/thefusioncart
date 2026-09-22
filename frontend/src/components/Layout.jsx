@@ -37,11 +37,13 @@ const Layout = () => {
       }`}
       style={{ '--app-header-height': `${headerHeight}px` }}
     >
-      <div ref={headerWrapRef} className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md">
+      <div ref={headerWrapRef} className="fixed top-0 left-0 right-0 z-50">
         <Navbar />
       </div>
 
-      <div aria-hidden="true" style={{ height: headerHeight }} className="bg-white" />
+      {location.pathname !== '/' && (
+        <div aria-hidden="true" style={{ height: headerHeight }} className="bg-transparent" />
+      )}
 
       <main className="flex-grow bg-canvas" style={{ position: 'relative' }}>
         <Outlet />

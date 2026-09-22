@@ -396,8 +396,14 @@ const Navbar = () => {
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
+  const isHome = location.pathname === '/';
+
   return (
-    <nav className={`sticky top-0 z-[70] w-full bg-white/95 backdrop-blur-md border-b transition-all duration-200 ${isScrolled ? 'border-line shadow-[0_8px_24px_rgba(23,23,23,0.04)]' : 'border-line/70 shadow-none'}`}>
+    <nav className={`w-full transition-all duration-300 ${
+      isHome && !isScrolled
+        ? 'bg-transparent border-transparent shadow-none'
+        : 'bg-white/95 backdrop-blur-md border-b border-line shadow-[0_8px_24px_rgba(23,23,23,0.04)]'
+    }`}>
       <div className="w-full">
         <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-[72px] lg:h-14 gap-3 lg:gap-4 min-w-0">
@@ -406,7 +412,7 @@ const Navbar = () => {
               <img 
                 src={headerLogo.url || brandLogo}
                 alt={headerLogo.alt || 'Shopzen'}
-                className="h-10 sm:h-11 md:h-12 lg:h-8 xl:h-9 w-auto max-w-[180px] sm:max-w-[220px] md:max-w-[260px] lg:max-w-[160px] xl:max-w-[180px] object-contain object-left"
+                className={`h-10 sm:h-11 md:h-12 lg:h-8 xl:h-9 w-auto max-w-[180px] sm:max-w-[220px] md:max-w-[260px] lg:max-w-[160px] xl:max-w-[180px] object-contain object-left ${isHome && !isScrolled ? 'mix-blend-multiply' : ''}`}
                 onError={(e) => {
                   e.target.src = brandLogo;
                 }}
@@ -422,7 +428,7 @@ const Navbar = () => {
                   className={`font-display text-[15px] xl:text-base font-medium tracking-[-0.02em] whitespace-nowrap px-2.5 py-1.5 border-b-2 transition-colors ${
                     location.pathname === '/'
                       ? 'border-ink text-ink'
-                      : 'border-transparent text-muted hover:text-ink'
+                      : 'border-transparent text-ink hover:opacity-70'
                   }`}
                 >
                   Home
@@ -441,7 +447,7 @@ const Navbar = () => {
                     className={`flex items-center gap-1 font-display text-[15px] xl:text-base font-medium tracking-[-0.02em] transition-colors duration-200 cursor-pointer whitespace-nowrap px-2.5 py-1.5 border-b-2 ${
                       isCategoryRoute || activeCategory === 'shop'
                         ? 'border-ink text-ink'
-                        : 'border-transparent text-muted hover:text-ink'
+                        : 'border-transparent text-ink hover:opacity-70'
                     }`}
                     aria-expanded={activeCategory === 'shop'}
                     aria-haspopup="true"
@@ -459,20 +465,22 @@ const Navbar = () => {
                   </button>
 
                   {activeCategory === 'shop' && (
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-[80]">
-                      <div className="bg-white border border-line rounded-xl shadow-[0_16px_40px_rgba(16,32,48,0.1)] min-w-[460px] p-3">
-                        <p className="section-kicker px-3 pt-1 pb-2">Shop by category</p>
-                        <div className="grid grid-cols-2 gap-0.5">
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full pt-4 z-[80]">
+                      {/* Invisible bridge to prevent hover loss */}
+                      <div className="absolute top-0 inset-x-0 h-4"></div>
+                      <div className="bg-canvas/95 backdrop-blur-xl border border-line rounded-2xl shadow-2xl min-w-[500px] p-4 overflow-hidden transform origin-top transition-all">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold px-3 mb-3">Shop by category</p>
+                        <div className="grid grid-cols-2 gap-2">
                           {categories.map((category) => {
                             const isActive = location.pathname === category.path;
                             return (
                               <button
                                 key={category.name}
                                 type="button"
-                                className={`flex items-center gap-3 text-left px-2.5 py-2 rounded-lg text-sm transition-colors ${
+                                className={`group flex items-center gap-3.5 text-left p-2.5 rounded-xl text-sm transition-all duration-300 ${
                                   isActive
-                                    ? 'bg-canvas text-ink font-medium'
-                                    : 'text-ink/80 hover:bg-canvas hover:text-ink'
+                                    ? 'bg-ink text-white font-medium shadow-md'
+                                    : 'text-ink/80 hover:bg-ink/5 hover:text-ink'
                                 }`}
                                 onClick={() => {
                                   setActiveCategory(null);
@@ -480,18 +488,18 @@ const Navbar = () => {
                                   window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }}
                               >
-                                <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-canvas ring-1 ring-line">
+                                <span className={`flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg transition-colors ${isActive ? 'bg-white/20' : 'bg-white shadow-sm border border-black/5 group-hover:border-black/10 group-hover:shadow'}`}>
                                   <img
                                     src={categoryFallbackImage[category.slug]}
                                     alt=""
-                                    className="h-[82%] w-[82%] object-contain"
+                                    className="h-[80%] w-[80%] object-contain transition-transform duration-500 group-hover:scale-110"
                                     onError={(e) => {
                                       e.target.onerror = null;
                                       e.target.src = categoryFallbackImage[category.slug] || placeholders.productList;
                                     }}
                                   />
                                 </span>
-                                <span className="leading-snug">{category.name}</span>
+                                <span className="leading-snug font-medium">{category.name}</span>
                               </button>
                             );
                           })}
@@ -501,29 +509,6 @@ const Navbar = () => {
                   )}
                 </div>
 
-                <Link
-                  to="/about"
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className={`font-display text-[15px] xl:text-base font-medium tracking-[-0.02em] whitespace-nowrap px-2.5 py-1.5 border-b-2 transition-colors ${
-                    location.pathname === '/about'
-                      ? 'border-ink text-ink'
-                      : 'border-transparent text-muted hover:text-ink'
-                  }`}
-                >
-                  About Us
-                </Link>
-
-                <Link
-                  to="/contact"
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className={`font-display text-[15px] xl:text-base font-medium tracking-[-0.02em] whitespace-nowrap px-2.5 py-1.5 border-b-2 transition-colors ${
-                    location.pathname === '/contact'
-                      ? 'border-ink text-ink'
-                      : 'border-transparent text-muted hover:text-ink'
-                  }`}
-                >
-                  Contact Us
-                </Link>
               </div>
             </div>
 
@@ -534,7 +519,11 @@ const Navbar = () => {
                   e.preventDefault();
                   handleSearch();
                 }}
-                className="flex items-center h-8 xl:h-9 w-full rounded-full border border-line bg-canvas pl-3 pr-1 gap-2 focus-within:border-ink focus-within:bg-white transition-colors"
+                className={`flex items-center h-8 xl:h-9 w-full rounded-full border pl-3 pr-1 gap-2 transition-colors ${
+                  isHome && !isScrolled
+                    ? 'border-ink/20 bg-transparent focus-within:border-ink focus-within:bg-white/20'
+                    : 'border-line bg-canvas focus-within:border-ink focus-within:bg-white'
+                }`}
               >
                 <Search className="w-4 h-4 text-muted shrink-0" strokeWidth={1.75} />
                 <input

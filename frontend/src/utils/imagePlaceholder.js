@@ -42,6 +42,19 @@ export const rewriteProductImageUrl = (url = '') => {
   if (!url || typeof url !== 'string') return '';
   let next = url.trim();
   if (!next || next === 'null' || next === 'undefined') return '';
+  
+  // Handle URLs missing the protocol
+  if (next.startsWith('www.')) {
+    next = 'https://' + next;
+  } else if (!next.startsWith('http') && !next.startsWith('//') && !next.startsWith('/')) {
+    // Handle relative bigbasket paths or raw filenames
+    if (next.startsWith('uploads/')) {
+      next = 'https://www.bbassets.com/media/' + next;
+    } else if (!next.includes('/')) {
+      next = 'https://www.bbassets.com/media/uploads/p/l/' + next;
+    }
+  }
+
   next = next.replace(/^http:\/\//i, 'https://');
   next = next.replace(/https?:\/\/(?:www\.)?bigbasket\.com\/media\//i, 'https://www.bbassets.com/media/');
   return next;

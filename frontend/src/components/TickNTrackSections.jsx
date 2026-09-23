@@ -18,8 +18,6 @@ import skinCareImg from '../assets/skin care1.png';
 import premiumSkinCareImg from '../assets/priminum skincare.png';
 import premiumMakeupImg from '../assets/primiummakeup.png';
 import premiumHairCareImg from '../assets/primium haircare.png';
-import premiumFragrancesImg from '../assets/primiumfragerence.png';
-
 const MAIN_CATEGORY_SLUG = slugifyCategory('Beauty & Hygiene');
 
 const HOME_CATEGORIES = [
@@ -355,87 +353,6 @@ const BuyNestSections = () => {
     );
   };
 
-  // Premium Collection Section
-  const PremiumCollection = () => {
-    const productData = [
-      {
-        image: premiumSkinCareImg,
-        name: 'Skin Essentials',
-        path: '/category/beauty-and-hygiene/skin-care',
-        description: 'Moisturizers, cleansers, serums and daily skin essentials.',
-        cta: 'Shop Skin',
-        bgTint: 'bg-canvas'
-      },
-      {
-        image: premiumMakeupImg,
-        name: 'Colour & Makeup',
-        path: '/category/beauty-and-hygiene/makeup',
-        description: 'Lips, eyes, face, brushes and makeup kits.',
-        cta: 'Shop Makeup',
-        bgTint: 'bg-canvas'
-      },
-      {
-        image: premiumHairCareImg,
-        name: 'Hair Essentials',
-        path: '/category/beauty-and-hygiene/hair-care',
-        description: 'Shampoos, conditioners, hair oils and styling.',
-        cta: 'Shop Hair',
-        bgTint: 'bg-canvas'
-      },
-      {
-        image: premiumFragrancesImg,
-        name: 'Scents & Deos',
-        path: '/category/beauty-and-hygiene/fragrances-and-deos',
-        description: 'Body sprays, mists, deodorants and perfumes.',
-        cta: 'Shop Scents',
-        bgTint: 'bg-canvas'
-      }
-    ];
-
-    return (
-      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 w-full bg-canvas">
-        <div className="max-w-[1440px] mx-auto">
-          <div className="text-center mb-10 sm:mb-12">
-            <p className="section-kicker mb-3">Featured</p>
-            <h2 className="section-title text-3xl sm:text-4xl md:text-5xl">Premium collection</h2>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-            {productData.map((product, index) => (
-              <div
-                key={index}
-                onClick={() => handleCategoryClick(product.path)}
-                className="group product-card cursor-pointer bg-white"
-              >
-                <div className="relative w-full aspect-square overflow-hidden bg-white p-4">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://via.placeholder.com/500x500/1F2937/FFFFFF?text=Product+Image';
-                    }}
-                  />
-                </div>
-                <div className="px-4 pb-5 text-center">
-                  <h3 className="text-ink font-medium text-base sm:text-lg mb-1">{product.name}</h3>
-                  <p className="text-xs sm:text-sm text-muted leading-relaxed line-clamp-2 mb-4 min-h-[32px]">
-                    {product.description}
-                  </p>
-                  <button type="button" className="btn-secondary w-full py-2.5 text-[11px]">
-                    {product.cta}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  };
-
   // Banner Section
   const BannerSection = () => {
     return (
@@ -637,7 +554,6 @@ const BuyNestSections = () => {
     <div className="bg-canvas">
       <MainCategories />
       <CategoryProductShelves />
-      <PremiumCollection />
       <WhyChooseUs />
     </div>
   );

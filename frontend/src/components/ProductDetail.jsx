@@ -6,6 +6,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { placeholders, getProductImage, rewriteProductImageUrl } from '../utils/imagePlaceholder';
 import { FaRupeeSign, FaSpinner, FaStar, FaRegStar, FaHeart, FaRegHeart } from 'react-icons/fa';
 import ScrollToTop from './ScrollToTop';
+import ProductCard from './ProductCard';
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
@@ -81,89 +82,6 @@ const LoginModal = ({ isOpen, onClose, backgroundLocation }) => {
           >
             Cancel
           </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Simple ProductCard Component
-const ProductCard = ({ product }) => {
-  const navigate = useNavigate();
-  const imageUrl = getProductImage(product, 'image1');
-  const finalPrice = resolveDisplayPrice(product);
-  const ratingValue = (() => {
-    const r =
-      product?.rating ??
-      product?.averageRating ??
-      product?.ratingAvg ??
-      product?.ratingsAvg ??
-      product?.product_info?.rating;
-    const n = Number(r);
-    return Number.isFinite(n) && n > 0 ? n : 4.2;
-  })();
-
-  const brand =
-    product?.product_info?.brand ||
-    product?.brand ||
-    product?.product_info?.manufacturer ||
-    product?.manufacturer ||
-    product?.product_info?.brandName ||
-    'Shopzen';
-
-  const shortDescription = String(
-    product?.shortDescription ||
-      product?.description ||
-      product?.product_info?.shortDescription ||
-      product?.product_info?.description ||
-      ''
-  ).trim();
-
-  return (
-    <div
-      onClick={() => navigate(`/product/${product._id || product.id}`)}
-      className="group product-card cursor-pointer bg-white"
-    >
-      <div className="relative w-full aspect-[3/4] bg-canvas overflow-hidden flex items-center justify-center">
-        <img
-          src={imageUrl}
-          alt={product.name || product.title || 'Product'}
-          className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
-          referrerPolicy="no-referrer"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = placeholders.productList;
-          }}
-          loading="lazy"
-        />
-      </div>
-      <div className="relative p-4 bg-white">
-        <p className="text-[11px] font-medium text-muted uppercase tracking-[0.14em] line-clamp-1 mb-1.5">
-          {brand}
-        </p>
-        <p className="text-sm font-medium text-ink line-clamp-2 mb-2 min-h-[2.5rem]">
-          {product.name || product.title || 'Untitled Product'}
-        </p>
-        <p className="text-xs text-muted line-clamp-2 mb-3 min-h-[1.5rem]">
-          {shortDescription || ' '}
-        </p>
-        <div className="flex items-center gap-1.5 mb-3">
-          <div className="flex items-center">
-            {Array.from({ length: 5 }).map((_, idx) => {
-              const ratingRounded = Math.round(ratingValue);
-              return idx < ratingRounded ? (
-                <FaStar key={idx} className="w-3 h-3 text-ink/80" />
-              ) : (
-                <FaRegStar key={idx} className="w-3 h-3 text-line" />
-              );
-            })}
-          </div>
-          <span className="text-xs text-muted">{ratingValue.toFixed(1)}</span>
-        </div>
-        <div>
-          <span className="text-lg font-semibold text-ink">
-            ₹{Math.round(finalPrice).toLocaleString()}
-          </span>
         </div>
       </div>
     </div>
@@ -323,7 +241,7 @@ const ProductDetail = () => {
       };
 
       const shuffled = shuffleArray(filtered);
-      const selectedProducts = shuffled.filter(hasDisplayablePrice).slice(0, 10);
+      const selectedProducts = shuffled.filter(hasDisplayablePrice).slice(0, 15);
 
       // Normalize products
       const normalized = selectedProducts.map(p => ({
@@ -565,72 +483,42 @@ const ProductDetail = () => {
             
             {/* LEFT COLUMN: Flipkart-like gallery */}
             <div className="p-1 sm:p-2 h-fit">
-              <div className="grid grid-cols-[56px_1fr] gap-3">
-                <div className="space-y-2 max-h-[420px] overflow-auto pr-1 scrollbar-hide">
-                  {images.map((img, idx) => {
-                    const thumbUrl = typeof img === 'string' ? img : (img?.url || placeholders.thumbnail);
-                    const isActive = idx === selectedImageIndex;
-                    return (
-                      <button
-                        key={`${thumbUrl}-${idx}`}
-                        type="button"
-                        onClick={() => setSelectedImageIndex(idx)}
-                        className={`w-12 h-12 border rounded-sm overflow-hidden bg-white ${
-                          isActive ? 'border-ink' : 'border-line hover:border-ink/50'
-                        }`}
-                      >
-                        <img
-                          src={thumbUrl}
-                          alt={`Thumbnail ${idx + 1}`}
-                          className="w-full h-full object-contain"
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = placeholders.thumbnail;
-                          }}
-                        />
-                      </button>
-                    );
-                  })}
+              <div className="relative">
+                <div className="aspect-square max-h-[420px] sm:max-h-[480px] w-full bg-canvas flex items-center justify-center border border-line rounded-lg overflow-hidden mx-auto">
+                  <img
+                    src={imageUrl}
+                    alt={productTitle}
+                    className="max-w-full max-h-full object-contain p-3 sm:p-4"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = placeholders.productDetail;
+                    }}
+                    loading="lazy"
+                  />
                 </div>
-
-                <div className="relative">
-                  <div className="aspect-square max-h-[420px] sm:max-h-[480px] w-full bg-canvas flex items-center justify-center border border-line rounded-lg overflow-hidden mx-auto">
-                    <img
-                      src={imageUrl}
-                      alt={productTitle}
-                      className="max-w-full max-h-full object-contain p-3 sm:p-4"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = placeholders.productDetail;
-                      }}
-                      loading="lazy"
-                    />
-                  </div>
-                  {images.length > 1 && (
-                    <>
-                      <button
-                        onClick={handlePrevImage}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm"
-                        aria-label="Previous image"
-                      >
-                        <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={handleNextImage}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm"
-                        aria-label="Next image"
-                      >
-                        <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </>
-                  )}
-                </div>
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm"
+                      aria-label="Previous image"
+                    >
+                      <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={handleNextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm"
+                      aria-label="Next image"
+                    >
+                      <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
               </div>
 
               <div className="mt-5 hidden sm:flex gap-3">
@@ -760,7 +648,24 @@ const ProductDetail = () => {
           </div>
           </div>
 
-          <div className="mt-12 sm:mt-16 pt-8 sm:pt-12 border-t border-gray-200 mb-12 sm:mb-20" />
+          {(loadingRecommendations || recommendedProducts.length > 0) && (
+            <section className="mt-12 sm:mt-16 pt-8 sm:pt-12 border-t border-line mb-12 sm:mb-20">
+              <h2 className="section-title text-2xl sm:text-3xl text-ink mb-6 sm:mb-8">
+                Suggested products
+              </h2>
+              {loadingRecommendations ? (
+                <div className="flex items-center justify-center py-16">
+                  <FaSpinner className="w-8 h-8 text-ink animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
+                  {recommendedProducts.map((item) => (
+                    <ProductCard key={item.id || item._id} product={item} />
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
         </div>
       </div>
 

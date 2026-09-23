@@ -10,7 +10,7 @@ export default function TermsAndConditions() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-canvas text-ink">
+    <div className="legal-page min-h-screen bg-canvas text-ink">
       <div className="bg-ink text-white py-14 sm:py-16 px-4 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-white/90 text-xs font-semibold uppercase tracking-wider mb-4 border border-white/20">
@@ -23,7 +23,7 @@ export default function TermsAndConditions() {
           <p className="text-sm sm:text-base md:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
             Welcome to {COMPANY_INFO.brandName}. These Terms and Conditions ("Terms") govern your use of our website and services. By accessing or using our website, you agree to be bound by these Terms.
           </p>
-          <p className="text-xs sm:text-sm text-gray-400 mt-3">Last Updated: August 2025</p>
+          <p className="text-xs sm:text-sm text-gray-400 mt-3">Last Updated: 2026</p>
         </div>
       </div>
 
@@ -49,13 +49,7 @@ export default function TermsAndConditions() {
           <p className="text-sm text-gray-600 mb-3">This website is operated by:</p>
           <div className="p-4 sm:p-5 rounded-xl bg-gray-50 border border-gray-100 text-sm sm:text-base space-y-2">
             <p className="font-bold text-gray-900">{COMPANY_INFO.legalName}</p>
-            <p className="text-gray-700">{COMPANY_INFO.registeredAddress}</p>
-            <p className="text-gray-700">GSTIN: {COMPANY_INFO.gstin}</p>
-            <p className="text-gray-700">CIN: {COMPANY_INFO.cin}</p>
-            <p className="text-gray-700">Website: <a href={COMPANY_INFO.website} className="text-rose-600 font-semibold hover:underline" target="_blank" rel="noopener noreferrer">{COMPANY_INFO.website}</a></p>
-            <p className="text-gray-700">Email: <a href={`mailto:${COMPANY_INFO.email}`} className="text-rose-600 font-semibold hover:underline">{COMPANY_INFO.email}</a></p>
-            <p className="text-gray-700">Phone: <a href={`tel:${COMPANY_INFO.phone}`} className="text-gray-900 font-semibold hover:underline">{COMPANY_INFO.phone}</a></p>
-            <p className="text-gray-700">Contact Person: {COMPANY_INFO.contactPerson}</p>
+            <p className="text-gray-700">Registered Office: {COMPANY_INFO.registeredAddress}</p>
           </div>
         </div>
 
@@ -138,7 +132,7 @@ export default function TermsAndConditions() {
             Governing Law
           </h2>
           <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-            These Terms shall be governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of the courts in Gurugram, Haryana, India.
+            These Terms shall be governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of the courts in Mohali, Punjab, India.
           </p>
         </div>
 
@@ -149,7 +143,7 @@ export default function TermsAndConditions() {
             Contact Information
           </h2>
           <p className="text-sm sm:text-base text-gray-300 mb-6">
-            If you have any questions about these Terms, please contact us:
+            If you have any questions about these Terms, please contact us via our <Link to="/contact" className="text-rose-300 font-semibold hover:underline">contact form</Link>.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm mb-6">
             <div className="p-4 rounded-xl bg-white/5 border border-white/10">

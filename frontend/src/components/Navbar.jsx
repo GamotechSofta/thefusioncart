@@ -37,12 +37,9 @@ const Navbar = () => {
   const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
-  const [activeCategory, setActiveCategory] = useState(null);
   const searchWrapRefDesktop = useRef(null);
   const searchWrapRefMobile = useRef(null);
   const mobileSearchInputRef = useRef(null);
-  const categoryRef = useRef(null);
-  const hoverCloseTimeoutRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { cartCount } = useCart();
@@ -330,39 +327,6 @@ const Navbar = () => {
   }, []);
 
   const categories = navbarCategories;
-  const isCategoryRoute = location.pathname.startsWith('/category/');
-
-  const CATEGORY_MENU_CLOSE_MS = 160;
-
-  const cancelCategoryMenuClose = () => {
-    if (hoverCloseTimeoutRef.current) {
-      clearTimeout(hoverCloseTimeoutRef.current);
-      hoverCloseTimeoutRef.current = null;
-    }
-  };
-
-  const scheduleCategoryMenuClose = (categoryName) => {
-    cancelCategoryMenuClose();
-    hoverCloseTimeoutRef.current = setTimeout(() => {
-      setActiveCategory((prev) => (prev === categoryName ? null : prev));
-      hoverCloseTimeoutRef.current = null;
-    }, CATEGORY_MENU_CLOSE_MS);
-  };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      // Don't close if clicking on a link
-      if (event.target.tagName === 'A' || event.target.closest('a')) {
-        return;
-      }
-      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
-        setActiveCategory(null);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -406,111 +370,18 @@ const Navbar = () => {
     }`}>
       <div className="w-full">
         <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-[72px] lg:h-14 gap-3 lg:gap-4 min-w-0">
+          <div className="flex items-center justify-between h-20 sm:h-[5.25rem] lg:h-[4.75rem] gap-3 lg:gap-4 min-w-0">
             {/* Logo/Brand - Left */}
             <Link to="/" className="flex-shrink-0 flex items-center py-1">
               <img 
                 src={headerLogo.url || brandLogo}
                 alt={headerLogo.alt || 'Shopzen'}
-                className={`h-10 sm:h-11 md:h-12 lg:h-8 xl:h-9 w-auto max-w-[180px] sm:max-w-[220px] md:max-w-[260px] lg:max-w-[160px] xl:max-w-[180px] object-contain object-left ${isHome && !isScrolled ? 'mix-blend-multiply' : ''}`}
+                className={`h-14 sm:h-16 lg:h-14 xl:h-16 w-auto max-w-[240px] sm:max-w-[280px] md:max-w-[320px] lg:max-w-[240px] xl:max-w-[280px] object-contain object-left ${isHome && !isScrolled ? 'mix-blend-multiply' : ''}`}
                 onError={(e) => {
                   e.target.src = brandLogo;
                 }}
               />
             </Link>
-
-            {/* Navigation Menu - Center (Desktop & Laptop >= 1024px) */}
-            <div className="hidden lg:flex items-center justify-center shrink-0 px-1" ref={categoryRef}>
-              <div className="flex items-center gap-1 xl:gap-2">
-                <Link
-                  to="/"
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className={`font-display text-[15px] xl:text-base font-medium tracking-[-0.02em] whitespace-nowrap px-2.5 py-1.5 border-b-2 transition-colors ${
-                    location.pathname === '/'
-                      ? 'border-ink text-ink'
-                      : 'border-transparent text-ink hover:opacity-70'
-                  }`}
-                >
-                  Home
-                </Link>
-
-                <div
-                  className="relative"
-                  onMouseEnter={() => {
-                    cancelCategoryMenuClose();
-                    setActiveCategory('shop');
-                  }}
-                  onMouseLeave={() => scheduleCategoryMenuClose('shop')}
-                >
-                  <button
-                    type="button"
-                    className={`flex items-center gap-1 font-display text-[15px] xl:text-base font-medium tracking-[-0.02em] transition-colors duration-200 cursor-pointer whitespace-nowrap px-2.5 py-1.5 border-b-2 ${
-                      isCategoryRoute || activeCategory === 'shop'
-                        ? 'border-ink text-ink'
-                        : 'border-transparent text-ink hover:opacity-70'
-                    }`}
-                    aria-expanded={activeCategory === 'shop'}
-                    aria-haspopup="true"
-                  >
-                    <span>Categories</span>
-                    <svg
-                      className={`w-3.5 h-3.5 transition-transform duration-200 ${activeCategory === 'shop' ? 'rotate-180' : ''}`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-
-                  {activeCategory === 'shop' && (
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full pt-4 z-[80]">
-                      {/* Invisible bridge to prevent hover loss */}
-                      <div className="absolute top-0 inset-x-0 h-4"></div>
-                      <div className="bg-canvas/95 backdrop-blur-xl border border-line rounded-2xl shadow-2xl min-w-[500px] p-4 overflow-hidden transform origin-top transition-all">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold px-3 mb-3">Shop by category</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {categories.map((category) => {
-                            const isActive = location.pathname === category.path;
-                            return (
-                              <button
-                                key={category.name}
-                                type="button"
-                                className={`group flex items-center gap-3.5 text-left p-2.5 rounded-xl text-sm transition-all duration-300 ${
-                                  isActive
-                                    ? 'bg-ink text-white font-medium shadow-md'
-                                    : 'text-ink/80 hover:bg-ink/5 hover:text-ink'
-                                }`}
-                                onClick={() => {
-                                  setActiveCategory(null);
-                                  navigate(category.path);
-                                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }}
-                              >
-                                <span className={`flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg transition-colors ${isActive ? 'bg-white/20' : 'bg-white shadow-sm border border-black/5 group-hover:border-black/10 group-hover:shadow'}`}>
-                                  <img
-                                    src={categoryFallbackImage[category.slug]}
-                                    alt=""
-                                    className="h-[80%] w-[80%] object-contain transition-transform duration-500 group-hover:scale-110"
-                                    onError={(e) => {
-                                      e.target.onerror = null;
-                                      e.target.src = categoryFallbackImage[category.slug] || placeholders.productList;
-                                    }}
-                                  />
-                                </span>
-                                <span className="leading-snug font-medium">{category.name}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            </div>
 
             {/* Desktop search bar */}
             <div className="hidden lg:block relative flex-1 max-w-[320px] xl:max-w-[380px] mx-3 xl:mx-4" ref={searchWrapRefDesktop}>
@@ -750,6 +621,28 @@ const Navbar = () => {
               </button>
             </div>
           </div>
+
+          <div className={`hidden lg:block ${isHome && !isScrolled ? 'bg-white/80 backdrop-blur-md' : 'border-t border-line'}`}>
+            <div className="flex items-center justify-center gap-x-1 overflow-x-auto scrollbar-hide px-2 py-1.5 xl:gap-x-2">
+              {categories.map((category) => {
+                const isActive = location.pathname === category.path;
+                return (
+                  <Link
+                    key={category.path}
+                    to={category.path}
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className={`shrink-0 whitespace-nowrap border-b-2 px-2 py-1 text-[13px] font-medium transition-colors xl:text-sm ${
+                      isActive
+                        ? 'border-ink text-ink'
+                        : 'border-transparent text-ink/80 hover:text-ink'
+                    }`}
+                  >
+                    {category.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -791,7 +684,6 @@ const Navbar = () => {
               <div className="flex-1 overflow-y-auto px-5 py-5">
                 <nav className="space-y-1">
                   {[
-                    { name: 'Home', path: '/' },
                     { name: 'About Us', path: '/about' },
                     { name: 'Contact Us', path: '/contact' },
                   ].map((item) => {

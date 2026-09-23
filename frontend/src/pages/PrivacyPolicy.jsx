@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import ScrollToTop from "../components/ScrollToTop";
 import { Shield, Mail, Phone, MapPin } from "lucide-react";
 import { COMPANY_INFO } from "../config/companyInfo";
@@ -9,7 +10,7 @@ export default function PrivacyPolicy() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-canvas text-ink">
+    <div className="legal-page min-h-screen bg-canvas text-ink">
       <div className="bg-ink text-white py-14 sm:py-16 px-4 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-white/90 text-xs font-semibold uppercase tracking-wider mb-4 border border-white/20">
@@ -22,7 +23,7 @@ export default function PrivacyPolicy() {
           <p className="text-sm sm:text-base md:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
             At <strong className="text-white font-semibold">{COMPANY_INFO.legalName}</strong> ("we," "us," or "our"), we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
           </p>
-          <p className="text-xs sm:text-sm text-gray-400 mt-3">Last Updated: August 2025</p>
+          <p className="text-xs sm:text-sm text-gray-400 mt-3">Last Updated: 2026</p>
         </div>
       </div>
 
@@ -52,6 +53,7 @@ export default function PrivacyPolicy() {
               <ul className="space-y-1.5 text-xs sm:text-sm text-gray-700 list-disc list-inside">
                 <li><strong className="text-gray-900">Create an Account:</strong> Name, email address, phone number, password</li>
                 <li><strong className="text-gray-900">Make a Purchase:</strong> Billing address, shipping address, payment information, order details</li>
+                <li><strong className="text-gray-900">Financial Services (KYC):</strong> Aadhaar details, PAN, biometric data, and bank account details where applicable</li>
                 <li><strong className="text-gray-900">Contact Us:</strong> Name, email address, phone number, message content</li>
                 <li><strong className="text-gray-900">Subscribe to Newsletter:</strong> Email address</li>
                 <li><strong className="text-gray-900">Participate in Surveys or Promotions:</strong> Information you choose to provide</li>
@@ -188,7 +190,7 @@ export default function PrivacyPolicy() {
             <li><strong className="text-gray-900">Withdraw Consent:</strong> You can withdraw consent for data processing where applicable</li>
           </ul>
           <p className="text-xs sm:text-sm text-gray-600">
-            To exercise these rights, please contact us at <a href={`mailto:${COMPANY_INFO.email}`} className="text-rose-600 font-semibold hover:underline">{COMPANY_INFO.email}</a>.
+            To exercise these rights, please reach out via our <Link to="/contact" className="text-rose-600 font-semibold hover:underline">contact form</Link>.
           </p>
         </div>
 

@@ -253,11 +253,11 @@ const BuyNestSections = () => {
                 onClick={() => handleCategoryClick(category.path)}
                 className="group flex w-[5.5rem] shrink-0 flex-col items-center sm:w-auto"
               >
-                <span className="relative flex h-[5.5rem] w-[5.5rem] items-center justify-center rounded-full bg-canvas ring-1 ring-line transition-all duration-300 group-hover:-translate-y-1 group-hover:ring-gold/50 sm:h-[6.5rem] sm:w-[6.5rem] lg:h-28 lg:w-28">
+                <span className="relative block h-[5.5rem] w-[5.5rem] overflow-hidden rounded-full transition-transform duration-300 group-hover:-translate-y-1 sm:h-[6.5rem] sm:w-[6.5rem] lg:h-28 lg:w-28">
                   <img
                     src={category.image}
                     alt=""
-                    className="h-[70%] w-[70%] object-contain transition-transform duration-500 group-hover:scale-110"
+                    className="h-full w-full rounded-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = placeholders.productList;

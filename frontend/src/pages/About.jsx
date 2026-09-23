@@ -13,7 +13,7 @@ const About = () => {
             Welcome to {COMPANY_INFO.brandName}
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Based in Gurugram, India, <strong className="text-white font-semibold">{COMPANY_INFO.legalName}</strong> is an e-commerce company dedicated to bringing you a curated range of beauty, wellness, and everyday essentials.
+            Based in Mohali, Punjab, <strong className="text-white font-semibold">{COMPANY_INFO.legalName}</strong> is India’s premier destination for both premium e-commerce and trusted assisted financial services.
           </p>
         </div>
       </div>
@@ -23,7 +23,7 @@ const About = () => {
         {/* Intro Highlight Box */}
         <div className="bg-white rounded-2xl p-6 sm:p-10 border border-gray-200 shadow-sm">
           <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center max-w-4xl mx-auto">
-            Our mission is to make premium apparel accessible and affordable for everyone. Whether it's everyday wear, seasonal collections, or trending fashion — we ensure variety, value, and quality under one roof.
+            Our mission is to empower every local shop and individual by providing accessible financial services (AEPS, money transfers, insurance, Micro ATMs) alongside our curated e-commerce offerings. We combine bank-grade security with retail-friendly tools to deliver trusted services to your community.
           </p>
         </div>
 
@@ -36,7 +36,7 @@ const About = () => {
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Our Vision</h2>
             <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-              To become a leading name in online beauty and wellness retail by offering diverse, high-quality products for everyday rituals, while maintaining a strong presence in Gurugram and across India.
+              To bridge the gap in digital commerce and financial inclusion by turning every retail counter into a comprehensive service hub for Bharat.
             </p>
           </div>
 
@@ -47,7 +47,7 @@ const About = () => {
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Our Mission</h2>
             <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-              To deliver excellence in product availability, affordability, and service — ensuring every customer finds the right apparel with complete satisfaction.
+              To deliver excellence in both digital commerce and assisted financial services, ensuring financial inclusion, instant settlements, and delightful customer experiences across India's small towns and villages.
             </p>
           </div>
         </div>
@@ -55,8 +55,8 @@ const About = () => {
         {/* What We Stand For */}
         <div>
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">What We Stand For</h2>
-            <p className="text-gray-500 text-sm sm:text-base mt-2">Core pillars that guide everything we do</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">The FusionCart Standard</h2>
+            <p className="text-gray-500 text-sm sm:text-base mt-2">How we serve shops and customers across India</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -64,9 +64,9 @@ const About = () => {
               <div className="w-10 h-10 rounded-lg bg-pink-50 text-pink-600 flex items-center justify-center mb-4">
                 <HeartHandshake className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-gray-900 mb-2">Customer-Centric</h3>
+              <h3 className="text-base font-bold text-gray-900 mb-2">Financial Inclusion</h3>
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                We prioritize customer satisfaction by helping people find the right apparel and fashion products for their needs.
+                Vernacular-first platforms designed for assisted use.
               </p>
             </div>
 
@@ -74,9 +74,9 @@ const About = () => {
               <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
                 <ShieldCheck className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-gray-900 mb-2">Quality Assurance</h3>
+              <h3 className="text-base font-bold text-gray-900 mb-2">Bank-grade Security</h3>
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                Every apparel product is carefully sourced from trusted manufacturers and quality brands.
+                Audited infrastructure, biometric eKYC, and end-to-end encryption for every transaction.
               </p>
             </div>
 
@@ -84,9 +84,9 @@ const About = () => {
               <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
                 <Lightbulb className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-gray-900 mb-2">Innovation</h3>
+              <h3 className="text-base font-bold text-gray-900 mb-2">Instant Settlement</h3>
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                Continuously expanding our portfolio with the latest fashion trends and styles.
+                Real-time wallet credit on AEPS, DMT, and BBPS transactions.
               </p>
             </div>
 
@@ -94,9 +94,9 @@ const About = () => {
               <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-gray-900 mb-2">Trust</h3>
+              <h3 className="text-base font-bold text-gray-900 mb-2">Curated E-commerce</h3>
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                Building long-term relationships through integrity, transparency, and accountability.
+                Handpicked products with direct-to-consumer luxury pricing.
               </p>
             </div>
           </div>
@@ -125,10 +125,10 @@ const About = () => {
               </div>
 
               <div className="mt-5 space-y-1">
-                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider">GSTIN</p>
-                <p className="text-gray-200">{COMPANY_INFO.gstin}</p>
-                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mt-3">CIN</p>
-                <p className="text-gray-200">{COMPANY_INFO.cin}</p>
+                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider">Country of Origin</p>
+                <p className="text-gray-200">India</p>
+                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mt-3">Specialty</p>
+                <p className="text-gray-200">Digital Commerce &amp; Assisted Financial Services (AEPS, DMT, Micro ATM)</p>
               </div>
             </div>
 

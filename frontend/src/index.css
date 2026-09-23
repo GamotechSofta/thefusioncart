@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --color-canvas: #fdfaf0;
   --color-ink: #1c1a17;
   --color-muted: #6b635a;
@@ -69,7 +69,7 @@ html {
 }
 
 body {
-  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
   background: var(--canvas);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
@@ -78,7 +78,15 @@ body {
 }
 
 h1, h2, h3, .font-display {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Cormorant Garamond", Georgia, serif;
+}
+
+.legal-page,
+.legal-page h1,
+.legal-page h2,
+.legal-page h3,
+.legal-page .section-title {
+  font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
 }
 
 button, input, select, textarea {
@@ -177,7 +185,7 @@ button, input, select, textarea {
 }
 
 .section-title {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Cormorant Garamond", Georgia, serif;
   font-weight: 600;
   letter-spacing: -0.03em;
   color: var(--ink);

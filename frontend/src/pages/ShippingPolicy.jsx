@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import ScrollToTop from "../components/ScrollToTop";
 import { Truck, PackageCheck, Clock, ShieldAlert, Mail, Phone, CheckCircle, AlertTriangle } from "lucide-react";
 import { COMPANY_INFO } from "../config/companyInfo";
@@ -9,7 +10,7 @@ export default function ShippingPolicy() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-canvas text-ink">
+    <div className="legal-page min-h-screen bg-canvas text-ink">
       <div className="bg-ink text-white py-14 sm:py-16 px-4 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-white/90 text-xs font-semibold uppercase tracking-wider mb-4 border border-white/20">
@@ -20,7 +21,7 @@ export default function ShippingPolicy() {
             Shipping Policy
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            At {COMPANY_INFO.brandName}, we understand the importance of timely delivery. We have partnered with reliable logistics providers to ensure your apparel orders reach you safely and on time.
+            At {COMPANY_INFO.brandName}, we understand the importance of timely delivery. We have partnered with reliable logistics providers to ensure your physical products and devices (like Micro ATMs) reach you safely and on time.
           </p>
         </div>
       </div>
@@ -152,7 +153,7 @@ export default function ShippingPolicy() {
             In the rare event that your order is damaged during transit or lost:
           </p>
           <ul className="space-y-2 text-sm sm:text-base text-gray-600 leading-relaxed list-disc list-inside mb-4">
-            <li>Please contact us immediately at <a href={`mailto:${COMPANY_INFO.email}`} className="text-rose-600 hover:underline font-semibold">{COMPANY_INFO.email}</a> or call <a href={`tel:${COMPANY_INFO.phone}`} className="text-gray-900 font-semibold hover:underline">{COMPANY_INFO.phone}</a>.</li>
+            <li>Please contact our support team immediately.</li>
             <li>Provide your order number and photos of the damaged package (if applicable).</li>
             <li>We will investigate and resolve the issue promptly.</li>
             <li>You may be eligible for a replacement or full refund as per our refund policy.</li>
@@ -163,7 +164,7 @@ export default function ShippingPolicy() {
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-2xl p-6 sm:p-8 shadow-lg">
           <h2 className="text-xl sm:text-2xl font-bold mb-4">Contact for Shipping Queries</h2>
           <p className="text-sm sm:text-base text-gray-300 mb-6">
-            For any shipping-related queries or concerns, please contact us:
+            For any shipping-related queries or concerns, please reach out via our <Link to="/contact" className="text-rose-300 font-semibold hover:underline">contact form</Link>.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
             <div className="p-4 rounded-xl bg-white/5 border border-white/10">

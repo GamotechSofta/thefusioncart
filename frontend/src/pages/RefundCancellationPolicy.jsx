@@ -9,7 +9,7 @@ export default function RefundCancellationPolicy() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-canvas text-ink">
+    <div className="legal-page min-h-screen bg-canvas text-ink">
       <div className="bg-ink text-white py-14 sm:py-16 px-4 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-white/90 text-xs font-semibold uppercase tracking-wider mb-4 border border-white/20">
@@ -59,6 +59,10 @@ export default function RefundCancellationPolicy() {
               <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
               <span>Personal care items and consumables cannot be returned for hygiene reasons (unless defective).</span>
             </li>
+            <li className="flex items-start gap-2.5 text-amber-800 bg-amber-50 p-2.5 rounded-lg border border-amber-200 text-xs sm:text-sm">
+              <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+              <span>Financial transactions (like money transfers, bill payments, or AEPS) are subject to banking regulations and typically cannot be reversed once processed successfully.</span>
+            </li>
           </ul>
         </div>
 
@@ -79,8 +83,9 @@ export default function RefundCancellationPolicy() {
             <li>Pack the product securely in its original packaging.</li>
             <li>Include the original invoice and RA number.</li>
           </ol>
-          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-xs sm:text-sm text-gray-700">
-            <strong>Alternative:</strong> You can also directly email us at <a href={`mailto:${COMPANY_INFO.email}`} className="text-rose-600 hover:underline font-semibold">{COMPANY_INFO.email}</a> or call <a href={`tel:${COMPANY_INFO.phone}`} className="text-gray-900 font-semibold hover:underline">{COMPANY_INFO.phone}</a>.
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-xs sm:text-sm text-gray-700 space-y-2">
+            <p>Alternatively, contact us via customer support.</p>
+            <p>Include your order number and reason for return, then wait for return authorization and shipping instructions.</p>
           </div>
         </div>
 
@@ -107,23 +112,23 @@ export default function RefundCancellationPolicy() {
               </div>
               <h2 className="text-lg sm:text-xl font-bold text-gray-900">Cancellation Policy</h2>
             </div>
-            <ul className="space-y-2 text-sm text-gray-600 leading-relaxed mb-3">
-              <li>
-                <strong className="text-gray-900">Before Shipment:</strong> Full refund will be credited within 24-48 hours.
-              </li>
-              <li>
-                <strong className="text-gray-900">After Shipment:</strong> You can still cancel, but return shipping charges may apply.
-              </li>
-            </ul>
-            <p className="text-xs sm:text-sm text-gray-500">
-              To cancel, contact us at <a href={`mailto:${COMPANY_INFO.email}`} className="text-rose-600 font-semibold hover:underline">{COMPANY_INFO.email}</a>.
+            <p className="text-sm text-gray-600 leading-relaxed mb-3">
+              You can cancel your order within 24 hours of placing it, provided it has not been dispatched.
             </p>
+            <ul className="space-y-2 text-sm text-gray-600 leading-relaxed mb-3">
+              <li>Log in to your account and go to <strong className="text-gray-900">My Orders</strong> to request cancellation.</li>
+              <li>To cancel, contact our customer support team.</li>
+              <li>Once cancelled, a full refund will be initiated within 5-7 business days.</li>
+            </ul>
           </div>
         </div>
 
         {/* Contact for Returns & Refunds */}
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-2xl p-6 sm:p-8 shadow-lg">
-          <h2 className="text-xl sm:text-2xl font-bold mb-4">Contact for Returns &amp; Refunds</h2>
+          <h2 className="text-xl sm:text-2xl font-bold mb-4">Contact Us</h2>
+          <p className="text-sm sm:text-base text-gray-300 mb-6">
+            For any refund or return-related queries, please contact our support desk.
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm mb-6">
             <div className="p-4 rounded-xl bg-white/5 border border-white/10">
               <p className="text-gray-400 text-xs font-semibold uppercase mb-1 flex items-center gap-1.5">

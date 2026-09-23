@@ -57,7 +57,7 @@ const HeroSlider = () => {
           
           {/* Main Content */}
           <div className="pt-24 lg:pt-32 max-w-[500px] lg:max-w-[700px] pointer-events-auto">
-            <h1 className="text-[3.2rem] leading-[1] md:text-[4.5rem] lg:text-[5.5rem] font-medium tracking-tight text-[#1a1a1a] mb-6" style={{ fontFamily: 'Inter, system-ui, sans-serif', letterSpacing: '-0.04em' }}>
+            <h1 className="text-[3.2rem] leading-[1] md:text-[4.5rem] lg:text-[5.5rem] font-medium tracking-tight text-[#1a1a1a] mb-6" style={{ letterSpacing: '-0.02em' }}>
               Skincare that<br/>
               brings out your<br/>
               natural glow
@@ -79,26 +79,7 @@ const HeroSlider = () => {
         </div>
         
         {/* Bottom Elements */}
-        <div className="absolute bottom-0 left-0 right-0 z-20 max-w-[1800px] mx-auto px-6 md:px-12 pb-8 md:pb-12 w-full flex flex-col md:flex-row justify-between items-end gap-8 pointer-events-none">
-          {/* Floating Product Card */}
-          <div className="bg-[#f0ead8]/60 backdrop-blur-md p-3 rounded-[1.25rem] flex items-center gap-4 w-[24rem] border border-black/10 pointer-events-auto">
-            <div className="w-16 h-20 bg-white/40 rounded-xl p-1 flex items-center justify-center shrink-0">
-               <div className="w-8 h-12 bg-gradient-to-t from-yellow-500 to-yellow-300 rounded-sm shadow-sm relative">
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-200 rounded-t-sm border-b border-yellow-600/30"></div>
-               </div>
-            </div>
-            <div className="flex-1 min-w-0 pr-2">
-              <h3 className="text-[15px] font-semibold text-black truncate mb-1">Bride Timeless Serum</h3>
-              <p className="text-[11px] text-black/70 leading-tight mb-2">
-                Activé EGF MAX-10 — Advanced anti-aging serum for wrinkle brightening & skin repair.
-              </p>
-              <p className="text-[15px] font-bold text-black">$49.00</p>
-            </div>
-            <button className="w-12 h-16 border border-black/20 rounded-xl flex items-center justify-center hover:bg-black/5 shrink-0 transition-colors pointer-events-auto">
-              <span className="text-xl text-black">↗</span>
-            </button>
-          </div>
-
+        <div className="absolute bottom-0 left-0 right-0 z-20 max-w-[1800px] mx-auto px-6 md:px-12 pb-8 md:pb-12 w-full flex justify-end items-end pointer-events-none">
           {/* Slider Controls */}
           <div className="flex items-center gap-4 pointer-events-auto">
             <button className="w-11 h-11 rounded-full border border-black/30 flex items-center justify-center hover:bg-black/5 transition-colors text-black">
@@ -145,7 +126,7 @@ const HeroSlider = () => {
         {/* Floating Content Overlay for Mobile */}
         <div className="absolute inset-0 z-10 flex flex-col justify-end px-6 pb-20 pointer-events-none">
           <div className="pointer-events-auto">
-            <h1 className="text-[2.5rem] leading-[1.05] font-medium tracking-tight text-white mb-4 shadow-sm" style={{ fontFamily: 'Inter, system-ui, sans-serif', letterSpacing: '-0.04em' }}>
+            <h1 className="text-[2.5rem] leading-[1.05] font-medium tracking-tight text-white mb-4 shadow-sm" style={{ letterSpacing: '-0.02em' }}>
               Skincare that<br/>
               brings out your<br/>
               natural glow

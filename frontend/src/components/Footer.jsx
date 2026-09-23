@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Mail, ShoppingBag } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { COMPANY_INFO } from '../config/companyInfo';
+import favIcon from '../assets/favIcon.png';
 
 const IconLinkedIn = () => (
   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
@@ -78,8 +79,8 @@ const Footer = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
             <div className="space-y-5">
               <Link to="/" className="inline-flex items-center gap-2.5 group">
-                <span className="w-8 h-8 rounded-[6px] bg-[#c39662] text-white flex items-center justify-center shadow-[0_0_18px_rgba(195,150,98,0.45)]">
-                  <ShoppingBag className="w-4 h-4" strokeWidth={2.2} />
+                <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-[6px] bg-black shadow-[0_0_18px_rgba(195,150,98,0.45)]">
+                  <img src={favIcon} alt="" className="h-full w-full scale-125 object-cover" />
                 </span>
                 <span className="text-[22px] font-semibold tracking-tight text-white">
                   TheFusionCart<span className="text-[#c39662]">.</span>
@@ -161,14 +162,13 @@ const Footer = () => {
           </div>
 
           <p className="relative z-10 mt-16 sm:mt-20 max-w-3xl mx-auto text-center text-[12px] leading-relaxed text-white/35">
-            {COMPANY_INFO.legalName} is an e-commerce retailer of beauty, wellness, and everyday
-            essentials. Please review our policies before placing an order. GSTIN: {COMPANY_INFO.gstin}
-            {' · '}CIN: {COMPANY_INFO.cin}.
+            {COMPANY_INFO.legalName}, based in Mohali, Punjab, offers digital commerce and
+            assisted financial services. Please review our policies before placing an order.
           </p>
 
           <div className="relative z-10 mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-white/40">
             <p>
-              © {currentYear} {COMPANY_INFO.brandName}. All Rights Reserved.
+              © {currentYear} FUSIONCART PRIVATE LIMITED. All Rights Reserved.
             </p>
             <p>India — Serving nationwide</p>
           </div>
@@ -178,8 +178,8 @@ const Footer = () => {
           className="pointer-events-none select-none absolute inset-x-0 bottom-[-0.15em] z-0 flex justify-center overflow-hidden"
           aria-hidden="true"
         >
-          <span className="font-bold text-[clamp(4.5rem,18vw,13.5rem)] leading-[0.82] tracking-[-0.06em] text-white/[0.045] uppercase">
-            Shopzen
+          <span className="font-bold text-[clamp(2.4rem,9.5vw,7.5rem)] leading-[0.82] tracking-[-0.04em] text-white/[0.045]">
+            TheFusionCart
           </span>
         </div>
       </footer>

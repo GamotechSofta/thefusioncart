@@ -10,6 +10,7 @@ export function buildAdminInvoicePayload({
   shipping,
   total,
   invoiceDate,
+  orderTxnId,
 }) {
   if (!selectedCustomer) {
     return { error: 'Please select a customer' };
@@ -40,6 +41,7 @@ export function buildAdminInvoicePayload({
     _id: invoiceId,
     createdAt,
     paymentMethod: 'Manual',
+    orderTxnId: String(orderTxnId || '').trim(),
     status: 'confirmed',
     amount: total,
     items: lineItems.map((item) => ({

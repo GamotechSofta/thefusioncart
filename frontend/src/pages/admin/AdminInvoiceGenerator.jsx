@@ -85,6 +85,7 @@ const AdminInvoiceGenerator = () => {
   const [shippingOverride, setShippingOverride] = useState(null);
   const [includeGst, setIncludeGst] = useState(true);
   const [invoiceDate, setInvoiceDate] = useState(todayDateInputValue);
+  const [orderTxnId, setOrderTxnId] = useState('');
   const [invoiceData, setInvoiceData] = useState(null);
   const [downloading, setDownloading] = useState(false);
   const [exportKey, setExportKey] = useState(0);
@@ -273,6 +274,7 @@ const AdminInvoiceGenerator = () => {
       shipping,
       total,
       invoiceDate,
+      orderTxnId,
     });
 
   const queueExport = (action, payload) => {
@@ -357,6 +359,7 @@ const AdminInvoiceGenerator = () => {
     setProductSearch('');
     setShippingOverride(null);
     setInvoiceDate(todayDateInputValue());
+    setOrderTxnId('');
   };
 
   const formatINR = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
@@ -850,6 +853,19 @@ const AdminInvoiceGenerator = () => {
                   value={invoiceDate}
                   onChange={(e) => setInvoiceDate(e.target.value)}
                   className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:border-pink-500 focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <label htmlFor="order-txn-id" className="text-sm text-gray-700 shrink-0">
+                  Order TXN ID
+                </label>
+                <input
+                  id="order-txn-id"
+                  type="text"
+                  value={orderTxnId}
+                  onChange={(e) => setOrderTxnId(e.target.value)}
+                  placeholder="Enter transaction ID"
+                  className="w-full sm:max-w-xs px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:border-pink-500 focus:outline-none"
                 />
               </div>
               <label className="flex items-center gap-2 text-sm text-gray-700">

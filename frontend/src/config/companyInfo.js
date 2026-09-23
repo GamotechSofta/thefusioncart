@@ -1,13 +1,13 @@
 /** Shared business details for footer, legal pages, and contact sections */
 export const COMPANY_INFO = {
-  legalName: 'SHOPZEN VENTURES PRIVATE LIMITED',
-  brandName: 'Shopzen',
+  legalName: 'FUSIONCART PRIVATE LIMITED',
+  brandName: 'FusionCart',
   website: 'https://buynestventures.shop',
   email: 'shopzen68@gmail.com',
   phone: '+918745015901',
   contactPerson: 'KAPIL YADAV',
   registeredAddress:
-    'Fourth Floor, Unit No OF-437, Tower A2, Spaze I Tech Park, Sohna Road, Sector 49, Gurugram, Haryana 122018',
+    '58, 2nd Floor, City Court, Near K Area Zirakpur, Zirakpur, Rajpura, Mohali- 140603, Punjab, India',
   gstin: '06ABUCSO304BIZP',
   cin: 'U47912HR2026PTC146574',
   pan: 'HELPS0440N',

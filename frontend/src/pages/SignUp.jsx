@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
-import brandLogo from '../assets/logo.jpeg';
+import brandLogo from '../assets/logo.png';
 import { getAuthBackgroundState, getAuthClosePath } from '../utils/authModal';
 
 const SignUp = () => {

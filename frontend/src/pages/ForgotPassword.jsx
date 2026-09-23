@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
-import brandLogo from '../assets/logo.jpeg';
+import brandLogo from '../assets/logo.png';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');

@@ -8,7 +8,7 @@ import { searchProducts } from '../services/api';
 import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 import { navbarCategories } from '../data/categoryTree';
 import { api } from '../utils/api';
-import brandLogo from '../assets/logo.jpeg';
+import brandLogo from '../assets/logo.png';
 
 import bathAndHandwashImg from '../assets/bath and handwash.png';
 import feminineHygieneImg from '../assets/Feminine Hygiene1.png';

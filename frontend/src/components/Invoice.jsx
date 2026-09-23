@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { COMPANY_INFO } from '../config/companyInfo';
-import brandLogo from '../assets/logo.jpeg';
+import brandLogo from '../assets/logo.png';
 import { api } from '../utils/api';
 import { INVOICE_EXPORT_CSS } from '../utils/invoiceExportStyles';
 

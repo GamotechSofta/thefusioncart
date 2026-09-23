@@ -82,7 +82,7 @@ const Footer = () => {
                   <ShoppingBag className="w-4 h-4" strokeWidth={2.2} />
                 </span>
                 <span className="text-[22px] font-semibold tracking-tight text-white">
-                  Shopzen<span className="text-[#c39662]">.</span>
+                  TheFusionCart<span className="text-[#c39662]">.</span>
                 </span>
               </Link>
               <p className="text-[13px] leading-relaxed text-white/55 max-w-[240px]">

@@ -234,6 +234,30 @@ const AdminInvoiceGenerator = () => {
   const shipping = shippingOverride !== null ? Number(shippingOverride) : autoShipping;
   const total = subtotal + gst + shipping;
 
+  const invoicePreview = useMemo(() => {
+    if (!selectedCustomer || lineItems.length === 0) return null;
+    const result = buildAdminInvoicePayload({
+      selectedCustomer,
+      lineItems,
+      subtotal,
+      gst,
+      shipping,
+      total,
+      invoiceDate,
+      orderTxnId,
+    });
+    return result.error ? null : result.payload;
+  }, [
+    selectedCustomer,
+    lineItems,
+    subtotal,
+    gst,
+    shipping,
+    total,
+    invoiceDate,
+    orderTxnId,
+  ]);
+
   const addedProductIds = useMemo(
     () => new Set(lineItems.map((i) => String(i.productId))),
     [lineItems]
@@ -857,14 +881,14 @@ const AdminInvoiceGenerator = () => {
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                 <label htmlFor="order-txn-id" className="text-sm text-gray-700 shrink-0">
-                  Order TXN ID
+                  Order Transaction ID
                 </label>
                 <input
                   id="order-txn-id"
                   type="text"
                   value={orderTxnId}
                   onChange={(e) => setOrderTxnId(e.target.value)}
-                  placeholder="Enter transaction ID"
+                  placeholder="Enter payment / transaction ID"
                   className="w-full sm:max-w-xs px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:border-pink-500 focus:outline-none"
                 />
               </div>
@@ -939,6 +963,28 @@ const AdminInvoiceGenerator = () => {
           </div>
         </section>
       </div>
+
+      {invoicePreview && (
+        <section className="bg-white border-2 border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-5 py-4 bg-gradient-to-r from-slate-700 to-slate-900 text-white">
+            <h3 className="font-bold flex items-center gap-2">
+              <FiFileText className="w-5 h-5" />
+              Invoice preview
+            </h3>
+            <p className="text-xs text-white/80 mt-1">
+              Order Transaction ID appears under Invoice Details when filled in above.
+            </p>
+          </div>
+          <div className="p-4 sm:p-6 overflow-x-auto">
+            <Invoice
+              order={invoicePreview.order}
+              user={invoicePreview.user}
+              totals={invoicePreview.totals}
+              invoiceNumber={invoicePreview.invoiceNumber}
+            />
+          </div>
+        </section>
+      )}
 
       {/* Off-screen invoice for print & PDF download */}
       {invoiceData && (

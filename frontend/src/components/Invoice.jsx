@@ -179,7 +179,7 @@ const Invoice = ({
                   <FieldRow
                     leftLabel="Payment Mode"
                     leftValue={paymentModeLabel(order.paymentMethod)}
-                    rightLabel="Order TXN ID"
+                    rightLabel="Order Transaction ID"
                     rightValue={order.orderTxnId || order.payuTxnId}
                   />
                 </tbody>

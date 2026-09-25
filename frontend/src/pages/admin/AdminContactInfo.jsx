@@ -27,7 +27,7 @@ const AdminContactInfo = () => {
         email: data.email || '',
         phone: data.phone || '',
         address: data.address || '',
-        companyName: data.companyName || 'Shopzen',
+        companyName: data.companyName || 'TheFusionCart',
       });
       setError('');
     } catch (err) {

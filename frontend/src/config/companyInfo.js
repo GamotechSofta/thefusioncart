@@ -1,9 +1,9 @@
 /** Shared business details for footer, legal pages, and contact sections */
 export const COMPANY_INFO = {
   legalName: 'FUSIONCART PRIVATE LIMITED',
-  brandName: 'FusionCart',
-  website: 'https://buynestventures.shop',
-  email: 'shopzen68@gmail.com',
+  brandName: 'TheFusionCart',
+  website: 'https://thefusioncart.shop',
+  email: 'info@thefusioncart.shop',
   phone: '+918745015901',
   contactPerson: 'KAPIL YADAV',
   registeredAddress:
@@ -12,7 +12,7 @@ export const COMPANY_INFO = {
   cin: 'U47912HR2026PTC146574',
   pan: 'HELPS0440N',
   tan: 'DELB32873B',
-  accountName: 'SHOPZEN VENTURES PRIVATE LIMITED',
+  accountName: 'FUSIONCART PRIVATE LIMITED',
   accountNumber: '',
   ifsc: '',
   upiId: '',

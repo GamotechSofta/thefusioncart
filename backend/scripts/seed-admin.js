@@ -12,15 +12,10 @@ async function seedAdmin() {
 
     const adminAccounts = [
       {
-        email: 'admin@shopzenventures.shop',
-        password: 'Admin@shopzen123',
-        name: 'Shopzen Master Admin',
-      },
-      {
-        email: 'admin@buynestventures.shop',
-        password: 'Admin@buynest123',
-        name: 'BuyNest Master Admin',
-      },
+        email: 'admin@thefusioncart.shop',
+        password: 'admin@2026',
+        name: 'TheFusionCart Admin',
+      }
     ];
 
     const salt = await bcrypt.genSalt(10);

@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 
 const CURRENT_CONTACT = {
-  email: 'shopzen68@gmail.com',
+  email: 'info@thefusioncart.shop',
   phone: '+918745015901',
   address:
     'Fourth Floor, Unit No OF-437, Tower A2, Spaze I Tech Park, Sohna Road, Sector 49, Gurugram, Haryana 122018',
-  companyName: 'SHOPZEN VENTURES PRIVATE LIMITED',
+  companyName: 'TheFusionCart',
 };
 
 const contactInfoSchema = new mongoose.Schema(
@@ -28,7 +28,7 @@ const contactInfoSchema = new mongoose.Schema(
     },
     companyName: {
       type: String,
-      default: 'SHOPZEN VENTURES PRIVATE LIMITED',
+      default: 'TheFusionCart',
       trim: true,
     },
   },

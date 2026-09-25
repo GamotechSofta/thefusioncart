@@ -41,11 +41,15 @@ const OrderSchema = new mongoose.Schema(
     payuMihpayid: { type: String },
     payuStatus: { type: String },
     shippingAddress: { type: ShippingAddressSchema },
-    store: { type: String, default: 'shopzen', index: true },
+    store: { type: String, default: 'thefusioncart', index: true },
     invoiceEmailSentAt: { type: Date },
   },
   { timestamps: true }
 );
 
-export const Order = mongoose.models.Order || mongoose.model('Order', OrderSchema);
+const ORDER_MODEL_NAME = 'thefusioncartOrders';
+
+export const Order =
+  mongoose.models[ORDER_MODEL_NAME] ||
+  mongoose.model(ORDER_MODEL_NAME, OrderSchema, 'thefusioncartOrders');
 export default Order;

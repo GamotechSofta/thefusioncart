@@ -162,7 +162,7 @@ export const verifyPayment = async (req, res) => {
       razorpayPaymentId: paymentId,
       razorpaySignature: signature,
       shippingAddress,
-      store: process.env.STORE_NAME || 'shopzen',
+      store: process.env.STORE_NAME || 'thefusioncart',
     });
 
     cart.items = [];
@@ -238,7 +238,7 @@ export const createCodOrder = async (req, res) => {
       status: 'created',
       paymentMethod: 'COD',
       shippingAddress,
-      store: process.env.STORE_NAME || 'shopzen',
+      store: process.env.STORE_NAME || 'thefusioncart',
     });
 
     cart.items = [];
@@ -347,7 +347,7 @@ export const initiatePayuPayment = async (req, res) => {
       paymentMethod: 'PayU',
       payuTxnId: txnid,
       shippingAddress,
-      store: process.env.STORE_NAME || 'shopzen',
+      store: process.env.STORE_NAME || 'thefusioncart',
     });
 
     const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';

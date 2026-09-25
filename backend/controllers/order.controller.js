@@ -90,16 +90,7 @@ export const getMyOrders = async (req, res) => {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
-    const storeName = req.query?.store || process.env.STORE_NAME || 'shopzen';
-    const storeFilter = {
-      user: userId,
-      $or: [
-        { store: storeName },
-        { store: { $exists: false } },
-      ],
-    };
-
-    const orders = await Order.find(storeFilter)
+    const orders = await Order.find({ user: userId })
       .sort({ createdAt: -1 })
       .lean();
 

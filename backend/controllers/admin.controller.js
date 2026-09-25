@@ -315,21 +315,13 @@ export async function deleteProductById(req, res) {
 
 export async function adminListOrders(req, res) {
   try {
-    const storeName = req.query?.store || process.env.STORE_NAME || 'shopzen';
-    console.log(`[adminListOrders] Fetching orders for store: ${storeName}...`);
-    
-    const storeFilter = {
-      $or: [
-        { store: storeName },
-        { store: { $exists: false } },
-      ],
-    };
+    console.log('[adminListOrders] Fetching orders from thefusioncartOrders...');
 
-    const orders = await Order.find(storeFilter)
+    const orders = await Order.find({})
       .sort({ createdAt: -1 })
       .lean();
 
-    console.log(`[adminListOrders] Found ${orders.length} orders for ${storeName}`);
+    console.log(`[adminListOrders] Found ${orders.length} orders`);
 
     // Get unique user IDs
     const userIds = Array.from(new Set(orders.map(o => String(o.user)).filter(Boolean)));
@@ -385,17 +377,8 @@ export async function adminListOrders(req, res) {
 
 export async function adminStats(req, res) {
   try {
-    const storeName = req.query?.store || process.env.STORE_NAME || 'shopzen';
-    const storeFilter = {
-      status: 'paid',
-      $or: [
-        { store: storeName },
-        { store: { $exists: false } },
-      ],
-    };
-
     const [revenueAgg] = await Order.aggregate([
-      { $match: storeFilter },
+      { $match: { status: 'paid' } },
       { $group: { _id: null, total: { $sum: '$amount' }, count: { $sum: 1 } } },
     ]);
     const totalRevenue = revenueAgg?.total || 0;

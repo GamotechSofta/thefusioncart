@@ -125,7 +125,11 @@ const About = () => {
               </div>
 
               <div className="mt-5 space-y-1">
-                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider">Country of Origin</p>
+                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider">GSTIN</p>
+                <p className="text-gray-200 font-mono">{COMPANY_INFO.gstin}</p>
+                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mt-3">CIN</p>
+                <p className="text-gray-200 font-mono">{COMPANY_INFO.cin}</p>
+                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mt-3">Country of Origin</p>
                 <p className="text-gray-200">India</p>
                 <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mt-3">Specialty</p>
                 <p className="text-gray-200">Digital Commerce &amp; Assisted Financial Services (AEPS, DMT, Micro ATM)</p>

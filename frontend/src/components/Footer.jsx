@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Mail } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import { COMPANY_INFO } from '../config/companyInfo';
 import favIcon from '../assets/favIcon.png';
 
@@ -106,15 +106,35 @@ const Footer = () => {
                   );
                 })}
               </div>
-              {COMPANY_INFO.email && (
-                <a
-                  href={`mailto:${COMPANY_INFO.email}`}
-                  className="inline-flex items-center gap-2 text-[13px] text-white/70 hover:text-[#c39662] transition-colors"
-                >
-                  <Mail className="w-4 h-4 shrink-0" strokeWidth={1.75} />
-                  {COMPANY_INFO.email}
-                </a>
-              )}
+              <div className="space-y-2 pt-1 text-[13px] text-white/70">
+                {COMPANY_INFO.email && (
+                  <div>
+                    <a
+                      href={`mailto:${COMPANY_INFO.email}`}
+                      className="inline-flex items-center gap-2 hover:text-[#c39662] transition-colors"
+                    >
+                      <Mail className="w-4 h-4 shrink-0 text-[#c39662]" strokeWidth={1.75} />
+                      {COMPANY_INFO.email}
+                    </a>
+                  </div>
+                )}
+                {COMPANY_INFO.phone && (
+                  <div>
+                    <a
+                      href={`tel:${COMPANY_INFO.phone}`}
+                      className="inline-flex items-center gap-2 hover:text-[#c39662] transition-colors"
+                    >
+                      <Phone className="w-4 h-4 shrink-0 text-[#c39662]" strokeWidth={1.75} />
+                      +91 {COMPANY_INFO.phone}
+                    </a>
+                  </div>
+                )}
+                {COMPANY_INFO.contactPerson && (
+                  <p className="text-[12px] text-white/60">
+                    <span className="text-white/40">Contact:</span> {COMPANY_INFO.contactPerson}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div>
@@ -163,16 +183,19 @@ const Footer = () => {
             </div>
           </div>
 
-          <p className="relative z-10 mt-16 sm:mt-20 max-w-3xl mx-auto text-center text-[12px] leading-relaxed text-white/35">
-            {COMPANY_INFO.legalName}, based in Mohali, Punjab, offers digital commerce and
-            assisted financial services. Please review our policies before placing an order.
-          </p>
+          <div className="relative z-10 mt-14 sm:mt-16 p-4 rounded-xl bg-white/[0.03] border border-white/10 max-w-3xl mx-auto text-center text-[12px] leading-relaxed text-white/60 space-y-1.5">
+            <p className="font-semibold text-white/90">{COMPANY_INFO.legalName}</p>
+            <p className="text-white/50">{COMPANY_INFO.registeredAddress}</p>
+            <p className="text-white/70">
+              <span className="text-[#c39662] font-semibold">GSTIN:</span> {COMPANY_INFO.gstin} &nbsp;|&nbsp; <span className="text-[#c39662] font-semibold">CIN:</span> {COMPANY_INFO.cin} &nbsp;|&nbsp; <span className="text-[#c39662] font-semibold">Contact Person:</span> {COMPANY_INFO.contactPerson}
+            </p>
+          </div>
 
           <div className="relative z-10 mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-white/40">
             <p>
-              © {currentYear} FUSIONCART PRIVATE LIMITED. All Rights Reserved.
+              © {currentYear} {COMPANY_INFO.legalName}. All Rights Reserved.
             </p>
-            <p>India — Serving nationwide</p>
+            <p>GSTIN: {COMPANY_INFO.gstin} | CIN: {COMPANY_INFO.cin}</p>
           </div>
         </div>
 

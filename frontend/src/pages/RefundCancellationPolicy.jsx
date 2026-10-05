@@ -158,6 +158,17 @@ export default function RefundCancellationPolicy() {
                 Mon to Sat: 9:00 AM – 6:00 PM IST
               </p>
             </div>
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 sm:col-span-3">
+              <div className="flex flex-wrap items-center gap-4 text-xs text-gray-300">
+                <span><strong className="text-white">Contact Person:</strong> {COMPANY_INFO.contactPerson}</span>
+                <span>•</span>
+                <span><strong className="text-white">GSTIN:</strong> {COMPANY_INFO.gstin}</span>
+                <span>•</span>
+                <span><strong className="text-white">CIN:</strong> {COMPANY_INFO.cin}</span>
+                <span>•</span>
+                <span><strong className="text-white">Address:</strong> {COMPANY_INFO.registeredAddress}</span>
+              </div>
+            </div>
           </div>
           <p className="text-xs text-gray-400 border-t border-gray-700 pt-4 leading-relaxed">
             <strong>Note:</strong> This refund policy is subject to change without prior notice. By making a purchase on our website, you agree to the terms of this refund policy.

@@ -30,13 +30,23 @@ const Contact = () => {
           <p className="text-sm sm:text-base text-gray-500 max-w-xl mx-auto">
             E-commerce retailer of beauty, wellness, and everyday essentials.
           </p>
-          {(COMPANY_INFO.gstin || COMPANY_INFO.cin) && (
-            <p className="text-xs text-gray-400 mt-2">
-              {COMPANY_INFO.gstin ? `GSTIN: ${COMPANY_INFO.gstin}` : ''}
-              {COMPANY_INFO.gstin && COMPANY_INFO.cin ? ' | ' : ''}
-              {COMPANY_INFO.cin ? `CIN: ${COMPANY_INFO.cin}` : ''}
-            </p>
-          )}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 mt-4 text-xs sm:text-sm">
+            {COMPANY_INFO.gstin && (
+              <span className="px-3 py-1 bg-rose-50 border border-rose-100 rounded-full text-rose-800 font-medium">
+                <strong>GSTIN:</strong> {COMPANY_INFO.gstin}
+              </span>
+            )}
+            {COMPANY_INFO.cin && (
+              <span className="px-3 py-1 bg-blue-50 border border-blue-100 rounded-full text-blue-800 font-medium">
+                <strong>CIN:</strong> {COMPANY_INFO.cin}
+              </span>
+            )}
+            {COMPANY_INFO.contactPerson && (
+              <span className="px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-emerald-800 font-medium">
+                <strong>Contact Person:</strong> {COMPANY_INFO.contactPerson}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Contact Cards Grid */}

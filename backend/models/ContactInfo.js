@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 
 const CURRENT_CONTACT = {
-  email: 'info@thefusioncart.shop',
-  phone: '+918745015901',
+  email: 'fusioncart573@gmail.com',
+  phone: '8054499891',
   address:
-    'Fourth Floor, Unit No OF-437, Tower A2, Spaze I Tech Park, Sohna Road, Sector 49, Gurugram, Haryana 122018',
-  companyName: 'TheFusionCart',
+    '58, 2nd Floor, City Court, Near K Area Zirakpur, Zirakpur, Rajpura, Mohali- 140603, Punjab, India',
+  companyName: 'FUSIONCART PRIVATE LIMITED',
 };
 
 const contactInfoSchema = new mongoose.Schema(
@@ -57,6 +57,12 @@ contactInfoSchema.statics.getContactInfo = async function () {
   return contactInfo;
 };
 
-const ContactInfo = mongoose.models.ContactInfo || mongoose.model('ContactInfo', contactInfoSchema);
+const MODEL_NAME = 'fusionCompanyInfo';
 
-export default ContactInfo;
+export const fusionCompanyInfo =
+  mongoose.models[MODEL_NAME] ||
+  mongoose.model(MODEL_NAME, contactInfoSchema, MODEL_NAME);
+
+export const ContactInfo = fusionCompanyInfo;
+export default fusionCompanyInfo;
+

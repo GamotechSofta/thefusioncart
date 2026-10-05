@@ -49,7 +49,12 @@ export default function TermsAndConditions() {
           <p className="text-sm text-gray-600 mb-3">This website is operated by:</p>
           <div className="p-4 sm:p-5 rounded-xl bg-gray-50 border border-gray-100 text-sm sm:text-base space-y-2">
             <p className="font-bold text-gray-900">{COMPANY_INFO.legalName}</p>
-            <p className="text-gray-700">Registered Office: {COMPANY_INFO.registeredAddress}</p>
+            <p className="text-gray-700"><span className="font-semibold">Registered Office:</span> {COMPANY_INFO.registeredAddress}</p>
+            <p className="text-gray-700"><span className="font-semibold">GSTIN:</span> {COMPANY_INFO.gstin}</p>
+            <p className="text-gray-700"><span className="font-semibold">CIN:</span> {COMPANY_INFO.cin}</p>
+            <p className="text-gray-700"><span className="font-semibold">Contact Person:</span> {COMPANY_INFO.contactPerson}</p>
+            <p className="text-gray-700"><span className="font-semibold">Email:</span> {COMPANY_INFO.email}</p>
+            <p className="text-gray-700"><span className="font-semibold">Phone:</span> +91 {COMPANY_INFO.phone}</p>
           </div>
         </div>
 
@@ -173,6 +178,15 @@ export default function TermsAndConditions() {
               <p className="text-white leading-relaxed text-xs">
                 {COMPANY_INFO.registeredAddress}
               </p>
+            </div>
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 sm:col-span-3">
+              <div className="flex flex-wrap items-center gap-4 text-xs text-gray-300">
+                <span><strong className="text-white">Contact Person:</strong> {COMPANY_INFO.contactPerson}</span>
+                <span>•</span>
+                <span><strong className="text-white">GSTIN:</strong> {COMPANY_INFO.gstin}</span>
+                <span>•</span>
+                <span><strong className="text-white">CIN:</strong> {COMPANY_INFO.cin}</span>
+              </div>
             </div>
           </div>
           <p className="text-xs text-gray-400 border-t border-gray-700 pt-4 leading-relaxed">

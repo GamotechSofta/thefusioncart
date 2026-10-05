@@ -70,7 +70,7 @@ export default function AddressForm() {
   const location = useLocation();
   const [showSuccess, setShowSuccess] = useState(false);
   const [showForm, setShowForm] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState('payu'); // 'payu', 'razorpay', or 'cod'
+  const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod'
   const { cart, cartTotal: total, loadCart } = useCart();
 
   useEffect(() => {
@@ -1035,31 +1035,6 @@ export default function AddressForm() {
               <div className="mb-3 sm:mb-4 pb-3 sm:pb-4 border-b-2 border-gray-200">
                 <h4 className="text-black font-semibold mb-2 sm:mb-3 text-xs sm:text-sm">Select Payment Method</h4>
                 <div className="space-y-2">
-                  {/* PayU Payment */}
-                  <label className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === 'payu' 
-                      ? 'border-pink-500 bg-pink-50/50 shadow-sm' 
-                      : 'border-gray-200 hover:border-gray-300 bg-white'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="payu"
-                      checked={paymentMethod === 'payu'}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-4 h-4 text-pink-500 focus:ring-pink-500 flex-shrink-0 accent-pink-500"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-bold text-xs sm:text-sm text-gray-900 flex items-center gap-1.5">
-                        <span>Pay Online (UPI, Cards, NetBanking)</span>
-                        <span className="bg-green-100 text-green-800 text-[10px] font-bold px-1.5 py-0.5 rounded">FAST</span>
-                      </div>
-                      <div className="text-xs text-gray-500 mt-0.5">Instant checkout via GPay, PhonePe, Paytm, Cards & NetBanking</div>
-                    </div>
-                    <svg className="w-5 h-5 text-pink-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                  </label>
 
                   {/* Cash on Delivery */}
                   <label className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl border-2 cursor-pointer transition-all ${

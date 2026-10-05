@@ -1,6 +1,6 @@
 /** Company details for invoice emails (Resend) */
 export const COMPANY_INFO = {
-  legalName: 'FUSIONCART PRIVATE LIMITED',
+  legalName: 'FUSION CART PRIVATE LIMITED',
   brandName: 'TheFusionCart',
   website: 'https://thefusioncart.shop',
   email: 'fusioncart573@gmail.com',

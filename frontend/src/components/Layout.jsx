@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import ChatOnWhatsApp from './ChatOnWhatsApp';
 
 const Layout = () => {
   const location = useLocation();
@@ -32,9 +33,8 @@ const Layout = () => {
 
   return (
     <div
-      className={`flex flex-col min-h-screen bg-canvas ${
-        showMobileNav ? 'pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0' : ''
-      }`}
+      className={`flex flex-col min-h-screen bg-canvas ${showMobileNav ? 'pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0' : ''
+        }`}
       style={{ '--app-header-height': `${headerHeight}px` }}
     >
       <div ref={headerWrapRef} className="fixed top-0 left-0 right-0 z-50">
@@ -50,6 +50,11 @@ const Layout = () => {
       </main>
 
       {!hideFooter && <Footer />}
+
+      <div className="hidden lg:block">
+        <ChatOnWhatsApp showMobileNav={showMobileNav} />
+
+      </div>
     </div>
   );
 };

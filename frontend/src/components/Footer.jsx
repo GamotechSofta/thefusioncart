@@ -37,7 +37,7 @@ const WhatsAppIcon = ({ className = 'w-5 h-5' }) => (
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const whatsappHref = `https://wa.me/${COMPANY_INFO.phone.replace(/\D/g, '')}`;
+  const whatsappHref = COMPANY_INFO.phone ? `https://wa.me/${COMPANY_INFO.phone.replace(/\D/g, '')}` : '';
 
   const companyLinks = [
     { name: 'About', path: '/about' },
@@ -106,13 +106,15 @@ const Footer = () => {
                   );
                 })}
               </div>
-              <a
-                href={`mailto:${COMPANY_INFO.email}`}
-                className="inline-flex items-center gap-2 text-[13px] text-white/70 hover:text-[#c39662] transition-colors"
-              >
-                <Mail className="w-4 h-4 shrink-0" strokeWidth={1.75} />
-                {COMPANY_INFO.email}
-              </a>
+              {COMPANY_INFO.email && (
+                <a
+                  href={`mailto:${COMPANY_INFO.email}`}
+                  className="inline-flex items-center gap-2 text-[13px] text-white/70 hover:text-[#c39662] transition-colors"
+                >
+                  <Mail className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+                  {COMPANY_INFO.email}
+                </a>
+              )}
             </div>
 
             <div>
@@ -184,16 +186,18 @@ const Footer = () => {
         </div>
       </footer>
 
-      <a
-        href={whatsappHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed z-50 right-4 bottom-[calc(6.25rem+env(safe-area-inset-bottom))] lg:bottom-6 lg:right-6 inline-flex items-center gap-2 rounded-full bg-[#1f6b4a] hover:bg-[#185c3f] text-white pl-3.5 pr-4 py-2.5 shadow-lg shadow-black/30 text-sm font-medium transition-colors"
-        aria-label="Chat on WhatsApp"
-      >
-        <WhatsAppIcon className="w-[18px] h-[18px]" />
-        Chat on WhatsApp
-      </a>
+      {whatsappHref && (
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed z-50 right-4 bottom-[calc(6.25rem+env(safe-area-inset-bottom))] lg:bottom-6 lg:right-6 inline-flex items-center gap-2 rounded-full bg-[#1f6b4a] hover:bg-[#185c3f] text-white pl-3.5 pr-4 py-2.5 shadow-lg shadow-black/30 text-sm font-medium transition-colors"
+          aria-label="Chat on WhatsApp"
+        >
+          <WhatsAppIcon className="w-[18px] h-[18px]" />
+          Chat on WhatsApp
+        </a>
+      )}
     </>
   );
 };

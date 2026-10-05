@@ -90,7 +90,7 @@ function buildInvoiceHtml({ order, items, customerName, customerEmail }) {
         <td style="vertical-align:top;width:62%;">
           <p style="margin:0 0 6px;font-size:13px;font-weight:700;text-transform:uppercase;">${COMPANY_INFO.legalName}</p>
           <p style="margin:0 0 4px;font-size:12px;line-height:20px;">${COMPANY_INFO.registeredAddress}</p>
-          <p style="margin:0;font-size:12px;line-height:20px;">${COMPANY_INFO.email} · GSTIN: ${COMPANY_INFO.gstin}</p>
+          ${(COMPANY_INFO.email || COMPANY_INFO.gstin) ? `<p style="margin:0;font-size:12px;line-height:20px;">${[COMPANY_INFO.email, COMPANY_INFO.gstin ? `GSTIN: ${COMPANY_INFO.gstin}` : ''].filter(Boolean).join(' · ')}</p>` : ''}
         </td>
         <td style="vertical-align:top;text-align:right;font-size:28px;font-weight:700;text-transform:uppercase;">INVOICE</td>
       </tr>

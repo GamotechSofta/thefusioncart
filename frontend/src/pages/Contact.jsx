@@ -30,56 +30,64 @@ const Contact = () => {
           <p className="text-sm sm:text-base text-gray-500 max-w-xl mx-auto">
             E-commerce retailer of beauty, wellness, and everyday essentials.
           </p>
-          <p className="text-xs text-gray-400 mt-2">
-            GSTIN: {COMPANY_INFO.gstin} &nbsp;|&nbsp; CIN: {COMPANY_INFO.cin}
-          </p>
+          {(COMPANY_INFO.gstin || COMPANY_INFO.cin) && (
+            <p className="text-xs text-gray-400 mt-2">
+              {COMPANY_INFO.gstin ? `GSTIN: ${COMPANY_INFO.gstin}` : ''}
+              {COMPANY_INFO.gstin && COMPANY_INFO.cin ? ' | ' : ''}
+              {COMPANY_INFO.cin ? `CIN: ${COMPANY_INFO.cin}` : ''}
+            </p>
+          )}
         </div>
 
         {/* Contact Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-10">
           {/* Email Card */}
-          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:border-gray-300 hover:shadow-md transition-all flex flex-col justify-between">
-            <div>
-              <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5">
-                <Mail className="w-6 h-6" />
+          {COMPANY_INFO.email && (
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:border-gray-300 hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5">
+                  <Mail className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Email</h3>
+                <p className="text-sm text-gray-500 mb-4">For inquiries, orders, and customer support:</p>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Email</h3>
-              <p className="text-sm text-gray-500 mb-4">For inquiries, orders, and customer support:</p>
+              <a
+                href={`mailto:${COMPANY_INFO.email}`}
+                className="inline-flex items-center text-base sm:text-lg font-semibold text-rose-600 hover:text-rose-700 break-all transition-colors"
+              >
+                {COMPANY_INFO.email}
+              </a>
             </div>
-            <a
-              href={`mailto:${COMPANY_INFO.email}`}
-              className="inline-flex items-center text-base sm:text-lg font-semibold text-rose-600 hover:text-rose-700 break-all transition-colors"
-            >
-              {COMPANY_INFO.email}
-            </a>
-          </div>
+          )}
 
           {/* Phone / WhatsApp Card */}
-          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:border-gray-300 hover:shadow-md transition-all flex flex-col justify-between">
-            <div>
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-5">
-                <Phone className="w-6 h-6" />
+          {COMPANY_INFO.phone && (
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:border-gray-300 hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-5">
+                  <Phone className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Phone / WhatsApp</h3>
+                <p className="text-sm text-gray-500 mb-4">Call or message us directly for assistance:</p>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Phone / WhatsApp</h3>
-              <p className="text-sm text-gray-500 mb-4">Call or message us directly for assistance:</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <a
+                  href={`tel:${COMPANY_INFO.phone}`}
+                  className="inline-flex items-center text-base sm:text-lg font-semibold text-gray-900 hover:text-rose-600 transition-colors"
+                >
+                  {COMPANY_INFO.phone}
+                </a>
+                <a
+                  href={`https://wa.me/${COMPANY_INFO.phone.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-full transition-colors inline-flex items-center gap-1 shadow-sm"
+                >
+                  WhatsApp
+                </a>
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <a
-                href={`tel:${COMPANY_INFO.phone}`}
-                className="inline-flex items-center text-base sm:text-lg font-semibold text-gray-900 hover:text-rose-600 transition-colors"
-              >
-                {COMPANY_INFO.phone}
-              </a>
-              <a
-                href={`https://wa.me/${COMPANY_INFO.phone.replace(/\D/g, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-full transition-colors inline-flex items-center gap-1 shadow-sm"
-              >
-                WhatsApp
-              </a>
-            </div>
-          </div>
+          )}
 
           {/* Address Card */}
           <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:border-gray-300 hover:shadow-md transition-all">

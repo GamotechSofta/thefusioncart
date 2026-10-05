@@ -138,9 +138,13 @@ const Invoice = ({
               />
               <p className="invoice-export-company">{COMPANY_INFO.legalName}</p>
               <p className="invoice-export-contact">{COMPANY_INFO.registeredAddress}</p>
-              <p className="invoice-export-contact">
-                {COMPANY_INFO.email} · GSTIN: {COMPANY_INFO.gstin}
-              </p>
+              {(COMPANY_INFO.email || COMPANY_INFO.gstin) && (
+                <p className="invoice-export-contact">
+                  {COMPANY_INFO.email}
+                  {COMPANY_INFO.email && COMPANY_INFO.gstin ? ' · ' : ''}
+                  {COMPANY_INFO.gstin ? `GSTIN: ${COMPANY_INFO.gstin}` : ''}
+                </p>
+              )}
             </td>
             <td className="invoice-export-meta">
               <p className="invoice-export-doc-title">Invoice</p>
@@ -308,7 +312,7 @@ const Invoice = ({
       <div className="invoice-export-footer">
         <p>Thank you for your order!</p>
         <p className="muted">
-          For any queries, contact us at {COMPANY_INFO.email} or {COMPANY_INFO.phone}
+          For any queries, please visit our website or contact support.
         </p>
       </div>
     </div>

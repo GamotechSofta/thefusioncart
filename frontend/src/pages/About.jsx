@@ -133,25 +133,29 @@ const About = () => {
             </div>
 
             <div className="space-y-4 md:border-l md:border-gray-700 md:pl-8">
-              <div>
-                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1 flex items-center gap-1.5">
-                  <Mail className="w-4 h-4 text-rose-400 shrink-0" />
-                  Email
-                </p>
-                <a href={`mailto:${COMPANY_INFO.email}`} className="text-rose-300 hover:text-rose-200 underline font-medium">
-                  {COMPANY_INFO.email}
-                </a>
-              </div>
+              {COMPANY_INFO.email && (
+                <div>
+                  <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1 flex items-center gap-1.5">
+                    <Mail className="w-4 h-4 text-rose-400 shrink-0" />
+                    Email
+                  </p>
+                  <a href={`mailto:${COMPANY_INFO.email}`} className="text-rose-300 hover:text-rose-200 underline font-medium">
+                    {COMPANY_INFO.email}
+                  </a>
+                </div>
+              )}
 
-              <div>
-                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1 flex items-center gap-1.5">
-                  <Phone className="w-4 h-4 text-rose-400 shrink-0" />
-                  Mobile
-                </p>
-                <a href={`tel:${COMPANY_INFO.phone}`} className="text-white hover:text-rose-200 font-medium">
-                  {COMPANY_INFO.phone}
-                </a>
-              </div>
+              {COMPANY_INFO.phone && (
+                <div>
+                  <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1 flex items-center gap-1.5">
+                    <Phone className="w-4 h-4 text-rose-400 shrink-0" />
+                    Mobile
+                  </p>
+                  <a href={`tel:${COMPANY_INFO.phone}`} className="text-white hover:text-rose-200 font-medium">
+                    {COMPANY_INFO.phone}
+                  </a>
+                </div>
+              )}
 
               <div>
                 <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">Contact Person</p>

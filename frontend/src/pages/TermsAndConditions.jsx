@@ -145,23 +145,27 @@ export default function TermsAndConditions() {
           <p className="text-sm sm:text-base text-gray-300 mb-6">
             If you have any questions about these Terms, please contact us via our <Link to="/contact" className="text-rose-300 font-semibold hover:underline">contact form</Link>.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm mb-6">
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <p className="text-gray-400 text-xs font-semibold uppercase mb-1 flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-rose-400" /> Email
-              </p>
-              <a href={`mailto:${COMPANY_INFO.email}`} className="text-white hover:text-rose-300 break-all font-medium">
-                {COMPANY_INFO.email}
-              </a>
-            </div>
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <p className="text-gray-400 text-xs font-semibold uppercase mb-1 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-rose-400" /> Phone
-              </p>
-              <a href={`tel:${COMPANY_INFO.phone}`} className="text-white hover:text-rose-300 font-medium">
-                {COMPANY_INFO.phone}
-              </a>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-6">
+            {COMPANY_INFO.email && (
+              <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                <p className="text-gray-400 text-xs font-semibold uppercase mb-1 flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-rose-400" /> Email
+                </p>
+                <a href={`mailto:${COMPANY_INFO.email}`} className="text-white hover:text-rose-300 break-all font-medium">
+                  {COMPANY_INFO.email}
+                </a>
+              </div>
+            )}
+            {COMPANY_INFO.phone && (
+              <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                <p className="text-gray-400 text-xs font-semibold uppercase mb-1 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-rose-400" /> Phone
+                </p>
+                <a href={`tel:${COMPANY_INFO.phone}`} className="text-white hover:text-rose-300 font-medium">
+                  {COMPANY_INFO.phone}
+                </a>
+              </div>
+            )}
             <div className="p-4 rounded-xl bg-white/5 border border-white/10 sm:col-span-1">
               <p className="text-gray-400 text-xs font-semibold uppercase mb-1 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-rose-400" /> Address

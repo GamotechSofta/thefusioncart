@@ -54,6 +54,9 @@ const OrderSuccess = () => {
           const response = await getOrderById(orderId);
           if (response) {
             setOrder(response);
+            if (response.amount) {
+              setOrderTotal(response.amount);
+            }
           }
         } catch (error) {
           console.error('Error fetching order:', error);
@@ -204,8 +207,26 @@ const OrderSuccess = () => {
               <p className="text-base font-semibold text-black">Order Summary</p>
             </div>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between items-center">
-                <span className="text-black">Order Total</span>
+              {order?.subtotal != null && (
+                <div className="flex justify-between items-center text-gray-700">
+                  <span>Subtotal</span>
+                  <span>₹{order.subtotal.toLocaleString()}</span>
+                </div>
+              )}
+              {order != null && (
+                <div className="flex justify-between items-center text-gray-700">
+                  <span>Shipping</span>
+                  <span>{order.shippingCharge > 0 ? `₹${order.shippingCharge.toLocaleString()}` : 'Free'}</span>
+                </div>
+              )}
+              {order?.tax != null && (
+                <div className="flex justify-between items-center text-gray-700">
+                  <span>GST (5%)</span>
+                  <span>₹{order.tax.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                <span className="font-semibold text-black">Order Total</span>
                 <span className="font-bold text-lg text-black">₹{orderTotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center">

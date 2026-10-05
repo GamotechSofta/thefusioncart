@@ -84,7 +84,7 @@ export default function AddressForm() {
   // Calculate price details
   const calculatePriceDetails = () => {
     const subtotal = total || 0;
-    const shippingCharge = subtotal < 5000 ? 99 : 0;
+    const shippingCharge = subtotal >= 500 ? 0 : 99;
     const tax = Math.round(subtotal * 0.05); // 5% tax
     const totalPayable = subtotal + shippingCharge + tax;
     const savings = Math.round(subtotal * 0.35); // Assuming 35% savings

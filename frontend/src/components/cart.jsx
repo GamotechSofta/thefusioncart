@@ -172,8 +172,8 @@ function Cart() {
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-line">
                   <span className="text-muted text-sm">Shipping</span>
-                  <span className={`text-sm ${cartTotal >= 1000 ? "text-accent font-medium" : "text-ink"}`}>
-                    {cartTotal >= 1000 ? 'Free' : '₹99'}
+                  <span className={`text-sm ${cartTotal >= 500 ? "text-accent font-medium" : "text-ink"}`}>
+                    {cartTotal >= 500 ? 'Free' : '₹99'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-line">
@@ -182,7 +182,7 @@ function Cart() {
                 </div>
                 <div className="flex justify-between items-center text-lg font-semibold bg-canvas p-4 rounded-md">
                   <span className="text-ink">Total</span>
-                  <span className="text-ink">₹{(cartTotal + (cartTotal >= 1000 ? 0 : 99) + Math.round(cartTotal * 0.05)).toLocaleString()}</span>
+                  <span className="text-ink">₹{(cartTotal + (cartTotal >= 500 ? 0 : 99) + Math.round(cartTotal * 0.05)).toLocaleString()}</span>
                 </div>
               </div>
               

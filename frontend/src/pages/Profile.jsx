@@ -1371,20 +1371,34 @@ export default function FlipkartAccountSettings() {
                                       <FiDollarSign className="w-4 h-4 text-black" />
                                       <span className="font-semibold text-black text-sm">Order Summary</span>
                                     </div>
-                                    <div className="space-y-2 ml-6 text-sm">
-                                      <div className="flex justify-between">
-                                        <span className="text-black">Subtotal ({order.items?.length || 0} items)</span>
-                                        <span className="font-medium text-black">{formatINR(order.amount)}</span>
-                                      </div>
-                                      <div className="flex justify-between">
-                                        <span className="text-black">Shipping</span>
-                                        <span className="font-medium text-black">Free</span>
-                                      </div>
-                                      <div className="flex justify-between pt-2 border-t border-gray-300">
-                                        <span className="font-bold text-black">Total Amount</span>
-                                        <span className="font-bold text-lg text-black">{formatINR(order.amount)}</span>
-                                      </div>
-                                    </div>
+                                    {(() => {
+                                      const lineSubtotal = order.items?.reduce((sum, it) => sum + (it.price * (it.quantity || 1)), 0) || 0;
+                                      const subtotal = (typeof order.subtotal === 'number' && order.subtotal > 0) ? order.subtotal : lineSubtotal;
+                                      const shippingCharge = (typeof order.shippingCharge === 'number') ? order.shippingCharge : (subtotal >= 500 ? 0 : 99);
+                                      const tax = (typeof order.tax === 'number') ? order.tax : Math.round(subtotal * 0.05);
+                                      const totalAmount = (typeof order.amount === 'number' && order.amount > subtotal) ? order.amount : (subtotal + shippingCharge + tax);
+
+                                      return (
+                                        <div className="space-y-2 ml-6 text-sm">
+                                          <div className="flex justify-between">
+                                            <span className="text-black">Subtotal ({order.items?.length || 0} items)</span>
+                                            <span className="font-medium text-black">{formatINR(subtotal)}</span>
+                                          </div>
+                                          <div className="flex justify-between">
+                                            <span className="text-black">Shipping</span>
+                                            <span className="font-medium text-black">{shippingCharge > 0 ? formatINR(shippingCharge) : 'Free'}</span>
+                                          </div>
+                                          <div className="flex justify-between">
+                                            <span className="text-black">GST (5%)</span>
+                                            <span className="font-medium text-black">{formatINR(tax)}</span>
+                                          </div>
+                                          <div className="flex justify-between pt-2 border-t border-gray-300">
+                                            <span className="font-bold text-black">Total Amount</span>
+                                            <span className="font-bold text-lg text-black">{formatINR(totalAmount)}</span>
+                                          </div>
+                                        </div>
+                                      );
+                                    })()}
                                   </div>
                                 </div>
                               )}

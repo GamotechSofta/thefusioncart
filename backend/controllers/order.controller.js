@@ -98,12 +98,29 @@ export const getMyOrders = async (req, res) => {
       orders.map(async (order) => {
         try {
           const populatedItems = await populateOrderItems(order.items || []);
-          const totalAmount = (order.amount && order.amount > 0)
-            ? order.amount
-            : populatedItems.reduce((sum, it) => sum + (it.price * (it.quantity || 1)), 0);
+          const lineSubtotal = populatedItems.reduce((sum, it) => sum + (it.price * (it.quantity || 1)), 0);
+          const subtotal = (typeof order.subtotal === 'number' && order.subtotal > 0)
+            ? order.subtotal
+            : lineSubtotal;
+          const shippingCharge = (typeof order.shippingCharge === 'number')
+            ? order.shippingCharge
+            : (subtotal >= 500 ? 0 : 99);
+          const tax = (typeof order.tax === 'number')
+            ? order.tax
+            : Math.round(subtotal * 0.05);
+
+          let totalAmount = order.amount;
+          if (typeof order.subtotal !== 'number' && (totalAmount === subtotal || !totalAmount)) {
+            totalAmount = subtotal + shippingCharge + tax;
+          } else if (!totalAmount || totalAmount <= 0) {
+            totalAmount = subtotal + shippingCharge + tax;
+          }
 
           return {
             ...order,
+            subtotal,
+            shippingCharge,
+            tax,
             amount: totalAmount,
             items: populatedItems,
           };
@@ -134,12 +151,29 @@ export const getOrderById = async (req, res) => {
     if (!order) return res.status(404).json({ message: 'Order not found' });
 
     const populatedItems = await populateOrderItems(order.items || []);
-    const totalAmount = (order.amount && order.amount > 0)
-      ? order.amount
-      : populatedItems.reduce((sum, it) => sum + (it.price * (it.quantity || 1)), 0);
+    const lineSubtotal = populatedItems.reduce((sum, it) => sum + (it.price * (it.quantity || 1)), 0);
+    const subtotal = (typeof order.subtotal === 'number' && order.subtotal > 0)
+      ? order.subtotal
+      : lineSubtotal;
+    const shippingCharge = (typeof order.shippingCharge === 'number')
+      ? order.shippingCharge
+      : (subtotal >= 500 ? 0 : 99);
+    const tax = (typeof order.tax === 'number')
+      ? order.tax
+      : Math.round(subtotal * 0.05);
+
+    let totalAmount = order.amount;
+    if (typeof order.subtotal !== 'number' && (totalAmount === subtotal || !totalAmount)) {
+      totalAmount = subtotal + shippingCharge + tax;
+    } else if (!totalAmount || totalAmount <= 0) {
+      totalAmount = subtotal + shippingCharge + tax;
+    }
 
     const populatedOrder = {
       ...order,
+      subtotal,
+      shippingCharge,
+      tax,
       amount: totalAmount,
       items: populatedItems,
     };

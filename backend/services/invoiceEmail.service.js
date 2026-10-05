@@ -75,6 +75,12 @@ function buildInvoiceHtml({ order, items, customerName, customerEmail }) {
     })
     .join('');
 
+  const lineSubtotal = items.reduce((sum, it) => sum + ((it.price || 0) * (it.quantity || 1)), 0);
+  const subtotal = (typeof order.subtotal === 'number' && order.subtotal > 0) ? order.subtotal : lineSubtotal;
+  const shippingCharge = (typeof order.shippingCharge === 'number') ? order.shippingCharge : (subtotal >= 500 ? 0 : 99);
+  const tax = (typeof order.tax === 'number') ? order.tax : Math.round(subtotal * 0.05);
+  const totalAmount = (typeof order.amount === 'number' && order.amount > subtotal) ? order.amount : (subtotal + shippingCharge + tax);
+
   const field = (label, value) =>
     `<td style="padding:10px 12px;font-weight:700;border-bottom:1px solid #eef0f2;border-right:1px solid #e5e7eb;width:18%;">${label}</td>
      <td style="padding:10px 12px;border-bottom:1px solid #eef0f2;width:32%;">${value}</td>`;
@@ -145,19 +151,19 @@ function buildInvoiceHtml({ order, items, customerName, customerEmail }) {
             </tr>
             <tr>
               <td style="padding:9px 12px;border:1px solid #d1d5db;">Sub Total</td>
-              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;">${formatINR(order.amount)}</td>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;">${formatINR(subtotal)}</td>
             </tr>
             <tr>
-              <td style="padding:9px 12px;border:1px solid #d1d5db;">GST (18%)</td>
-              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;">₹0</td>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;">GST (5%)</td>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;">${formatINR(tax)}</td>
             </tr>
             <tr>
               <td style="padding:9px 12px;border:1px solid #d1d5db;">Shipping Charges</td>
-              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;">₹0</td>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;">${shippingCharge > 0 ? formatINR(shippingCharge) : 'Free'}</td>
             </tr>
             <tr>
               <td style="padding:9px 12px;border:1px solid #d1d5db;font-weight:700;background:#f8f9fa;">Total Amount</td>
-              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;font-weight:700;background:#f8f9fa;">${formatINR(order.amount)}</td>
+              <td style="padding:9px 12px;border:1px solid #d1d5db;text-align:right;font-weight:700;background:#f8f9fa;">${formatINR(totalAmount)}</td>
             </tr>
           </table>
         </td>

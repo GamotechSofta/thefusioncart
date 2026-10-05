@@ -85,12 +85,16 @@ const Invoice = ({
     return sum + Math.max(0, (Number(mrp) - Number(price)) * qty);
   }, 0);
 
-  const subtotal = totalsOverride?.subtotal ?? lineSubtotal ?? order.amount ?? 0;
-  const gst = totalsOverride?.gst ?? 0;
-  const gstRate = totalsOverride?.gstRate ?? 18;
-  const shipping = totalsOverride?.shipping ?? 0;
+  const subtotal = totalsOverride?.subtotal ?? order.subtotal ?? lineSubtotal ?? order.amount ?? 0;
+  const shipping = totalsOverride?.shipping ?? order.shippingCharge ?? (subtotal >= 500 ? 0 : 99);
+  const gstRate = totalsOverride?.gstRate ?? order.gstRate ?? 5;
+  const gst = totalsOverride?.gst ?? order.tax ?? order.gst ?? Math.round(subtotal * (gstRate / 100));
   const discount = totalsOverride?.discount ?? discountFromLines;
-  const total = totalsOverride?.total ?? order.amount ?? (subtotal - discount + gst + shipping);
+  const total = totalsOverride?.total ?? (
+    (typeof order.amount === 'number' && order.amount > subtotal)
+      ? order.amount
+      : (subtotal - discount + gst + shipping)
+  );
   const shippingAddress = order.shippingAddress || {};
 
   const formattedDate = orderDate.toLocaleDateString('en-GB', {
@@ -295,7 +299,7 @@ const Invoice = ({
                     </tr>
                     <tr>
                       <td>Shipping Charges</td>
-                      <td className="right">{formatINR(shipping)}</td>
+                      <td className="right">{shipping > 0 ? formatINR(shipping) : 'Free'}</td>
                     </tr>
                     <tr className="grand">
                       <td>Total Amount</td>

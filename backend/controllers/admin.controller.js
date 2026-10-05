@@ -348,9 +348,30 @@ export async function adminListOrders(req, res) {
           
           // Get address (prefer shippingAddress, fallback to user's address)
           const address = order.shippingAddress || (order.user ? (addrMap[String(order.user)] || null) : null);
-          
+          const lineSubtotal = populatedItems.reduce((sum, it) => sum + (it.price * (it.quantity || 1)), 0);
+          const subtotal = (typeof order.subtotal === 'number' && order.subtotal > 0)
+            ? order.subtotal
+            : lineSubtotal;
+          const shippingCharge = (typeof order.shippingCharge === 'number')
+            ? order.shippingCharge
+            : (subtotal >= 500 ? 0 : 99);
+          const tax = (typeof order.tax === 'number')
+            ? order.tax
+            : Math.round(subtotal * 0.05);
+
+          let totalAmount = order.amount;
+          if (typeof order.subtotal !== 'number' && (totalAmount === subtotal || !totalAmount)) {
+            totalAmount = subtotal + shippingCharge + tax;
+          } else if (!totalAmount || totalAmount <= 0) {
+            totalAmount = subtotal + shippingCharge + tax;
+          }
+
           return {
             ...order,
+            subtotal,
+            shippingCharge,
+            tax,
+            amount: totalAmount,
             user: user || { _id: order.user, name: 'Unknown', email: '' },
             items: populatedItems,
             address: address,

@@ -22,6 +22,14 @@ const getClient = () => {
   return { client: new Razorpay({ key_id, key_secret }), key_id, key_secret };
 };
 
+const calculateOrderTotals = (items) => {
+  const subtotal = items.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+  const shippingCharge = subtotal >= 500 ? 0 : 99;
+  const tax = Math.round(subtotal * 0.05); // 5% GST
+  const amount = subtotal + shippingCharge + tax;
+  return { subtotal, shippingCharge, tax, amount };
+};
+
 // Helper function to find product in unified collection
 async function findProductById(productId) {
   return Product.findById(productId);
@@ -138,8 +146,8 @@ export const verifyPayment = async (req, res) => {
       })
     );
     
-    const amount = items.reduce((sum, it) => sum + (it.price * it.quantity), 0);
-    console.log('[verifyPayment] Order amount:', amount);
+    const { subtotal, shippingCharge, tax, amount } = calculateOrderTotals(items);
+    console.log('[verifyPayment] Order calculation:', { subtotal, shippingCharge, tax, amount });
 
     // Load user's current address to snapshot into the order
     let shippingAddress = null;
@@ -154,6 +162,9 @@ export const verifyPayment = async (req, res) => {
     const order = await Order.create({
       user: userId,
       items,
+      subtotal,
+      shippingCharge,
+      tax,
       amount,
       currency: 'INR',
       status: 'paid',
@@ -216,7 +227,8 @@ export const createCodOrder = async (req, res) => {
       })
     );
     
-    const amount = items.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+    const { subtotal, shippingCharge, tax, amount } = calculateOrderTotals(items);
+    console.log('[createCodOrder] Order calculation:', { subtotal, shippingCharge, tax, amount });
 
     // Load user's current address to snapshot into the order
     let shippingAddress = null;
@@ -233,6 +245,9 @@ export const createCodOrder = async (req, res) => {
     const order = await Order.create({
       user: userId,
       items,
+      subtotal,
+      shippingCharge,
+      tax,
       amount,
       currency: 'INR',
       status: 'created',
@@ -300,8 +315,9 @@ export const initiatePayuPayment = async (req, res) => {
       })
     );
     
-    const amountNum = items.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+    const { subtotal, shippingCharge, tax, amount: amountNum } = calculateOrderTotals(items);
     const amount = amountNum.toFixed(2);
+    console.log('[initiatePayuPayment] Order calculation:', { subtotal, shippingCharge, tax, amountNum });
 
     // Load user's current address to snapshot into the order
     let shippingAddress = null;
@@ -341,6 +357,9 @@ export const initiatePayuPayment = async (req, res) => {
     const order = await Order.create({
       user: userId,
       items,
+      subtotal,
+      shippingCharge,
+      tax,
       amount: amountNum,
       currency: 'INR',
       status: 'created',

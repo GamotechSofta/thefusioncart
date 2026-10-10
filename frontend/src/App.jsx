@@ -4,7 +4,10 @@ import Router from './router/Router';
 function App() {
   return (
     <BrowserRouter>
-      <Router />
+      {/* <Router /> */}
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-2xl font-bold">SITE IS UNDER MAINTENANCE</p>
+      </div>
     </BrowserRouter>
    
   );

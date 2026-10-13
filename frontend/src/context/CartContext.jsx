@@ -7,6 +7,7 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+  const [cartLoading, setCartLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -79,8 +80,10 @@ export const CartProvider = ({ children }) => {
   const loadCart = useCallback(async () => {
     if (!hasToken()) {
       setCart([]);
+      setCartLoading(false);
       return;
     }
+    setCartLoading(true);
     try {
       const data = await api.getCart();
       setCart(mapServerCartToUI(data));
@@ -98,8 +101,9 @@ export const CartProvider = ({ children }) => {
       } else {
         // For other errors, just log them but don't break the app
         console.error('Error loading cart:', error);
-        setCart([]);
       }
+    } finally {
+      setCartLoading(false);
     }
   }, [mapServerCartToUI]);
 
@@ -212,6 +216,7 @@ export const CartProvider = ({ children }) => {
   return (
     <CartContext.Provider value={{
       cart,
+      cartLoading,
       addToCart,
       removeFromCart,
       updateQuantity,

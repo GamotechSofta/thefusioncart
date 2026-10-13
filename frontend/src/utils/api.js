@@ -47,8 +47,8 @@ async function request(path, options = {}) {
   const fetchOpts = {
     ...options,
     headers,
-    // Use explicit credentials if provided, otherwise use cookie session logic
-    credentials: options.credentials ?? (isCookieSession ? 'include' : 'same-origin'),
+    // Use explicit credentials if provided, otherwise default to include for consistent session handling
+    credentials: options.credentials ?? 'include',
   };
 
   // Avoid sending body on GET/HEAD

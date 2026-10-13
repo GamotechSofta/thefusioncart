@@ -71,7 +71,8 @@ export default function AddressForm() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showForm, setShowForm] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod'
-  const { cart, cartTotal: total, loadCart } = useCart();
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const { cart, cartTotal: total, loadCart, cartLoading } = useCart();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -105,15 +106,34 @@ export default function AddressForm() {
   const priceDetails = calculatePriceDetails();
 
   const handlePayment = async () => {
+    if (isPlacingOrder) return;
+
+    if (!cart || cart.length === 0) {
+      alert('Your cart is empty. Please add items to your cart before placing an order.');
+      navigate('/cart');
+      return;
+    }
+
     if (!hasSavedAddress) {
       alert('Please save your delivery address first.');
       return;
     }
+
+    const orderPayload = {
+      addressId: selectedAddressId || undefined,
+      items: (cart || []).map((item) => ({
+        productId: item.id || item._id,
+        quantity: item.quantity || 1,
+        size: item.size || undefined,
+      })),
+    };
+
+    setIsPlacingOrder(true);
     
     // Handle Cash on Delivery
     if (paymentMethod === 'cod') {
       try {
-        const result = await createCodOrder();
+        const result = await createCodOrder(orderPayload);
         if (result && result.success) {
           localStorage.setItem('lastOrderTotal', priceDetails.total.toString());
           await loadCart();
@@ -127,6 +147,8 @@ export default function AddressForm() {
         console.error('COD order error:', e);
         const errorMsg = e?.message || e?.response?.error || 'Failed to place COD order. Please try again.';
         alert(errorMsg);
+      } finally {
+        setIsPlacingOrder(false);
       }
       return;
     }
@@ -134,7 +156,7 @@ export default function AddressForm() {
     // Handle PayU Payment Gateway
     if (paymentMethod === 'payu') {
       try {
-        const res = await initiatePayuPayment();
+        const res = await initiatePayuPayment(orderPayload);
         if (res && res.success && res.action && res.params) {
           // Store order total before redirecting
           localStorage.setItem('lastOrderTotal', priceDetails.total.toString());
@@ -156,10 +178,12 @@ export default function AddressForm() {
           form.submit();
         } else {
           alert(res?.error || 'Failed to initiate PayU payment. Please try again.');
+          setIsPlacingOrder(false);
         }
       } catch (e) {
         console.error('PayU payment error:', e);
         alert(e?.message || 'Unable to start PayU payment. Please try another method.');
+        setIsPlacingOrder(false);
       }
       return;
     }
@@ -186,11 +210,16 @@ export default function AddressForm() {
           key,
           amount: order.amount,
           currency: order.currency,
-          name: 'Shopzen',
+          name: 'The Fusion Cart',
           description: 'Order Payment',
           order_id: order.id,
           prefill: { name: formData.name || '', contact: formData.mobile || '' },
           theme: { color: '#ec4899' },
+          modal: {
+            ondismiss: function () {
+              setIsPlacingOrder(false);
+            },
+          },
           handler: async function (response) {
             try {
               console.log('[Razorpay] Payment response received:', response);
@@ -199,6 +228,7 @@ export default function AddressForm() {
                 razorpay_order_id: response.razorpay_order_id || response.razorpayOrderId,
                 razorpay_payment_id: response.razorpay_payment_id || response.razorpayPaymentId,
                 razorpay_signature: response.razorpay_signature || response.razorpaySignature,
+                ...orderPayload,
               };
               
               console.log('[Razorpay] Sending to backend:', paymentData);
@@ -217,6 +247,8 @@ export default function AddressForm() {
               console.error('[Razorpay] Payment verification error:', e);
               const errorMsg = e?.message || e?.response?.error || 'Payment verification failed. Please contact support if amount was deducted.';
               alert(errorMsg);
+            } finally {
+              setIsPlacingOrder(false);
             }
           },
         };
@@ -224,6 +256,7 @@ export default function AddressForm() {
         rzp.open();
       } catch (e) {
         alert('Unable to start payment');
+        setIsPlacingOrder(false);
       }
     }
   };
@@ -1062,16 +1095,36 @@ export default function AddressForm() {
               </div>
             )}
 
+            {!cartLoading && (!cart || cart.length === 0) && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
+                <p className="font-semibold mb-1">Your cart is empty</p>
+                <p className="mb-2">Please add products to your cart before proceeding to checkout.</p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/')}
+                  className="text-pink-600 font-semibold underline hover:text-pink-700"
+                >
+                  Browse Products &rarr;
+                </button>
+              </div>
+            )}
+
             <button 
               onClick={handlePayment}
-              disabled={!hasSavedAddress}
+              disabled={!hasSavedAddress || !cart || cart.length === 0 || isPlacingOrder || cartLoading}
               className={`w-full mt-3 sm:mt-4 py-3 sm:py-4 px-3 sm:px-4 rounded-lg sm:rounded-xl transition-all text-sm sm:text-base font-bold cursor-pointer shadow-lg ${
-                hasSavedAddress 
+                hasSavedAddress && cart && cart.length > 0 && !isPlacingOrder && !cartLoading
                   ? 'bg-pink-500 hover:bg-pink-600 text-white hover:shadow-xl transform hover:scale-105 active:scale-95' 
                   : 'bg-gray-300 text-gray-600 cursor-not-allowed'
               }`}
             >
-              {paymentMethod === 'cod' ? 'PLACE ORDER (COD)' : 'PROCEED TO PAYMENT'}
+              {isPlacingOrder 
+                ? 'PLACING ORDER...' 
+                : cartLoading 
+                  ? 'LOADING CART...' 
+                  : (!cart || cart.length === 0) 
+                    ? 'CART IS EMPTY' 
+                    : (paymentMethod === 'cod' ? 'PLACE ORDER (COD)' : 'PROCEED TO PAYMENT')}
             </button>
           </div>
         </div>

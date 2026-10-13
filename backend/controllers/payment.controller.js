@@ -111,17 +111,29 @@ export const verifyPayment = async (req, res) => {
     }
 
     console.log('[verifyPayment] User ID:', userId);
-    const cart = await Cart.findOne({ user: userId });
-    if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
+    let cart = await Cart.findOne({ user: userId });
+    let rawItems = cart?.items || [];
+
+    // Fallback: If DB cart is empty, check if items were provided in request body
+    if ((!rawItems || rawItems.length === 0) && Array.isArray(req.body?.items) && req.body.items.length > 0) {
+      console.log('[verifyPayment] DB cart is empty, using fallback items from request body');
+      rawItems = req.body.items.map((i) => ({
+        product: i.productId || i.product?._id || i.product || i.id,
+        quantity: i.quantity || 1,
+        size: i.size || undefined,
+      }));
+    }
+
+    if (!Array.isArray(rawItems) || rawItems.length === 0) {
       console.error('[verifyPayment] Cart is empty for user:', userId);
       return res.status(400).json({ error: 'Cart is empty' });
     }
 
-    console.log('[verifyPayment] Cart items count:', cart.items.length);
+    console.log('[verifyPayment] Cart items count:', rawItems.length);
 
     // Populate products from unified collection
     const items = await Promise.all(
-      cart.items.map(async (i) => {
+      rawItems.map(async (i) => {
         const product = await findProductById(i.product);
         if (!product) {
           console.error('[verifyPayment] Product not found:', i.product);
@@ -149,15 +161,24 @@ export const verifyPayment = async (req, res) => {
     const { subtotal, shippingCharge, tax, amount } = calculateOrderTotals(items);
     console.log('[verifyPayment] Order calculation:', { subtotal, shippingCharge, tax, amount });
 
-    // Load user's current address to snapshot into the order
+    // Load user's selected or default address to snapshot into the order
     let shippingAddress = null;
     try {
-      const addr = await Address.findOne({ userId });
+      const addressId = req.body?.addressId;
+      let addr = null;
+      if (addressId) {
+        addr = await Address.findOne({ _id: addressId, userId });
+      }
+      if (!addr) {
+        addr = await Address.findOne({ userId });
+      }
       if (addr) {
         const { fullName, mobileNumber, pincode, locality, address, city, state, landmark, alternatePhone, addressType } = addr;
         shippingAddress = { fullName, mobileNumber, pincode, locality, address, city, state, landmark, alternatePhone, addressType };
       }
-    } catch {}
+    } catch (err) {
+      console.error('Error loading address:', err);
+    }
 
     const order = await Order.create({
       user: userId,
@@ -176,8 +197,12 @@ export const verifyPayment = async (req, res) => {
       store: process.env.STORE_NAME || 'thefusioncart',
     });
 
-    cart.items = [];
-    await cart.save();
+    if (cart) {
+      cart.items = [];
+      await cart.save();
+    } else {
+      await Cart.updateOne({ user: userId }, { $set: { items: [] } }, { upsert: true });
+    }
 
     console.log('[verifyPayment] Order created successfully:', order._id);
     sendOrderInvoiceEmail(order._id).catch((err) =>
@@ -196,14 +221,26 @@ export const createCodOrder = async (req, res) => {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const cart = await Cart.findOne({ user: userId });
-    if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
+    let cart = await Cart.findOne({ user: userId });
+    let rawItems = cart?.items || [];
+
+    // Fallback: If DB cart is empty, check if items were provided in request body
+    if ((!rawItems || rawItems.length === 0) && Array.isArray(req.body?.items) && req.body.items.length > 0) {
+      console.log('[createCodOrder] DB cart is empty, using fallback items from request body');
+      rawItems = req.body.items.map((i) => ({
+        product: i.productId || i.product?._id || i.product || i.id,
+        quantity: i.quantity || 1,
+        size: i.size || undefined,
+      }));
+    }
+
+    if (!Array.isArray(rawItems) || rawItems.length === 0) {
       return res.status(400).json({ error: 'Cart is empty' });
     }
 
     // Populate products from unified collection
     const items = await Promise.all(
-      cart.items.map(async (i) => {
+      rawItems.map(async (i) => {
         const product = await findProductById(i.product);
         if (!product) {
           throw new Error(`Product ${i.product} not found`);
@@ -230,10 +267,17 @@ export const createCodOrder = async (req, res) => {
     const { subtotal, shippingCharge, tax, amount } = calculateOrderTotals(items);
     console.log('[createCodOrder] Order calculation:', { subtotal, shippingCharge, tax, amount });
 
-    // Load user's current address to snapshot into the order
+    // Load user's selected or default address to snapshot into the order
     let shippingAddress = null;
     try {
-      const addr = await Address.findOne({ userId });
+      const addressId = req.body?.addressId;
+      let addr = null;
+      if (addressId) {
+        addr = await Address.findOne({ _id: addressId, userId });
+      }
+      if (!addr) {
+        addr = await Address.findOne({ userId });
+      }
       if (addr) {
         const { fullName, mobileNumber, pincode, locality, address, city, state, landmark, alternatePhone, addressType } = addr;
         shippingAddress = { fullName, mobileNumber, pincode, locality, address, city, state, landmark, alternatePhone, addressType };
@@ -256,8 +300,12 @@ export const createCodOrder = async (req, res) => {
       store: process.env.STORE_NAME || 'thefusioncart',
     });
 
-    cart.items = [];
-    await cart.save();
+    if (cart) {
+      cart.items = [];
+      await cart.save();
+    } else {
+      await Cart.updateOne({ user: userId }, { $set: { items: [] } }, { upsert: true });
+    }
 
     sendOrderInvoiceEmail(order._id).catch((err) =>
       console.error('[createCodOrder] Invoice email failed:', err.message)
@@ -284,14 +332,26 @@ export const initiatePayuPayment = async (req, res) => {
       ? 'https://test.payu.in/_payment' 
       : 'https://secure.payu.in/_payment';
 
-    const cart = await Cart.findOne({ user: userId });
-    if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
+    let cart = await Cart.findOne({ user: userId });
+    let rawItems = cart?.items || [];
+
+    // Fallback: If DB cart is empty, check if items were provided in request body
+    if ((!rawItems || rawItems.length === 0) && Array.isArray(req.body?.items) && req.body.items.length > 0) {
+      console.log('[initiatePayuPayment] DB cart is empty, using fallback items from request body');
+      rawItems = req.body.items.map((i) => ({
+        product: i.productId || i.product?._id || i.product || i.id,
+        quantity: i.quantity || 1,
+        size: i.size || undefined,
+      }));
+    }
+
+    if (!Array.isArray(rawItems) || rawItems.length === 0) {
       return res.status(400).json({ error: 'Cart is empty' });
     }
 
     // Populate products from unified collection
     const items = await Promise.all(
-      cart.items.map(async (i) => {
+      rawItems.map(async (i) => {
         const product = await findProductById(i.product);
         if (!product) {
           throw new Error(`Product ${i.product} not found`);
@@ -319,14 +379,21 @@ export const initiatePayuPayment = async (req, res) => {
     const amount = amountNum.toFixed(2);
     console.log('[initiatePayuPayment] Order calculation:', { subtotal, shippingCharge, tax, amountNum });
 
-    // Load user's current address to snapshot into the order
+    // Load user's selected or default address to snapshot into the order
     let shippingAddress = null;
     let userPhone = '';
     let userName = '';
     let userEmail = '';
 
     try {
-      const addr = await Address.findOne({ userId });
+      const addressId = req.body?.addressId;
+      let addr = null;
+      if (addressId) {
+        addr = await Address.findOne({ _id: addressId, userId });
+      }
+      if (!addr) {
+        addr = await Address.findOne({ userId });
+      }
       if (addr) {
         const { fullName, mobileNumber, pincode, locality, address, city, state, landmark, alternatePhone, addressType } = addr;
         shippingAddress = { fullName, mobileNumber, pincode, locality, address, city, state, landmark, alternatePhone, addressType };
@@ -592,14 +659,14 @@ export const handlePayuResponse = async (req, res) => {
       }
 
       const errorMsg = encodeURIComponent(data.error_Message || data.unmappedstatus || 'Payment failed or cancelled');
-      const failUrl = `${frontendUrl}/address?payment=failed&reason=${errorMsg}`;
+      const failUrl = `${frontendUrl}/checkout/address?payment=failed&reason=${errorMsg}`;
       res.setHeader('Content-Type', 'text/html');
       return res.send(renderAutoRedirectHtml(failUrl, 'Payment Incomplete or Failed'));
     }
   } catch (err) {
     console.error('[handlePayuResponse] Error:', err);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const errUrl = `${frontendUrl}/address?payment=failed&reason=InternalServerError`;
+    const errUrl = `${frontendUrl}/checkout/address?payment=failed&reason=InternalServerError`;
     res.setHeader('Content-Type', 'text/html');
     return res.send(renderAutoRedirectHtml(errUrl, 'Payment Processing Error'));
   }

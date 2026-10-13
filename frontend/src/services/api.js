@@ -147,7 +147,8 @@ const authHeaders = () => {
       return null;
     }
   })();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  if (!token || token === 'cookie') return {};
+  return { Authorization: `Bearer ${token}` };
 };
 
 
@@ -228,10 +229,11 @@ export const verifyPayment = async (payload) => {
   return res.json();
 };
 
-export const createCodOrder = async () => {
+export const createCodOrder = async (payload = {}) => {
   const res = await fetch(`${API_URL}/payment/cod`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(payload),
     credentials: "include",
   });
   if (!res.ok) {
@@ -243,10 +245,11 @@ export const createCodOrder = async () => {
   return res.json();
 };
 
-export const initiatePayuPayment = async () => {
+export const initiatePayuPayment = async (payload = {}) => {
   const res = await fetch(`${API_URL}/payment/payu/initiate`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(payload),
     credentials: "include",
   });
   if (!res.ok) {

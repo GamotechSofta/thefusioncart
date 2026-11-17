@@ -1,6 +1,6 @@
 import React from 'react';
 import ScrollToTop from '../components/ScrollToTop';
-import { Target, Eye, ShieldCheck, HeartHandshake, Lightbulb, CheckCircle2, Building, Mail, Phone, MapPin } from 'lucide-react';
+import { ShieldCheck, HeartHandshake, Lightbulb, CheckCircle2, Building, Mail, Phone, MapPin } from 'lucide-react';
 import { COMPANY_INFO } from '../config/companyInfo';
 
 const About = () => {
@@ -19,39 +19,6 @@ const About = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-16">
-        
-        {/* Intro Highlight Box */}
-        <div className="bg-white rounded-2xl p-6 sm:p-10 border border-gray-200 shadow-sm">
-          <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center max-w-4xl mx-auto">
-            Our mission is to empower every local shop and individual by providing accessible financial services (AEPS, money transfers, insurance, Micro ATMs) alongside our curated e-commerce offerings. We combine bank-grade security with retail-friendly tools to deliver trusted services to your community.
-          </p>
-        </div>
-
-        {/* Vision & Mission Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-          {/* Vision */}
-          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mb-5">
-              <Eye className="w-6 h-6" />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Our Vision</h2>
-            <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-              To bridge the gap in digital commerce and financial inclusion by turning every retail counter into a comprehensive service hub for Bharat.
-            </p>
-          </div>
-
-          {/* Mission */}
-          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 mb-5">
-              <Target className="w-6 h-6" />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Our Mission</h2>
-            <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-              To deliver excellence in both digital commerce and assisted financial services, ensuring financial inclusion, instant settlements, and delightful customer experiences across India's small towns and villages.
-            </p>
-          </div>
-        </div>
-
         {/* What We Stand For */}
         <div>
           <div className="text-center mb-10">

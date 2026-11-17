@@ -622,7 +622,11 @@ const Navbar = () => {
             </div>
           </div>
 
-          <div className={`hidden lg:block ${isHome && !isScrolled ? 'bg-white/80 backdrop-blur-md' : 'border-t border-line'}`}>
+          <div className={`hidden lg:block transition-all duration-300 ${
+            isHome && !isScrolled
+              ? 'bg-transparent border-transparent'
+              : 'border-t border-line'
+          }`}>
             <div className="flex items-center justify-center gap-x-1 overflow-x-auto scrollbar-hide px-2 py-1.5 xl:gap-x-2">
               {categories.map((category) => {
                 const isActive = location.pathname === category.path;

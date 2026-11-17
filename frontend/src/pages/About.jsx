@@ -1,6 +1,6 @@
 import React from 'react';
 import ScrollToTop from '../components/ScrollToTop';
-import { ShieldCheck, HeartHandshake, Truck, CheckCircle2, Building, Mail, Phone, MapPin } from 'lucide-react';
+import { ShieldCheck, Truck, Package, CheckCircle2, Building, Mail, Phone, MapPin } from 'lucide-react';
 import { COMPANY_INFO } from '../config/companyInfo';
 
 const About = () => {
@@ -13,7 +13,7 @@ const About = () => {
             Welcome to {COMPANY_INFO.brandName}
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Based in Mohali, Punjab, <strong className="text-white font-semibold">{COMPANY_INFO.legalName}</strong> is an online destination for everyday shopping—bringing quality products, fair prices, and a smooth checkout experience to customers across India.
+            Based in Mohali, Punjab, <strong className="text-white font-semibold">{COMPANY_INFO.legalName}</strong> is an online shopping destination offering quality products across beauty, hygiene, and everyday essentials — delivered with care across India.
           </p>
         </div>
       </div>
@@ -21,24 +21,24 @@ const About = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-16">
         <div className="bg-white rounded-2xl p-6 sm:p-10 border border-gray-200 shadow-sm">
           <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center max-w-4xl mx-auto">
-            We curate a growing catalogue of trusted brands and everyday essentials so you can discover, compare, and order from home. From product discovery to delivery updates, our focus is simple: reliable quality, clear pricing, and a shopping experience that feels easy on any device.
+            We bring together carefully selected products, fair pricing, and a smooth shopping experience so you can discover what you need and get it delivered to your doorstep. From personal care to household essentials, our goal is simple: trustworthy products, clear information, and reliable service.
           </p>
         </div>
 
         <div>
           <div className="text-center mb-10">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Why shop with us</h2>
-            <p className="text-gray-500 text-sm sm:text-base mt-2">What we stand for as an e-commerce brand</p>
+            <p className="text-gray-500 text-sm sm:text-base mt-2">What we focus on for every customer</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-gray-300 transition-all">
-              <div className="w-10 h-10 rounded-lg bg-pink-50 text-pink-600 flex items-center justify-center mb-4">
-                <HeartHandshake className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+                <CheckCircle2 className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-gray-900 mb-2">Customer First</h3>
+              <h3 className="text-base font-bold text-gray-900 mb-2">Curated Catalog</h3>
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                Helpful support and a shopping journey designed around clarity and convenience.
+                A focused selection of products chosen for quality, relevance, and everyday value.
               </p>
             </div>
 
@@ -48,7 +48,7 @@ const About = () => {
               </div>
               <h3 className="text-base font-bold text-gray-900 mb-2">Secure Shopping</h3>
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                Protected checkout and careful handling of your account and order details.
+                Protected checkout and careful handling of your order and account information.
               </p>
             </div>
 
@@ -58,17 +58,17 @@ const About = () => {
               </div>
               <h3 className="text-base font-bold text-gray-900 mb-2">Reliable Delivery</h3>
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                Orders packed with care and shipped through trusted logistics partners.
+                Orders packed with care and shipped through trusted logistics partners across India.
               </p>
             </div>
 
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-gray-300 transition-all">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-                <CheckCircle2 className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-lg bg-pink-50 text-pink-600 flex items-center justify-center mb-4">
+                <Package className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-gray-900 mb-2">Curated Catalogue</h3>
+              <h3 className="text-base font-bold text-gray-900 mb-2">Customer First</h3>
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                Handpicked products with clear details so you know exactly what you are buying.
+                Clear product details, responsive support, and a shopping experience built for ease.
               </p>
             </div>
           </div>
